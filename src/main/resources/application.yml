@@ -1,8 +1,11 @@
 spring:
+  application:
+    name: optica
+
   datasource:
     url: jdbc:mysql://localhost:3306/optica?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
     username: admin_optica
-    password: secreto_optica
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -11,7 +14,6 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
 server:
