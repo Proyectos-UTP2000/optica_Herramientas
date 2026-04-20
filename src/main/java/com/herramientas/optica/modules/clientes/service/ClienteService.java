@@ -1,11 +1,11 @@
-package com.herramientas.optica.modules.usuarios.Service;
+package com.herramientas.optica.modules.clientes.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.herramientas.optica.modules.usuarios.model.Cliente;
-import com.herramientas.optica.modules.usuarios.repository.ClienteRepository;
+import com.herramientas.optica.modules.clientes.model.Cliente;
+import com.herramientas.optica.modules.clientes.repository.ClienteRepository;
 
 @Service
 public class ClienteService {

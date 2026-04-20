@@ -1,4 +1,4 @@
-package com.herramientas.optica.modules.usuarios.controller;
+package com.herramientas.optica.modules.clientes.controller;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.herramientas.optica.modules.usuarios.Service.ClienteService;
-import com.herramientas.optica.modules.usuarios.model.Cliente;
+import com.herramientas.optica.modules.clientes.model.Cliente;
+import com.herramientas.optica.modules.clientes.service.ClienteService;
 
 @RestController
 @RequestMapping("/api/v1/clientes")

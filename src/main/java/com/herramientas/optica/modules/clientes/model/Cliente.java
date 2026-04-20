@@ -1,4 +1,4 @@
-package com.herramientas.optica.modules.usuarios.model;
+package com.herramientas.optica.modules.clientes.model;
 
 import java.time.LocalDateTime;
 
