@@ -18,3 +18,13 @@ spring:
 
 server:
   port: 8080
+
+api:
+  peru:
+    url-dni: "https://miapi.cloud/v1/dni/"
+    url-ruc: "https://miapi.cloud/v1/ruc/"
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MDYsImV4cCI6MTc2Mzc4NjU4N30.mCthamubrKmkP7sQcieZo3YJM9vawV7ANvUnEMCQG8k"
+
+jwt:
+  secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+  expiration: 86400000
