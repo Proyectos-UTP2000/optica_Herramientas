@@ -23,4 +23,6 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
     List<Empleado> findByEstadoNot(Integer estado);
 
     long countByPerfilIdAndEstadoNot(Long perfilId, Integer estado);
+
+    Optional<Empleado> findByUsername(String username);
 }
