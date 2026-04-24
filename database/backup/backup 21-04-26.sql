@@ -357,7 +357,7 @@ CREATE TABLE `empleado` (
 
 LOCK TABLES `empleado` WRITE;
 /*!40000 ALTER TABLE `empleado` DISABLE KEYS */;
-INSERT INTO `empleado` VALUES (1,'ROGER PAUL','rvelasco','VELASCO','ZAPATA','prueba.optica@ejemplo.com','$2a$12$KHq9.h4WnAz0rod7c1Q8NejMMfCFdSnC58sJg.LZ2nEqdisGpKqlW','987654321','CALLE SANTA ROSA 355',1,'72934888',1,1,1,NULL,NULL);
+INSERT INTO `empleado` VALUES (1,'admin','admin','','','admin@ejemplo.com','$2a$12$KHq9.h4WnAz0rod7c1Q8NejMMfCFdSnC58sJg.LZ2nEqdisGpKqlW','1','',1,'1',1,1,1,NULL,NULL);
 /*!40000 ALTER TABLE `empleado` ENABLE KEYS */;
 UNLOCK TABLES;
 
