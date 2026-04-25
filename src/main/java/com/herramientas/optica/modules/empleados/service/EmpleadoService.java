@@ -18,6 +18,7 @@ import com.herramientas.optica.modules.empleados.model.Empleado;
 import com.herramientas.optica.modules.empleados.model.Perfil;
 import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
 import com.herramientas.optica.modules.empleados.repository.PerfilRepository;
+import com.herramientas.optica.modules.shared.email.EmailService;
 
 @Service
 public class EmpleadoService {
@@ -26,17 +27,19 @@ public class EmpleadoService {
     private final PerfilRepository perfilRepository;
     private final DNI_RUC_Service dniRucService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     private static final int ESTADO_ACTIVO = 1;
     private static final int ESTADO_DESHABILITADO = 2;
     private static final int ESTADO_BORRADO = 0;
 
     public EmpleadoService(EmpleadoRepository empleadoRepository, PerfilRepository perfilRepository,
-            DNI_RUC_Service dniRucService, PasswordEncoder passwordEncoder) {
+            DNI_RUC_Service dniRucService, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.empleadoRepository = empleadoRepository;
         this.perfilRepository = perfilRepository;
         this.dniRucService = dniRucService;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -90,7 +93,7 @@ public class EmpleadoService {
         String usernameGenerado = generarUsernameUnico(baseUsername);
         String rawPassword = UUID.randomUUID().toString().substring(0, 8);
         String encodedPassword = passwordEncoder.encode(rawPassword);
-
+        emailService.enviarCredencialesEmpleado(dto.getCorreo(), nombres, usernameGenerado, rawPassword);
         Empleado nuevoEmpleado = Empleado.builder()
                 .numeroDocumento(dto.getDni())
                 .nombre(nombres)
