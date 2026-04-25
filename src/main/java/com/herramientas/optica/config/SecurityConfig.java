@@ -54,6 +54,7 @@ public class SecurityConfig {
 
                 // Rutas a los que cualquiera tenga accesso Cualquiera puede intentar iniciar
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/dashboard/**").permitAll()
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
 
