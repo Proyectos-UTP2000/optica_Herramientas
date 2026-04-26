@@ -150,6 +150,35 @@ public class EmpleadoService {
         empleadoRepository.save(empleado);
     }
 
+    @Transactional
+    public EmpleadoResponseDTO actualizarEmpleado(Long id, EmpleadoRequestDTO dto) {
+        Empleado empleado = obtenerEmpleadoValidado(id, true);
+
+        // Validar correo único (ignorando el propio empleado)
+        if (!empleado.getCorreo().equals(dto.getCorreo()) &&
+                empleadoRepository.existsByCorreo(dto.getCorreo())) {
+            throw new IllegalArgumentException("El correo ya está en uso por otro empleado.");
+        }
+
+        // Validar teléfono único (ignorando el propio empleado)
+        if (dto.getTelefono() != null && !dto.getTelefono().isEmpty() &&
+                !dto.getTelefono().equals(empleado.getTelefono()) &&
+                empleadoRepository.existsByTelefono(dto.getTelefono())) {
+            throw new IllegalArgumentException("El teléfono ya está en uso por otro empleado.");
+        }
+
+        Perfil perfil = perfilRepository.findById(dto.getIdPerfil())
+                .orElseThrow(() -> new IllegalArgumentException("El perfil seleccionado no existe."));
+
+        empleado.setCorreo(dto.getCorreo());
+        empleado.setTelefono(dto.getTelefono());
+        empleado.setDireccion(dto.getDireccion());
+        empleado.setPerfil(perfil);
+
+        empleadoRepository.save(empleado);
+        return mapearAResponse(empleado);
+    }
+
     // Metodos privados
     private Empleado obtenerEmpleadoValidado(Long id, boolean bloquearBorrados) {
         Empleado empleado = empleadoRepository.findById(id)

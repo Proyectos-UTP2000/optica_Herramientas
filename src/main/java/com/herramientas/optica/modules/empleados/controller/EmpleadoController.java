@@ -1,7 +1,7 @@
 package com.herramientas.optica.modules.empleados.controller;
 
 import java.util.List;
-
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -55,5 +55,14 @@ public class EmpleadoController {
     public ResponseEntity<Void> eliminarEmpleado(@PathVariable Long id) {
         empleadoService.borradoLogico(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmpleadoResponseDTO> actualizarEmpleado(
+            @PathVariable Long id,
+            @RequestBody EmpleadoRequestDTO dto) {
+        EmpleadoResponseDTO actualizado = empleadoService.actualizarEmpleado(id, dto);
+        return ResponseEntity.ok(actualizado);
     }
 }

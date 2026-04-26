@@ -2,7 +2,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 
 const MainLayout = () => {
     const navigate = useNavigate();
-    const location = useLocation(); // Para saber qué menú resaltar
+    const location = useLocation();
     const username = localStorage.getItem('username');
     const rol = localStorage.getItem('rol');
 
@@ -11,11 +11,10 @@ const MainLayout = () => {
         navigate('/login');
     };
 
-    // Estilos para reutilizar
     const styles = {
         sidebar: {
             width: '260px',
-            background: '#1e293b', // Azul oscuro elegante
+            background: '#1e293b',
             color: 'white',
             padding: '0',
             display: 'flex',
@@ -52,6 +51,15 @@ const MainLayout = () => {
             transition: 'all 0.3s ease',
             fontWeight: isActive ? '600' : '400'
         }),
+        sectionLabel: {
+            fontSize: '11px',
+            fontWeight: '700',
+            letterSpacing: '1px',
+            color: '#475569',
+            textTransform: 'uppercase',
+            padding: '10px 15px 4px',
+            marginTop: '8px'
+        },
         header: {
             display: 'flex',
             justifyContent: 'flex-end',
@@ -83,20 +91,28 @@ const MainLayout = () => {
                 <div style={styles.logoContainer}>
                     <h2 style={styles.logoText}>SISTEMA GESTION DE ÓPTICA</h2>
                 </div>
-                
+
                 <nav style={styles.nav}>
                     <Link to="/dashboard" style={styles.navLink(location.pathname === '/dashboard')}>
                         <span style={{ marginRight: '10px' }}>🏠</span> Dashboard
                     </Link>
-                    
+
                     <Link to="/dashboard/clientes" style={styles.navLink(location.pathname === '/dashboard/clientes')}>
                         <span style={{ marginRight: '10px' }}>👥</span> Clientes
                     </Link>
-                    
+
                     {rol === 'ADMINISTRADOR' && (
-                        <Link to="/dashboard/empleados" style={styles.navLink(location.pathname === '/dashboard/empleados')}>
-                            <span style={{ marginRight: '10px' }}>👤</span> Empleados
-                        </Link>
+                        <>
+                            <div style={styles.sectionLabel}>Administración</div>
+
+                            <Link to="/dashboard/empleados" style={styles.navLink(location.pathname === '/dashboard/empleados')}>
+                                <span style={{ marginRight: '10px' }}>👤</span> Empleados
+                            </Link>
+
+                            <Link to="/dashboard/perfiles" style={styles.navLink(location.pathname === '/dashboard/perfiles')}>
+                                <span style={{ marginRight: '10px' }}>🛡️</span> Perfiles
+                            </Link>
+                        </>
                     )}
                 </nav>
 
@@ -111,19 +127,19 @@ const MainLayout = () => {
             <main style={{ flex: 1, marginLeft: '260px', display: 'flex', flexDirection: 'column' }}>
                 <header style={styles.header}>
                     <div style={{ fontSize: '14px', color: '#64748b' }}>
-                        Usuario: <strong style={{ color: '#1e293b' }}>{username}</strong> | 
-                        Rol: <span style={{ 
-                            marginLeft: '5px', 
-                            padding: '3px 8px', 
-                            background: '#dcfce7', 
-                            color: '#166534', 
+                        Usuario: <strong style={{ color: '#1e293b' }}>{username}</strong> |
+                        Rol: <span style={{
+                            marginLeft: '5px',
+                            padding: '3px 8px',
+                            background: '#dcfce7',
+                            color: '#166534',
                             borderRadius: '12px',
                             fontSize: '11px',
                             fontWeight: 'bold'
                         }}>{rol}</span>
                     </div>
                 </header>
-                
+
                 <section style={{ padding: '30px' }}>
                     <Outlet />
                 </section>
