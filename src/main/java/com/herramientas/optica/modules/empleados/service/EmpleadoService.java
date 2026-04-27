@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,7 +129,19 @@ public class EmpleadoService {
 
     @Transactional
     public EmpleadoResponseDTO cambiarEstado(Long id) {
+        // 1. Proteger al Super Administrador (ID = 1)
+        if (id == 1L) {
+            throw new IllegalStateException(
+                    "Acción denegada: No se puede deshabilitar la cuenta del Administrador Principal del sistema.");
+        }
+
         Empleado empleado = obtenerEmpleadoValidado(id, true);
+
+        String usuarioActual = getUsuarioAutenticado();
+        if (empleado.getUsername().equals(usuarioActual)) {
+            throw new IllegalStateException(
+                    "Acción denegada: Por razones de seguridad, no puedes deshabilitar tu propia sesión activa.");
+        }
 
         if (empleado.getEstado() == null) {
             throw new IllegalStateException("El estado actual del empleado es nulo y no puede ser procesado.");
@@ -145,9 +159,50 @@ public class EmpleadoService {
 
     @Transactional
     public void borradoLogico(Long id) {
+        if (id == 1L) {
+            throw new IllegalStateException(
+                    "Acción crítica denegada: El Administrador Principal no puede ser eliminado bajo ninguna circunstancia.");
+        }
+
         Empleado empleado = obtenerEmpleadoValidado(id, true);
+
+        String usuarioActual = getUsuarioAutenticado();
+        if (empleado.getUsername().equals(usuarioActual)) {
+            throw new IllegalStateException(
+                    "Acción denegada: No puedes eliminar tu propio usuario mientras estás en el sistema.");
+        }
+
         empleado.setEstado(ESTADO_BORRADO);
         empleadoRepository.save(empleado);
+    }
+
+    @Transactional
+    public EmpleadoResponseDTO actualizarEmpleado(Long id, EmpleadoRequestDTO dto) {
+        Empleado empleado = obtenerEmpleadoValidado(id, true);
+
+        // Validar correo único (ignorando el propio empleado)
+        if (!empleado.getCorreo().equals(dto.getCorreo()) &&
+                empleadoRepository.existsByCorreo(dto.getCorreo())) {
+            throw new IllegalArgumentException("El correo ya está en uso por otro empleado.");
+        }
+
+        // Validar teléfono único (ignorando el propio empleado)
+        if (dto.getTelefono() != null && !dto.getTelefono().isEmpty() &&
+                !dto.getTelefono().equals(empleado.getTelefono()) &&
+                empleadoRepository.existsByTelefono(dto.getTelefono())) {
+            throw new IllegalArgumentException("El teléfono ya está en uso por otro empleado.");
+        }
+
+        Perfil perfil = perfilRepository.findById(dto.getIdPerfil())
+                .orElseThrow(() -> new IllegalArgumentException("El perfil seleccionado no existe."));
+
+        empleado.setCorreo(dto.getCorreo());
+        empleado.setTelefono(dto.getTelefono());
+        empleado.setDireccion(dto.getDireccion());
+        empleado.setPerfil(perfil);
+
+        empleadoRepository.save(empleado);
+        return mapearAResponse(empleado);
     }
 
     // Metodos privados
@@ -185,5 +240,13 @@ public class EmpleadoService {
                 .estado(e.getEstado())
                 .perfilNombre(e.getPerfil().getNombre())
                 .build();
+    }
+
+    private String getUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication.getName();
+        }
+        return null;
     }
 }
