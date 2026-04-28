@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { PencilSquare, Trash3, Arrow90degLeft } from "react-bootstrap-icons";
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 
 const Perfiles = () => {
@@ -18,6 +19,7 @@ const Perfiles = () => {
   // Datos del formulario
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  8;
   // Simularemos algunas opciones base para asignar (Esto idealmente vendría de una tabla Opciones en BD)
   const opcionesDisponibles = [
     { id: 1, nombre: "Dashboard" },
@@ -287,14 +289,14 @@ const Perfiles = () => {
                       onClick={() => abrirEditar(p)}
                       title="Editar Accesos"
                     >
-                      ✏️
+                      <PencilSquare />
                     </button>
                     <button
                       className="btn-icon delete"
                       onClick={() => eliminar(p.id, p.nombre)}
                       title="Eliminar Perfil"
                     >
-                      🗑️
+                      <Trash3 />
                     </button>
                   </td>
                 </tr>

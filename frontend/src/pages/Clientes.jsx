@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { EyeFill, ExclamationTriangle, Search } from "react-bootstrap-icons";
 
 const Clientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -174,9 +175,7 @@ const Clientes = () => {
   const filtrados = clientes.filter((c) => {
     const t = busqueda.toLowerCase();
     return (
-      c.nombre?.toLowerCase().includes(t) ||
-      c.apellidoPaterno?.toLowerCase().includes(t) ||
-      c.apellidoMaterno?.toLowerCase().includes(t) ||
+      c.nombreCompleto?.toLowerCase().includes(t) ||
       c.correo?.toLowerCase().includes(t) ||
       c.numeroDocumento?.includes(t)
     );
@@ -220,7 +219,7 @@ const Clientes = () => {
   const errMsg = (campo) =>
     errores[campo] ? (
       <p style={{ fontSize: "11px", color: "#dc2626", marginTop: "3px" }}>
-        ⚠ {errores[campo]}
+        <ExclamationTriangle /> {errores[campo]}
       </p>
     ) : null;
   const grupo = { marginBottom: "14px" };
@@ -439,9 +438,7 @@ const Clientes = () => {
                       color: "#1e293b",
                     }}
                   >
-                    {[c.nombre, c.apellidoPaterno, c.apellidoMaterno]
-                      .filter(Boolean)
-                      .join(" ")}
+                    {c.nombreCompleto}
                   </td>
                   <td style={{ padding: "10px 14px", color: "#475569" }}>
                     {c.correo || "—"}
@@ -460,15 +457,9 @@ const Clientes = () => {
                   </td>
                   <td style={{ padding: "10px 14px" }}>
                     <span
-                      style={{
-                        padding: "3px 10px",
-                        borderRadius: "12px",
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        background: c.estado === 1 ? "#dcfce7" : "#fee2e2",
-                        color: c.estado === 1 ? "#15803d" : "#dc2626",
-                        border: `1px solid ${c.estado === 1 ? "#bbf7d0" : "#fecaca"}`,
-                      }}
+                      className={`badge ${c.estado === 1 ? "badge-active" : "badge-inactive"}`}
+                      style={{ cursor: "pointer" }}
+                      title="Click para cambiar estado"
                     >
                       {c.estado === 1 ? "Activo" : "Inactivo"}
                     </span>
@@ -480,18 +471,9 @@ const Clientes = () => {
                         setClienteSeleccionado(c);
                         setShowModalVer(true);
                       }}
-                      style={{
-                        background: "#eff6ff",
-                        border: "1px solid #bfdbfe",
-                        color: "#2563eb",
-                        padding: "5px 10px",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                        fontWeight: "600",
-                      }}
+                      className="btn-icon view"
                     >
-                      Ver
+                      <EyeFill />
                     </button>
                   </td>
                 </tr>
@@ -814,22 +796,25 @@ const Clientes = () => {
                       style={{ ...inputEditable("dni"), flex: 1 }}
                     />
                     <button
+                      className="btn-secondary"
                       onClick={consultarDni}
                       disabled={loadingDni}
                       style={{
-                        background: "#0f172a",
-                        color: "white",
-                        border: "none",
-                        padding: "0 12px",
-                        borderRadius: "6px",
-                        cursor: loadingDni ? "not-allowed" : "pointer",
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        opacity: loadingDni ? 0.6 : 1,
-                        whiteSpace: "nowrap",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
                       }}
                     >
-                      {loadingDni ? "⏳" : "🔍 Buscar"}
+                      {loadingDni ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm" />
+                          Consultando
+                        </>
+                      ) : (
+                        <>
+                          <Search /> Consultar
+                        </>
+                      )}
                     </button>
                   </div>
                   {errMsg("dni")}
@@ -975,7 +960,7 @@ const Clientes = () => {
                     fontSize: "13px",
                   }}
                 >
-                  ⚠ {errores.general}
+                  <ExclamationTriangle /> {errores.general}
                 </div>
               )}
             </div>

@@ -57,10 +57,15 @@
   background: transparent;
   border: 1px solid transparent;
 }
-.btn-icon.edit {
+.btn-icon.view {
   color: #16a34a;
   background: #f0fdf4;
   border-color: #bbf7d0;
+}
+.btn-icon.edit {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 .btn-icon.delete {
   color: #dc2626;
