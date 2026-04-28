@@ -179,26 +179,12 @@ public class EmpleadoService {
     @Transactional
     public EmpleadoResponseDTO actualizarEmpleado(Long id, EmpleadoRequestDTO dto) {
         Empleado empleado = obtenerEmpleadoValidado(id, true);
-
-        // Validar correo único (ignorando el propio empleado)
-        if (!empleado.getCorreo().equals(dto.getCorreo()) &&
-                empleadoRepository.existsByCorreo(dto.getCorreo())) {
-            throw new IllegalArgumentException("El correo ya está en uso por otro empleado.");
-        }
-
-        // Validar teléfono único (ignorando el propio empleado)
-        if (dto.getTelefono() != null && !dto.getTelefono().isEmpty() &&
-                !dto.getTelefono().equals(empleado.getTelefono()) &&
-                empleadoRepository.existsByTelefono(dto.getTelefono())) {
-            throw new IllegalArgumentException("El teléfono ya está en uso por otro empleado.");
-        }
+        empleado.setCorreo(validarYNormalizarCorreo(dto.getCorreo(), empleado.getCorreo()));
+        empleado.setTelefono(validarYNormalizarTelefono(dto.getTelefono(), empleado.getTelefono()));
+        empleado.setDireccion(normalizarDireccion(dto.getDireccion()));
 
         Perfil perfil = perfilRepository.findById(dto.getIdPerfil())
                 .orElseThrow(() -> new IllegalArgumentException("El perfil seleccionado no existe."));
-
-        empleado.setCorreo(dto.getCorreo());
-        empleado.setTelefono(dto.getTelefono());
-        empleado.setDireccion(dto.getDireccion());
         empleado.setPerfil(perfil);
 
         empleadoRepository.save(empleado);
@@ -225,6 +211,43 @@ public class EmpleadoService {
             contador++;
         }
         return username;
+    }
+
+    private String validarYNormalizarCorreo(String correoIngresado, String correoActual) {
+        if (correoIngresado == null || correoIngresado.trim().isEmpty()) {
+            return correoActual;
+        }
+        String correoNormalizado = correoIngresado.trim().toLowerCase();
+
+        if (!correoNormalizado.equals(correoActual)) {
+            if (empleadoRepository.existsByCorreo(correoNormalizado)) {
+                throw new IllegalArgumentException(
+                        "El correo '" + correoNormalizado + "' ya está registrado en otro empleado.");
+            }
+        }
+        return correoNormalizado;
+    }
+
+    private String validarYNormalizarTelefono(String telefonoIngresado, String telefonoActual) {
+        if (telefonoIngresado == null || telefonoIngresado.trim().isEmpty()) {
+            return telefonoActual;
+        }
+        String telNormalizado = telefonoIngresado.trim();
+
+        if (!telNormalizado.equals(telefonoActual)) {
+            if (empleadoRepository.existsByTelefono(telNormalizado)) {
+                throw new IllegalArgumentException(
+                        "El teléfono '" + telNormalizado + "' ya está registrado en otro empleado.");
+            }
+        }
+        return telNormalizado;
+    }
+
+    private String normalizarDireccion(String direccion) {
+        if (direccion == null || direccion.trim().isEmpty()) {
+            return null;
+        }
+        return direccion.trim().replaceAll("\\s+", " ").toUpperCase();
     }
 
     private EmpleadoResponseDTO mapearAResponse(Empleado e) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { EyeFill, PencilSquare, Trash3 } from "react-bootstrap-icons";
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 import ModalCrearEmpleado from "./empleados/ModalCrearEmpleado";
 import ModalEditarEmpleado from "./empleados/ModalEditarEmpleado";
@@ -228,25 +229,25 @@ const Empleados = () => {
                   </td>
                   <td style={{ padding: "12px", display: "flex", gap: "5px" }}>
                     <button
-                      className="btn-icon edit"
+                      className="btn-icon view"
                       onClick={() => abrirVer(e)}
                       title="Ver"
                     >
-                      👁️
+                      <EyeFill />
                     </button>
                     <button
                       className="btn-icon edit"
                       onClick={() => abrirEditar(e)}
                       title="Editar"
                     >
-                      ✏️
+                      <PencilSquare />
                     </button>
                     <button
                       className="btn-icon delete"
                       onClick={() => eliminar(e.id)}
                       title="Eliminar"
                     >
-                      🗑️
+                      <Trash3 />
                     </button>
                   </td>
                 </tr>

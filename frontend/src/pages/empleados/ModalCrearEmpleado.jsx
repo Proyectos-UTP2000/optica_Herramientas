@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Toast, mostrarAlerta } from "../../utils/alerts";
+import { ExclamationTriangle, Search } from "react-bootstrap-icons";
 import {
   ModalShell,
   SeccionLabel,
@@ -163,7 +164,7 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
             border: "1px solid #fecaca",
           }}
         >
-          ⚠ {errores.general}
+          <ExclamationTriangle /> {errores.general}
         </div>
       )}
 
@@ -184,8 +185,18 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
               className="btn-secondary"
               onClick={consultarDni}
               disabled={loadingDni}
+              style={{ display: "flex", alignItems: "center", gap: "6px" }}
             >
-              {loadingDni ? "⏳" : "🔍"}
+              {loadingDni ? (
+                <>
+                  <span className="spinner-border spinner-border-sm" />
+                  Consultando
+                </>
+              ) : (
+                <>
+                  <Search /> Consultar
+                </>
+              )}
             </button>
           </div>
           {msgError("dni")}

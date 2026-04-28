@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Linux (x86_64)
 --
--- Host: localhost    Database: optica
+-- Host: localhost    Database: optica  
 -- ------------------------------------------------------
 -- Server version	8.0.45
 
@@ -85,7 +85,7 @@ DROP TABLE IF EXISTS `cliente`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cliente` (
   `id_cliente` bigint NOT NULL AUTO_INCREMENT,
-  `cli_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `cli_nombre` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `cli_apellido_paterno` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `cli_apellido_materno` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `cli_correo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -96,9 +96,6 @@ CREATE TABLE `cliente` (
   `id_tipodocumento` bigint NOT NULL,
   `cli_nombre_empresa` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `cli_direccion_empresa` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_clave` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `token_reseteo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `token_reseteo_expira` datetime(6) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_cliente`),
@@ -113,7 +110,7 @@ CREATE TABLE `cliente` (
 
 LOCK TABLES `cliente` WRITE;
 /*!40000 ALTER TABLE `cliente` DISABLE KEYS */;
-INSERT INTO `cliente` VALUES (1,'Clientes Varios',' ',' ',' ',' ',' ',1,'99999999',1,NULL,NULL,NULL,NULL,NULL,'2026-04-20 00:51:59','2026-04-20 00:51:59');
+INSERT INTO `cliente` VALUES (1,'Clientes Varios',NULL,NULL,NULL,NULL,' ',1,'99999999',1,NULL,NULL,'2026-04-20 00:51:59','2026-04-20 00:51:59');
 /*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -653,25 +650,29 @@ CREATE TABLE `producto` (
   `produc_modelo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `produc_descripcion` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `produc_precio` decimal(38,2) DEFAULT NULL,
+  `produc_costo` decimal(10,2) DEFAULT '0.00',
   `produc_fecha_creacion` date DEFAULT NULL,
   `produc_fecha_vencimiento` date DEFAULT NULL,
   `produc_stock` int DEFAULT '0',
   `produc_stock_minimo` int DEFAULT '1',
   `produc_estado` int NOT NULL DEFAULT '1',
-  `tipo_producto` enum('ARMAZON','CRISTAL','LENTE_CONTACTO','ACCESORIO') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ARMAZON',
-  `id_unidad` int NOT NULL,
+  `tipo_producto` enum('ARMAZON','CRISTAL','LENTE_CONTACTO','ACCESORIO','CUIDADO_VISUAL') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ARMAZON',
   `id_categoria` bigint NOT NULL,
   `id_marca` bigint NOT NULL,
-  `produc_costo` decimal(10,2) DEFAULT '0.00',
+  `id_unidad_venta` int NOT NULL COMMENT 'Unidad en la que se vende al cliente (ej. Frasco, Unidad, Par)',
+  `id_unidad_compra` int NOT NULL COMMENT 'Unidad en la que llega del proveedor (ej. Caja, Paquete)',
+  `produc_factor_conversion` int NOT NULL DEFAULT '1' COMMENT 'Ej: Si la caja trae 24 frascos, el factor es 24',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_producto`),
-  KEY `FK_Unidad_Produc` (`id_unidad`),
   KEY `FK_Catego_Produc` (`id_categoria`),
   KEY `FK_Marca_Produc` (`id_marca`),
+  KEY `FK_UnidadVenta_Produc` (`id_unidad_venta`),
+  KEY `FK_UnidadCompra_Produc` (`id_unidad_compra`),
   CONSTRAINT `FK_Catego_Produc` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id_categoria`),
   CONSTRAINT `FK_Marca_Produc` FOREIGN KEY (`id_marca`) REFERENCES `marca` (`id_marca`),
-  CONSTRAINT `FK_Unidad_Produc` FOREIGN KEY (`id_unidad`) REFERENCES `unidad` (`id_unidad`)
+  CONSTRAINT `FK_UnidadVenta_Produc` FOREIGN KEY (`id_unidad_venta`) REFERENCES `unidad` (`id_unidad`),
+  CONSTRAINT `FK_UnidadCompra_Produc` FOREIGN KEY (`id_unidad_compra`) REFERENCES `unidad` (`id_unidad`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
