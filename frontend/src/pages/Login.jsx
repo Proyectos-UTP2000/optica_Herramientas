@@ -116,7 +116,9 @@ const Login = () => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.title}>SISTEMA GESTION DE ÓPTICA</h2>
+        <h2 style={styles.title}>
+          OPTICA DIVINO <br /> NIÑO DEL MILAGRO
+        </h2>
         <p style={styles.subtitle}>Gestión de Usuarios y Clientes</p>
 
         {error && <div style={styles.errorMsg}>{error}</div>}

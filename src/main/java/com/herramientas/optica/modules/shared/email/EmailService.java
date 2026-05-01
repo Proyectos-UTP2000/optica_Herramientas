@@ -42,7 +42,6 @@ public class EmailService {
                     + "Ir a Iniciar Sesión"
                     + "</a>"
                     + "<br><p>Atentamente,<br><b>El equipo de Administración</b></p>";
-
             helper.setText(contenidoHtml, true);
 
             mailSender.send(message);
