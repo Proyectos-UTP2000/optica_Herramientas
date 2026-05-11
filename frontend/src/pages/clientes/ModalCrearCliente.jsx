@@ -75,7 +75,9 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
 
     if (!dni || dni.length !== 8) err.dni = "DNI inválido";
     if (!datosDni) err.general = "Debe consultar el DNI";
-    if (!correo.includes("@")) err.correo = "Correo inválido";
+    if (correo && !correo.includes("@")) {
+      err.correo = "Correo inválido";
+    }
     if (telefono && telefono.length !== 9)
       err.telefono = "Debe tener 9 dígitos";
     if (!direccion.trim()) err.direccion = "Dirección obligatoria";
@@ -84,7 +86,6 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
     return Object.keys(err).length === 0;
   };
 
-  // 💾 GUARDAR
   const handleGuardar = async () => {
     if (!validar()) return;
 
@@ -216,7 +217,7 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
             fontWeight: "600",
           }}
         >
-          ✅ {nombre} {apePaterno} {apeMaterno}
+          {nombre} {apePaterno} {apeMaterno}
         </div>
       )}
 

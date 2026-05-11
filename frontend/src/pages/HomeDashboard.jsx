@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  PersonFill,
+  PeopleFill,
+  Box2Fill,
+  LightbulbFill,
+} from "react-bootstrap-icons";
 import { Toast } from "../utils/alerts";
 
 const HomeDashboard = () => {
@@ -120,7 +126,9 @@ const HomeDashboard = () => {
             <span style={styles.cardLabel}>Usuarios</span>
             <span style={styles.cardValue}>{stats.totalUsuarios}</span>
           </div>
-          <div style={styles.iconCircle("#3b82f6")}>👤</div>
+          <div style={styles.iconCircle("#3b82f6")}>
+            <PersonFill />
+          </div>
         </div>
 
         {/* Tarjeta de Clientes */}
@@ -129,7 +137,9 @@ const HomeDashboard = () => {
             <span style={styles.cardLabel}>Clientes</span>
             <span style={styles.cardValue}>{stats.totalClientes}</span>
           </div>
-          <div style={styles.iconCircle("#10b981")}>👥</div>
+          <div style={styles.iconCircle("#10b981")}>
+            <PeopleFill />
+          </div>
         </div>
 
         {/* Tarjeta de Productos */}
@@ -138,17 +148,21 @@ const HomeDashboard = () => {
             <span style={styles.cardLabel}>Inventario</span>
             <span style={styles.cardValue}>{stats.totalProductos}</span>
           </div>
-          <div style={styles.iconCircle("#f59e0b")}>📦</div>
+          <div style={styles.iconCircle("#f59e0b")}>
+            <Box2Fill />
+          </div>
         </div>
       </div>
 
-      <div style={styles.tipBox}>
-        <span style={{ marginRight: "10px", fontSize: "20px" }}>💡</span>
+      {/* <div style={styles.tipBox}>
+        <span style={{ marginRight: "10px", fontSize: "20px" }}>
+          <LightbulbFill />
+        </span>
         <span>
           <strong>Estado del Sistema:</strong> Los datos se están sincronizando
           correctamente con la base de datos centralizada.
         </span>
-      </div>
+      </div> */}
     </div>
   );
 };
