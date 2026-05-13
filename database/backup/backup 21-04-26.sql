@@ -59,7 +59,7 @@ DROP TABLE IF EXISTS `categoria`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `categoria` (
   `id_categoria` bigint NOT NULL AUTO_INCREMENT,
-  `categ_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `categ_nombre` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `categ_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_categoria`),
   UNIQUE KEY `categ_nombre` (`categ_nombre`)
@@ -475,10 +475,11 @@ DROP TABLE IF EXISTS `marca`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `marca` (
   `id_marca` bigint NOT NULL AUTO_INCREMENT,
-  `marca_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `marca_nombre` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `marca_fecha` date DEFAULT NULL,
   `marca_estado` int NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id_marca`)
+  PRIMARY KEY (`id_marca`),
+  UNIQUE KEY `marca_nombre` (`marca_nombre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

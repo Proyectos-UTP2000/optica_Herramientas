@@ -19,6 +19,8 @@ import com.herramientas.optica.modules.empleados.dto.PerfilRequestDTO;
 import com.herramientas.optica.modules.empleados.dto.PerfilResponseDTO;
 import com.herramientas.optica.modules.empleados.service.PerfilService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/perfiles")
 @CrossOrigin(origins = "*")
@@ -36,7 +38,7 @@ public class PerfilController {
     }
 
     @PostMapping
-    public ResponseEntity<PerfilResponseDTO> crearPerfil(@RequestBody PerfilRequestDTO dto) {
+    public ResponseEntity<PerfilResponseDTO> crearPerfil(@Valid @RequestBody PerfilRequestDTO dto) {
         PerfilResponseDTO nuevo = perfilService.crearPerfil(dto);
         return new ResponseEntity<>(nuevo, HttpStatus.CREATED);
     }

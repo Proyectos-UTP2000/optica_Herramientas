@@ -18,6 +18,8 @@ import com.herramientas.optica.modules.empleados.dto.EmpleadoRequestDTO;
 import com.herramientas.optica.modules.empleados.dto.EmpleadoResponseDTO;
 import com.herramientas.optica.modules.empleados.service.EmpleadoService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/empleados")
 @CrossOrigin(origins = "*")
@@ -35,7 +37,7 @@ public class EmpleadoController {
     }
 
     @PostMapping
-    public ResponseEntity<EmpleadoResponseDTO> crearEmpleado(@RequestBody EmpleadoRequestDTO dto) {
+    public ResponseEntity<EmpleadoResponseDTO> crearEmpleado(@Valid @RequestBody EmpleadoRequestDTO dto) {
         EmpleadoResponseDTO nuevoEmpleado = empleadoService.crearEmpleado(dto);
         return new ResponseEntity<>(nuevoEmpleado, HttpStatus.CREATED);
     }
@@ -61,7 +63,7 @@ public class EmpleadoController {
     @PutMapping("/{id}")
     public ResponseEntity<EmpleadoResponseDTO> actualizarEmpleado(
             @PathVariable Long id,
-            @RequestBody EmpleadoRequestDTO dto) {
+            @Valid @RequestBody EmpleadoRequestDTO dto) {
         EmpleadoResponseDTO actualizado = empleadoService.actualizarEmpleado(id, dto);
         return ResponseEntity.ok(actualizado);
     }
