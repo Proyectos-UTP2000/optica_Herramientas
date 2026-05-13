@@ -3,27 +3,25 @@ spring:
     name: optica
 
   datasource:
-    url: jdbc:mysql://localhost:3306/optica?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
-    username: admin_optica
-    password: 123456
+    url: ${DB_URL:jdbc:mysql://localhost:3306/optica?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:admin_optica}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      # CAMBIAMOS 'validate' POR 'update'
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        # Opcional: Ayuda a Hibernate a entender mejor MySQL 8
         dialect: org.hibernate.dialect.MySQLDialect
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: "rogervz.1710@gmail.com"
-    password: "lzbe lqnd ejwu itvi"
+    username: ${MAIL_USERNAME:rogervz.1710@gmail.com}
+    password: ${MAIL_PASSWORD:lzbe lqnd ejwu itvi}
     properties:
       mail:
         smtp:
@@ -32,17 +30,17 @@ spring:
             enable: true
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 api:
   peru:
     url-dni: "https://miapi.cloud/v1/dni/"
     url-ruc: "https://miapi.cloud/v1/ruc/"
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MDYsImV4cCI6MTc2Mzc4NjU4N30.mCthamubrKmkP7sQcieZo3YJM9vawV7ANvUnEMCQG8k"
+    token: ${API_PERU_TOKEN:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0MDYsImV4cCI6MTc2Mzc4NjU4N30.mCthamubrKmkP7sQcieZo3YJM9vawV7ANvUnEMCQG8k}
 
 jwt:
-  secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
-  expiration: 86400000
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION:86400000}
 
 app:
   frontend:

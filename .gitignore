@@ -34,5 +34,8 @@ build/
 
 ### Agents ###
 skills-lock.json
+GEMINI.md
 .gemini
 .agents
+
+/graphify-out/
