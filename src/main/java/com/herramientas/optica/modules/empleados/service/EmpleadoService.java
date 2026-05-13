@@ -128,6 +128,22 @@ public class EmpleadoService {
     }
 
     @Transactional
+    public EmpleadoResponseDTO reactivarEmpleado(String dni) {
+        Empleado empleado = empleadoRepository.findByNumeroDocumento(dni)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No se encontró ningún empleado con el DNI: " + dni));
+
+        if (empleado.getEstado() != ESTADO_BORRADO) {
+            throw new IllegalStateException("El empleado no se encuentra en la eliminado, su estado actual es: "
+                    + (empleado.getEstado() == 1 ? "Activo" : "Deshabilitado"));
+        }
+        empleado.setEstado(ESTADO_ACTIVO);
+        empleadoRepository.save(empleado);
+
+        return mapearAResponse(empleado);
+    }
+
+    @Transactional
     public EmpleadoResponseDTO cambiarEstado(Long id) {
         // 1. Proteger al Super Administrador (ID = 1)
         if (id == 1L) {

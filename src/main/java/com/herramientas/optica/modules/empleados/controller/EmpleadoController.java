@@ -1,7 +1,7 @@
 package com.herramientas.optica.modules.empleados.controller;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +43,12 @@ public class EmpleadoController {
         return new ResponseEntity<>(nuevoEmpleado, HttpStatus.CREATED);
     }
 
+    @PatchMapping("/reactivar/{dni}")
+    public ResponseEntity<EmpleadoResponseDTO> reactivarEmpleado(@PathVariable String dni) {
+        EmpleadoResponseDTO empleadoReactivado = empleadoService.reactivarEmpleado(dni);
+        return ResponseEntity.ok(empleadoReactivado);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EmpleadoResponseDTO> buscarEmpleado(@PathVariable Long id) {
         return ResponseEntity.ok(empleadoService.buscarPorId(id));
@@ -58,7 +65,6 @@ public class EmpleadoController {
         empleadoService.borradoLogico(id);
         return ResponseEntity.noContent().build();
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<EmpleadoResponseDTO> actualizarEmpleado(
