@@ -1,10 +1,13 @@
 package com.herramientas.optica.modules.productos.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.herramientas.optica.modules.productos.dto.CategoriaRequestDTO;
+import com.herramientas.optica.modules.productos.dto.CategoriaResponseDTO;
 import com.herramientas.optica.modules.productos.model.Categoria;
 import com.herramientas.optica.modules.productos.repository.CategoriaRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoRepository;
@@ -24,39 +27,49 @@ public class CategoriaService {
         this.productoRepository = productoRepository;
     }
 
-    public List<Categoria> listarGestion() {
-        return categoriaRepository.findByEstadoNot(ESTADO_BORRADO);
+    public List<CategoriaResponseDTO> listarGestion() {
+        return categoriaRepository.findByEstadoNot(ESTADO_BORRADO).stream()
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public Categoria crear(Categoria request) {
-        String nombreLimpio = request.getNombre().trim().toUpperCase();
+    public CategoriaResponseDTO crear(CategoriaRequestDTO dto) {
+        String nombreLimpio = dto.getNombre().trim().toUpperCase();
         if (categoriaRepository.existsByNombre(nombreLimpio)) {
             throw new IllegalArgumentException("La categoría '" + nombreLimpio + "' ya existe.");
         }
-        request.setNombre(nombreLimpio);
-        request.setEstado(ESTADO_ACTIVO);
-        return categoriaRepository.save(request);
+
+        Categoria categoria = Categoria.builder()
+                .nombre(nombreLimpio)
+                .estado(ESTADO_ACTIVO)
+                .build();
+
+        return mapearAResponse(categoriaRepository.save(categoria));
     }
 
     @Transactional
-    public Categoria actualizar(Long id, Categoria request) {
+    public CategoriaResponseDTO actualizar(Long id, CategoriaRequestDTO dto) {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
 
-        String nombreNuevo = request.getNombre().trim().toUpperCase();
+        String nombreNuevo = dto.getNombre().trim().toUpperCase();
         if (!categoria.getNombre().equals(nombreNuevo) && categoriaRepository.existsByNombre(nombreNuevo)) {
             throw new IllegalArgumentException("Ya existe otra categoría con el nombre '" + nombreNuevo + "'.");
         }
 
         categoria.setNombre(nombreNuevo);
-        return categoriaRepository.save(categoria);
+        return mapearAResponse(categoriaRepository.save(categoria));
     }
 
     @Transactional
-    public Categoria cambiarEstado(Long id) {
+    public CategoriaResponseDTO cambiarEstado(Long id) {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
+
+        if (categoria.getEstado() == ESTADO_BORRADO) {
+            throw new IllegalStateException("No se puede cambiar el estado de una categoría eliminada.");
+        }
 
         if (categoria.getEstado() == ESTADO_ACTIVO) {
             long conteo = productoRepository.countByCategoriaIdAndEstadoNot(id, ESTADO_BORRADO);
@@ -66,17 +79,27 @@ public class CategoriaService {
             }
         }
         categoria.setEstado(categoria.getEstado() == ESTADO_ACTIVO ? ESTADO_INACTIVO : ESTADO_ACTIVO);
-        return categoriaRepository.save(categoria);
+        return mapearAResponse(categoriaRepository.save(categoria));
     }
 
     @Transactional
     public void eliminar(Long id) {
-        Categoria categoria = categoriaRepository.findById(id).orElseThrow();
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
+
         long conteo = productoRepository.countByCategoriaIdAndEstadoNot(id, ESTADO_BORRADO);
         if (conteo > 0) {
             throw new IllegalStateException("No se puede eliminar una categoría con productos activos.");
         }
         categoria.setEstado(ESTADO_BORRADO);
         categoriaRepository.save(categoria);
+    }
+
+    private CategoriaResponseDTO mapearAResponse(Categoria categoria) {
+        return CategoriaResponseDTO.builder()
+                .id(categoria.getId())
+                .nombre(categoria.getNombre())
+                .estado(categoria.getEstado())
+                .build();
     }
 }

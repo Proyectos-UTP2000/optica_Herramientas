@@ -1,10 +1,13 @@
 package com.herramientas.optica.modules.productos.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.herramientas.optica.modules.productos.dto.MarcaRequestDTO;
+import com.herramientas.optica.modules.productos.dto.MarcaResponseDTO;
 import com.herramientas.optica.modules.productos.model.Marca;
 import com.herramientas.optica.modules.productos.repository.MarcaRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoRepository;
@@ -24,23 +27,46 @@ public class MarcaService {
         this.productoRepository = productoRepository;
     }
 
-    public List<Marca> listarGestion() {
-        return marcaRepository.findByEstadoNot(ESTADO_BORRADO);
+    public List<MarcaResponseDTO> listarGestion() {
+        return marcaRepository.findByEstadoNot(ESTADO_BORRADO).stream()
+                .map(this::mapearAResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public Marca crear(Marca request) {
-        String nombre = request.getNombre().trim().toUpperCase();
+    public MarcaResponseDTO crear(MarcaRequestDTO dto) {
+        String nombre = dto.getNombre().trim().toUpperCase();
         if (marcaRepository.existsByNombre(nombre)) {
             throw new IllegalArgumentException("La marca '" + nombre + "' ya existe.");
         }
-        request.setNombre(nombre);
-        request.setEstado(1);
-        return marcaRepository.save(request);
+
+        Marca marca = Marca.builder()
+                .nombre(nombre)
+                .fecha(dto.getFecha())
+                .estado(ESTADO_ACTIVO)
+                .build();
+
+        return mapearAResponse(marcaRepository.save(marca));
     }
 
     @Transactional
-    public Marca cambiarEstado(Long id) {
+    public MarcaResponseDTO actualizar(Long id, MarcaRequestDTO dto) {
+        Marca marca = marcaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada."));
+
+        String nombreNuevo = dto.getNombre().trim().toUpperCase();
+        if (!marca.getNombre().equals(nombreNuevo) && marcaRepository.existsByNombre(nombreNuevo)) {
+            throw new IllegalArgumentException("Ya existe otra marca con el nombre '" + nombreNuevo + "'.");
+        }
+
+        marca.setNombre(nombreNuevo);
+        marca.setFecha(dto.getFecha());
+
+        return mapearAResponse(marcaRepository.save(marca));
+    }
+
+    @Transactional
+    public MarcaResponseDTO cambiarEstado(Long id) {
         Marca marca = marcaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada."));
 
@@ -57,7 +83,7 @@ public class MarcaService {
         }
 
         marca.setEstado(marca.getEstado() == ESTADO_ACTIVO ? ESTADO_INACTIVO : ESTADO_ACTIVO);
-        return marcaRepository.save(marca);
+        return mapearAResponse(marcaRepository.save(marca));
     }
 
     @Transactional
@@ -73,5 +99,14 @@ public class MarcaService {
 
         marca.setEstado(ESTADO_BORRADO);
         marcaRepository.save(marca);
+    }
+
+    private MarcaResponseDTO mapearAResponse(Marca marca) {
+        return MarcaResponseDTO.builder()
+                .id(marca.getId())
+                .nombre(marca.getNombre())
+                .fecha(marca.getFecha())
+                .estado(marca.getEstado())
+                .build();
     }
 }
