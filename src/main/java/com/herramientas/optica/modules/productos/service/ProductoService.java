@@ -18,6 +18,8 @@ import com.herramientas.optica.modules.productos.repository.MarcaRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoRepository;
 import com.herramientas.optica.modules.productos.repository.UnidadRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoImagenRepository;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 @Service
 public class ProductoService {
@@ -27,6 +29,7 @@ public class ProductoService {
     private final MarcaRepository marcaRepository;
     private final UnidadRepository unidadRepository;
     private final ProductoImagenRepository productoImagenRepository;
+    private final CloudinaryService cloudinaryService;
 
     private static final int ESTADO_ACTIVO = 1;
     private static final int ESTADO_INACTIVO = 2;
@@ -34,12 +37,14 @@ public class ProductoService {
 
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository,
             MarcaRepository marcaRepository, UnidadRepository unidadRepository,
-            ProductoImagenRepository productoImagenRepository) {
+            ProductoImagenRepository productoImagenRepository,
+            CloudinaryService cloudinaryService) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.marcaRepository = marcaRepository;
         this.unidadRepository = unidadRepository;
         this.productoImagenRepository = productoImagenRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     public List<ProductoResponseDTO> listarTodos() {
@@ -54,7 +59,7 @@ public class ProductoService {
     }
 
     @Transactional
-    public ProductoResponseDTO crear(ProductoRequestDTO dto) {
+    public ProductoResponseDTO crear(ProductoRequestDTO dto, List<MultipartFile> imagenes) throws IOException {
         String codigoFinal = dto.getCodigo();
         if (codigoFinal == null || codigoFinal.trim().isEmpty()) {
             codigoFinal = generarCodigoAutomatico(dto.getTipoProducto());
@@ -92,12 +97,13 @@ public class ProductoService {
 
         Producto guardado = productoRepository.save(producto);
 
-        // Guardar imágenes
-        if (dto.getRutasImagenes() != null && !dto.getRutasImagenes().isEmpty()) {
-            for (int i = 0; i < dto.getRutasImagenes().size(); i++) {
+        // Guardar imágenes en Cloudinary
+        if (imagenes != null && !imagenes.isEmpty()) {
+            for (int i = 0; i < imagenes.size(); i++) {
+                String url = cloudinaryService.subirImagen(imagenes.get(i), guardado.getCodigo());
                 ProductoImagen img = ProductoImagen.builder()
                         .producto(guardado)
-                        .rutaImagen(dto.getRutasImagenes().get(i))
+                        .rutaImagen(url)
                         .esPrincipal(i == 0)
                         .build();
                 productoImagenRepository.save(img);
@@ -125,7 +131,7 @@ public class ProductoService {
     }
 
     @Transactional
-    public ProductoResponseDTO actualizar(Long id, ProductoRequestDTO dto) {
+    public ProductoResponseDTO actualizar(Long id, ProductoRequestDTO dto, List<MultipartFile> imagenes) throws Exception {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
 
@@ -160,13 +166,15 @@ public class ProductoService {
         producto.setUnidadCompra(unidadCompra);
         producto.setFactorConversion(dto.getFactorConversion());
 
-        // Actualizar imágenes (reemplazo simple por ahora)
-        if (dto.getRutasImagenes() != null) {
+        // Actualizar imágenes (reemplazo completo)
+        if (imagenes != null && !imagenes.isEmpty()) {
+            cloudinaryService.eliminarCarpetaProducto(producto.getCodigo());
             productoImagenRepository.deleteByProductoId(id);
-            for (int i = 0; i < dto.getRutasImagenes().size(); i++) {
+            for (int i = 0; i < imagenes.size(); i++) {
+                String url = cloudinaryService.subirImagen(imagenes.get(i), producto.getCodigo());
                 ProductoImagen img = ProductoImagen.builder()
                         .producto(producto)
-                        .rutaImagen(dto.getRutasImagenes().get(i))
+                        .rutaImagen(url)
                         .esPrincipal(i == 0)
                         .build();
                 productoImagenRepository.save(img);
