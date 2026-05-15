@@ -43,6 +43,4 @@ public class ProductoRequestDTO {
     private Integer idUnidadCompra;
 
     private Integer factorConversion;
-
-    private java.util.List<String> rutasImagenes;
 }
