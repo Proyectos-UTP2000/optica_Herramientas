@@ -21,6 +21,10 @@ import com.herramientas.optica.modules.productos.service.ProductoService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @RestController
 @RequestMapping("/api/v1/productos")
 @CrossOrigin(origins = "*")
@@ -42,15 +46,29 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.buscarPorId(id));
     }
 
-    @PostMapping
-    public ResponseEntity<ProductoResponseDTO> crear(@Valid @RequestBody ProductoRequestDTO dto) {
-        return new ResponseEntity<>(productoService.crear(dto), HttpStatus.CREATED);
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<ProductoResponseDTO> crear(
+            @RequestPart("producto") String productoJson,
+            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        ProductoRequestDTO dto = mapper.readValue(productoJson, ProductoRequestDTO.class);
+
+        return new ResponseEntity<>(productoService.crear(dto, imagenes), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponseDTO> actualizar(@PathVariable Long id,
-            @Valid @RequestBody ProductoRequestDTO dto) {
-        return ResponseEntity.ok(productoService.actualizar(id, dto));
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<ProductoResponseDTO> actualizar(
+            @PathVariable Long id,
+            @RequestPart("producto") String productoJson,
+            @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        ProductoRequestDTO dto = mapper.readValue(productoJson, ProductoRequestDTO.class);
+
+        return ResponseEntity.ok(productoService.actualizar(id, dto, imagenes));
     }
 
     @PatchMapping("/{id}/estado")
