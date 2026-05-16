@@ -28,8 +28,8 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // a. Si la ruta es pública, deja pasar
-        if (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/dashboard/")) {
+        // a. Rutas públicas de autenticación se permiten siempre
+        if (path.startsWith("/api/v1/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,7 +50,13 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // d. Verifica si alguna de las 'Opcion' del perfil tiene una 'ruta' que coincida
+        // d. El Dashboard básico (stats) es accesible para todos los autenticados
+        if (path.equals("/api/v1/dashboard/stats")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // e. Verifica si alguna de las 'Opcion' del perfil tiene una 'ruta' que coincida
         // Normalizamos la URI quitando el prefijo /api/v1 si existe
         String normalizedPath = path.replace("/api/v1", "");
         
@@ -58,16 +64,21 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
                 .anyMatch(opcion -> {
                     String ruta = opcion.getRuta();
                     if (ruta == null || ruta.isEmpty()) return false;
-                    // Aseguramos que la ruta empiece con /
-                    if (!ruta.startsWith("/")) ruta = "/" + ruta;
-                    return normalizedPath.startsWith(ruta);
+                    
+                    // Normalizar ruta de la DB: asegurar que empiece con /
+                    String cleanRuta = ruta.startsWith("/") ? ruta : "/" + ruta;
+                    
+                    // Si la ruta es exactamente igual o si es un prefijo (ej: /clientes permite /clientes/1)
+                    return normalizedPath.equals(cleanRuta) || normalizedPath.startsWith(cleanRuta + "/");
                 });
 
         if (hasAccess) {
             filterChain.doFilter(request, response);
         } else {
-            // g. Si NO tiene acceso
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "No tiene permisos para este módulo");
+            // f. Si NO tiene acceso
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\": \"No tiene permisos para acceder a este módulo (" + normalizedPath + ")\"}");
         }
     }
 }

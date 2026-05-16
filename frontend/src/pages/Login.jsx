@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../api/authService";
 import { Toast } from "../utils/alerts";
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
@@ -31,6 +31,7 @@ const Login = () => {
         title: `¡Bienvenido(a), ${data.username}!`,
       });
 
+      if (onLoginSuccess) onLoginSuccess();
       navigate("/");
     } catch (err) {
       const mensajeError =

@@ -106,7 +106,7 @@ const iconMap = {
   IconPerfiles: <IconPerfiles />,
 };
 
-const MainLayout = ({ opciones = [] }) => {
+const MainLayout = ({ opciones = [], setToken }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const username = localStorage.getItem("username");
@@ -134,6 +134,7 @@ const MainLayout = ({ opciones = [] }) => {
     );
     if (result.isConfirmed) {
       localStorage.clear();
+      if (setToken) setToken(null);
       Toast.fire({ icon: "info", title: "Sesión cerrada. ¡Hasta pronto!" });
       navigate("/login");
     }

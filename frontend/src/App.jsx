@@ -11,33 +11,44 @@ import { getMisOpciones } from './api/authService';
 
 function App() {
   const [opciones, setOpciones] = useState([]);
-  const token = localStorage.getItem('token');
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(!!localStorage.getItem('token'));
 
   useEffect(() => {
     if (token) {
       cargarOpciones();
+    } else {
+      setOpciones([]);
+      setLoading(false);
     }
   }, [token]);
 
   const cargarOpciones = async () => {
+    setLoading(true);
     try {
       const data = await getMisOpciones();
       setOpciones(data);
     } catch (error) {
       console.error("Error al cargar opciones:", error);
+      if (error.status === 401 || error.status === 403) {
+        localStorage.clear();
+        setToken(null);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login onLoginSuccess={() => setToken(localStorage.getItem('token'))} />} />
 
         <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <MainLayout opciones={opciones} />
+            <ProtectedRoute opciones={opciones} loading={loading}>
+              <MainLayout opciones={opciones} setToken={setToken} />
             </ProtectedRoute>
           }
         >
