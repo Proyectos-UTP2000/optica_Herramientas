@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api' // Ajusta según tu server
+  // Eliminamos la URL absoluta para que Vite use el proxy configurado en vite.config.js
+  // Esto soluciona los problemas de CORS y las rutas duplicadas /api/api
+  baseURL: '' 
 });
 
 // Este interceptor pega el token en cada petición automáticamente

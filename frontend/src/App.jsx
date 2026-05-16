@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import MainLayout from './layouts/MainLayout';
@@ -6,28 +7,57 @@ import HomeDashboard from './pages/HomeDashboard';
 import Empleados from './pages/Empleados';
 import Perfiles from './pages/Perfiles';
 import Clientes from './pages/Clientes';
+import ConfiguracionMenu from './pages/ConfiguracionMenu';
+import { getMisOpciones } from './api/authService';
 
 function App() {
+  const [opciones, setOpciones] = useState([]);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(!!localStorage.getItem('token'));
+
+  useEffect(() => {
+    if (token) {
+      cargarOpciones();
+    } else {
+      setOpciones([]);
+      setLoading(false);
+    }
+  }, [token]);
+
+  const cargarOpciones = async () => {
+    setLoading(true);
+    try {
+      const data = await getMisOpciones();
+      setOpciones(data);
+    } catch (error) {
+      console.error("Error al cargar opciones:", error);
+      if (error.status === 401 || error.status === 403) {
+        localStorage.clear();
+        setToken(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login onLoginSuccess={() => setToken(localStorage.getItem('token'))} />} />
 
         <Route
-          path="/dashboard"
+          path="/"
           element={
-            <ProtectedRoute>
-              <MainLayout />
+            <ProtectedRoute opciones={opciones} loading={loading}>
+              <MainLayout opciones={opciones} setToken={setToken} />
             </ProtectedRoute>
           }
         >
           <Route index element={<HomeDashboard />} />
-
-          {/* ← REEMPLAZAR el div inline por el componente */}
           <Route path="clientes" element={<Clientes />} />
-
           <Route path="empleados" element={<Empleados />} />
           <Route path="perfiles" element={<Perfiles />} />
+          <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />

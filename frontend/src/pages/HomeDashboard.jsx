@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import {
   PersonFill,
   PeopleFill,
@@ -18,9 +18,7 @@ const HomeDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/v1/dashboard/stats",
-        );
+        const response = await api.get("/api/v1/dashboard/stats");
         setStats(response.data);
       } catch (error) {
         console.error("Error cargando estadísticas:", error);
