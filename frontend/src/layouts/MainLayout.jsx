@@ -287,33 +287,37 @@ const MainLayout = ({ opciones = [], setToken }) => {
 
           {/* Nav */}
           <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
-            <Link
-              to="/"
-              className={`nav-link ${isActive("/") ? "active" : ""}`}
-            >
-              <IconDashboard /> Dashboard
-            </Link>
-            
             {opcionesPadre.map((op) => {
               const hijos = getHijos(op.id);
               const tieneHijos = hijos.length > 0;
               const abierto = seccionesAbiertas[op.id];
               const rutaReact = (op.ruta || "").replace("/api/v1", "") || "/";
-              
+
               if (tieneHijos) {
                 return (
                   <div key={op.id} style={{ marginBottom: "4px" }}>
                     <div
                       className="nav-link"
-                      style={{ cursor: "pointer", justifyContent: "space-between" }}
+                      style={{
+                        cursor: "pointer",
+                        justifyContent: "space-between",
+                      }}
                       onClick={() => toggleSeccion(op.id)}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
                         {iconMap[op.icono] || <IconDashboard />} {op.nombre}
                       </div>
                       <IconChevronDown
                         style={{
-                          transform: abierto ? "rotate(180deg)" : "rotate(0deg)",
+                          transform: abierto
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
                           transition: "transform 0.2s ease",
                         }}
                       />
@@ -321,7 +325,8 @@ const MainLayout = ({ opciones = [], setToken }) => {
                     {abierto && (
                       <div style={{ paddingLeft: "26px", marginTop: "2px" }}>
                         {hijos.map((hijo) => {
-                          const rutaHijo = (hijo.ruta || "").replace("/api/v1", "") || "/";
+                          const rutaHijo =
+                            (hijo.ruta || "").replace("/api/v1", "") || "/";
                           return (
                             <Link
                               key={hijo.id}

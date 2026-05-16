@@ -62,12 +62,20 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // e. Verifica si alguna de las 'Opcion' del perfil tiene una 'ruta' que coincida
         // Normalizamos la URI quitando el prefijo /api/v1 si existe
         String normalizedPath = path.replace("/api/v1", "");
         if (normalizedPath.isEmpty()) normalizedPath = "/";
         
         final String finalPath = normalizedPath;
+        
+        // Caso especial: La API de /opciones se permite si el usuario tiene acceso a /configuracion-menu
+        boolean accessToConfigMenu = empleado.getPerfil().getOpciones().stream()
+                .anyMatch(o -> "/configuracion-menu".equals(o.getRuta()));
+        
+        if (finalPath.startsWith("/opciones") && accessToConfigMenu) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         boolean hasAccess = empleado.getPerfil().getOpciones().stream()
                 .anyMatch(opcion -> {

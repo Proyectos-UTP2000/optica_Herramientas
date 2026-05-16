@@ -8,4 +8,5 @@ import com.herramientas.optica.modules.empleados.model.Perfil;
 @Repository
 public interface PerfilRepository extends JpaRepository<Perfil, Long> {
     boolean existsByNombre(String nombre);
+    java.util.Optional<Perfil> findByNombre(String nombre);
 }
