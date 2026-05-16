@@ -7,6 +7,7 @@ import HomeDashboard from './pages/HomeDashboard';
 import Empleados from './pages/Empleados';
 import Perfiles from './pages/Perfiles';
 import Clientes from './pages/Clientes';
+import ConfiguracionMenu from './pages/ConfiguracionMenu';
 import { getMisOpciones } from './api/authService';
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
           <Route path="clientes" element={<Clientes />} />
           <Route path="empleados" element={<Empleados />} />
           <Route path="perfiles" element={<Perfiles />} />
+          <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
