@@ -99,6 +99,22 @@ const IconMenu = () => (
   </svg>
 );
 
+const IconChevronDown = ({ style }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={style}
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 const iconMap = {
   IconDashboard: <IconDashboard />,
   IconClientes: <IconClientes />,
@@ -114,6 +130,26 @@ const MainLayout = ({ opciones = [], setToken }) => {
 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [esMovil, setEsMovil] = useState(window.innerWidth <= 768);
+  const [seccionesAbiertas, setSeccionesAbiertas] = useState({});
+
+  const toggleSeccion = (id) => {
+    setSeccionesAbiertas((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const opcionesPadre = opciones
+    .filter((op) => op.idPadre === null)
+    .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+  const opcionesHijas = opciones.filter((op) => op.idPadre !== null);
+
+  const getHijos = (idPadre) => {
+    return opcionesHijas
+      .filter((op) => op.idPadre === idPadre)
+      .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+  };
 
   useEffect(() => {
     const handle = () => setEsMovil(window.innerWidth <= 768);
@@ -258,10 +294,51 @@ const MainLayout = ({ opciones = [], setToken }) => {
               <IconDashboard /> Dashboard
             </Link>
             
-            {opciones.map((op) => {
-              // Normalizar ruta para el Link de React (quitar /api/v1 si existe)
+            {opcionesPadre.map((op) => {
+              const hijos = getHijos(op.id);
+              const tieneHijos = hijos.length > 0;
+              const abierto = seccionesAbiertas[op.id];
               const rutaReact = (op.ruta || "").replace("/api/v1", "") || "/";
               
+              if (tieneHijos) {
+                return (
+                  <div key={op.id} style={{ marginBottom: "4px" }}>
+                    <div
+                      className="nav-link"
+                      style={{ cursor: "pointer", justifyContent: "space-between" }}
+                      onClick={() => toggleSeccion(op.id)}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        {iconMap[op.icono] || <IconDashboard />} {op.nombre}
+                      </div>
+                      <IconChevronDown
+                        style={{
+                          transform: abierto ? "rotate(180deg)" : "rotate(0deg)",
+                          transition: "transform 0.2s ease",
+                        }}
+                      />
+                    </div>
+                    {abierto && (
+                      <div style={{ paddingLeft: "26px", marginTop: "2px" }}>
+                        {hijos.map((hijo) => {
+                          const rutaHijo = (hijo.ruta || "").replace("/api/v1", "") || "/";
+                          return (
+                            <Link
+                              key={hijo.id}
+                              to={rutaHijo}
+                              className={`nav-link ${isActive(rutaHijo) ? "active" : ""}`}
+                              style={{ padding: "7px 12px", fontSize: "13px" }}
+                            >
+                              {hijo.nombre}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={op.id}
