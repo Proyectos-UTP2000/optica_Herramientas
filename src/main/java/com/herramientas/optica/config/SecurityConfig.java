@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
+import com.herramientas.optica.security.jwt.DynamicAuthorizationFilter;
 import com.herramientas.optica.security.jwt.JwtAuthenticationFilter;
 import com.herramientas.optica.security.service.CustomUserDetailsService;
 
@@ -23,10 +25,17 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final EmpleadoRepository empleadoRepository;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomUserDetailsService userDetailsService, EmpleadoRepository empleadoRepository) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
+        this.empleadoRepository = empleadoRepository;
+    }
+
+    @Bean
+    public DynamicAuthorizationFilter dynamicAuthorizationFilter() {
+        return new DynamicAuthorizationFilter(empleadoRepository);
     }
 
     @Bean
@@ -64,7 +73,8 @@ public class SecurityConfig {
                 // le decimos a Spring que use Jwt en lugar de la seguirdad de SpringBoot
                 // tradicional
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(dynamicAuthorizationFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
     }
