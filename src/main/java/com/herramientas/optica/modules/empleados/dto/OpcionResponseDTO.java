@@ -14,4 +14,6 @@ public class OpcionResponseDTO {
     private String nombre;
     private String ruta;
     private String icono;
+    private Long idPadre;
+    private Integer orden;
 }

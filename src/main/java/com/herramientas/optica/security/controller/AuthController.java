@@ -20,6 +20,7 @@ import com.herramientas.optica.security.dto.AuthResponse;
 import com.herramientas.optica.security.jwt.JwtService;
 import com.herramientas.optica.security.service.CustomUserDetailsService;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,11 +77,14 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
 
         List<OpcionResponseDTO> opciones = empleado.getPerfil().getOpciones().stream()
+                .sorted(Comparator.comparing(op -> op.getOrden() != null ? op.getOrden() : 0))
                 .map(opcion -> OpcionResponseDTO.builder()
                         .id(opcion.getId())
                         .nombre(opcion.getNombre())
                         .ruta(opcion.getRuta())
                         .icono(opcion.getIcono())
+                        .idPadre(opcion.getPadre() != null ? opcion.getPadre().getId() : null)
+                        .orden(opcion.getOrden())
                         .build())
                 .collect(Collectors.toList());
 
