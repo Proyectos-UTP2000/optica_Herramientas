@@ -19,6 +19,8 @@ import com.herramientas.optica.modules.clientes.dto.ClienteRequestDTO;
 import com.herramientas.optica.modules.clientes.dto.ClienteResponseDTO;
 import com.herramientas.optica.modules.clientes.service.ClienteService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/clientes")
 @CrossOrigin(origins = "*")
@@ -41,7 +43,7 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<ClienteResponseDTO> crearCliente(@RequestBody ClienteRequestDTO dto) {
+    public ResponseEntity<ClienteResponseDTO> crearCliente(@Valid @RequestBody ClienteRequestDTO dto) {
         ClienteResponseDTO nuevoCliente = clienteService.crearCliente(dto);
         return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
     }
@@ -55,7 +57,7 @@ public class ClienteController {
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponseDTO> actualizarCliente(
             @PathVariable Long id,
-            @RequestBody ClienteRequestDTO dto) {
+            @Valid @RequestBody ClienteRequestDTO dto) {
 
         ClienteResponseDTO clienteActualizado = clienteService.actualizarCliente(id, dto);
         return ResponseEntity.ok(clienteActualizado);

@@ -5,6 +5,7 @@ import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 import ModalCrearEmpleado from "./empleados/ModalCrearEmpleado";
 import ModalEditarEmpleado from "./empleados/ModalEditarEmpleado";
 import ModalVerEmpleado from "./empleados/ModalVerEmpleado";
+import ToggleEstado from "../components/ui/ToggleEstado";
 
 const Empleados = () => {
   const [empleados, setEmpleados] = useState([]);
@@ -219,13 +220,19 @@ const Empleados = () => {
                   <td style={{ padding: "12px" }}>{e.perfilNombre}</td>
                   <td style={{ padding: "12px" }}>{e.dni}</td>
                   <td style={{ padding: "12px" }}>
-                    <span
-                      className={`badge ${e.estado === 1 ? "badge-active" : "badge-inactive"}`}
-                      onClick={() => cambiarEstado(e.id)}
-                      style={{ cursor: "pointer" }}
+                    <label
+                      className="toggle-switch"
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        cambiarEstado(e.id);
+                      }}
                     >
-                      {e.estado === 1 ? "Activo" : "Inactivo"}
-                    </span>
+                      <input type="checkbox" readOnly checked={e.estado === 1} />
+                      <span className="toggle-track" />
+                      <span className="toggle-label">
+                        {e.estado === 1 ? "Activo" : "Inactivo"}
+                      </span>
+                    </label>
                   </td>
                   <td style={{ padding: "12px", display: "flex", gap: "5px" }}>
                     <button

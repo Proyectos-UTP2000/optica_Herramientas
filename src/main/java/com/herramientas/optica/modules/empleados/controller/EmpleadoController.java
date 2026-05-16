@@ -1,7 +1,7 @@
 package com.herramientas.optica.modules.empleados.controller;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.herramientas.optica.modules.empleados.dto.EmpleadoRequestDTO;
 import com.herramientas.optica.modules.empleados.dto.EmpleadoResponseDTO;
 import com.herramientas.optica.modules.empleados.service.EmpleadoService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/empleados")
@@ -35,9 +38,15 @@ public class EmpleadoController {
     }
 
     @PostMapping
-    public ResponseEntity<EmpleadoResponseDTO> crearEmpleado(@RequestBody EmpleadoRequestDTO dto) {
+    public ResponseEntity<EmpleadoResponseDTO> crearEmpleado(@Valid @RequestBody EmpleadoRequestDTO dto) {
         EmpleadoResponseDTO nuevoEmpleado = empleadoService.crearEmpleado(dto);
         return new ResponseEntity<>(nuevoEmpleado, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/reactivar/{dni}")
+    public ResponseEntity<EmpleadoResponseDTO> reactivarEmpleado(@PathVariable String dni) {
+        EmpleadoResponseDTO empleadoReactivado = empleadoService.reactivarEmpleado(dni);
+        return ResponseEntity.ok(empleadoReactivado);
     }
 
     @GetMapping("/{id}")
@@ -57,11 +66,10 @@ public class EmpleadoController {
         return ResponseEntity.noContent().build();
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<EmpleadoResponseDTO> actualizarEmpleado(
             @PathVariable Long id,
-            @RequestBody EmpleadoRequestDTO dto) {
+            @Valid @RequestBody EmpleadoRequestDTO dto) {
         EmpleadoResponseDTO actualizado = empleadoService.actualizarEmpleado(id, dto);
         return ResponseEntity.ok(actualizado);
     }

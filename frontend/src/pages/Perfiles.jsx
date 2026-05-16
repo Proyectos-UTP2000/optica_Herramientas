@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { PencilSquare, Trash3, Arrow90degLeft } from "react-bootstrap-icons";
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
-
+import ToggleEstado from "../components/ui/ToggleEstado";
 const Perfiles = () => {
   const [perfiles, setPerfiles] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -274,14 +274,19 @@ const Perfiles = () => {
                     {p.descripcion}
                   </td>
                   <td style={{ padding: "12px" }}>
-                    <span
-                      className={`badge ${p.estado === 1 ? "badge-active" : "badge-inactive"}`}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => cambiarEstado(p.id, p.nombre)}
-                      title="Click para cambiar estado"
+                    <label
+                      className="toggle-switch"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cambiarEstado(p.id, p.nombre);
+                      }}
                     >
-                      {p.estado === 1 ? "Activo" : "Inactivo"}
-                    </span>
+                      <input type="checkbox" readOnly checked={p.estado === 1} />
+                      <span className="toggle-track" />
+                      <span className="toggle-label">
+                        {p.estado === 1 ? "Activo" : "Inactivo"}
+                      </span>
+                    </label>
                   </td>
                   <td style={{ padding: "12px", display: "flex", gap: "8px" }}>
                     <button

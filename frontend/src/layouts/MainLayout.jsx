@@ -2,24 +2,118 @@ import { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Toast, confirmarAccion } from "../utils/alerts";
 
+// ── Iconos SVG inline ───────────────────────
+const IconDashboard = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+  </svg>
+);
+const IconClientes = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+const IconEmpleados = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+const IconPerfiles = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+const IconLogout = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+const IconMenu = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
 const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const username = localStorage.getItem("username");
   const rol = localStorage.getItem("rol");
 
-  // Estado para controlar el menú en celulares
   const [menuAbierto, setMenuAbierto] = useState(false);
-  // Estado para saber si estamos en pantalla de celular
   const [esMovil, setEsMovil] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
-    const handleResize = () => setEsMovil(window.innerWidth <= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const handle = () => setEsMovil(window.innerWidth <= 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
   }, []);
 
-  // Cierra el menú al cambiar de ruta en móviles
   useEffect(() => {
     if (esMovil) setMenuAbierto(false);
   }, [location.pathname, esMovil]);
@@ -38,189 +132,285 @@ const MainLayout = () => {
     }
   };
 
-  // Estilos CSS inyectados para el reset y media queries (Responsividad)
-  const estilosGlobales = `
-        body { margin: 0; padding: 0; overflow-x: hidden; background-color: #f8fafc; }
-        * { box-sizing: border-box; }
-        .layout-container { display: flex; min-height: 100vh; }
-        
-        .sidebar {
-            width: 260px; background: #1e293b; color: white; display: flex; flex-direction: column;
-            position: fixed; height: 100vh; box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 50;
-            transition: transform 0.3s ease;
-        }
-        
-        .main-content {
-            flex: 1; display: flex; flex-direction: column; min-width: 0;
-            margin-left: 260px; transition: margin-left 0.3s ease;
-        }
+  const css = `
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { margin:0; padding:0; overflow-x:hidden; background:#f8fafc; font-family:'Inter',sans-serif; }
+    * { box-sizing:border-box; }
+    .layout-container { display:flex; min-height:100vh; }
 
-        /* 📱 RESPONSIVIDAD PARA CELULARES */
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.abierto { transform: translateX(0); }
-            .main-content { margin-left: 0; }
-            .overlay {
-                position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40;
-                opacity: 1; transition: opacity 0.3s ease;
-            }
-        }
-    `;
+    .sidebar {
+      width: 240px;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 50;
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+      border-right: 1px solid #1e293b;
+    }
+    .main-content {
+      flex:1; display:flex; flex-direction:column; min-width:0;
+      margin-left:240px; transition:margin-left 0.25s cubic-bezier(0.16,1,0.3,1);
+    }
+    .nav-link {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 12px; border-radius:8px; margin-bottom:2px;
+      text-decoration:none; font-size:13.5px; font-weight:500;
+      color:#94a3b8; transition:all 150ms ease;
+    }
+    .nav-link:hover { color:#e2e8f0; background:rgba(255,255,255,0.05); }
+    .nav-link.active { color:#fff; background:rgba(59,130,246,0.18); }
+    .nav-link.active svg { color:#60a5fa; }
 
-  const navLinkStyle = (isActive) => ({
-    display: "flex",
-    alignItems: "center",
-    padding: "12px 15px",
-    color: isActive ? "#fff" : "#94a3b8",
-    textDecoration: "none",
-    borderRadius: "8px",
-    marginBottom: "8px",
-    backgroundColor: isActive ? "#3b82f6" : "transparent",
-    transition: "all 0.3s ease",
-    fontWeight: isActive ? "600" : "400",
-  });
+    .nav-section-label {
+      font-size:10.5px; font-weight:700; color:#475569;
+      text-transform:uppercase; letter-spacing:0.08em;
+      padding:12px 12px 6px; margin-top:4px;
+    }
+
+    @media (max-width:768px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.abierto { transform:translateX(0); box-shadow:8px 0 30px rgba(0,0,0,0.3); }
+      .main-content { margin-left:0; }
+      .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40; }
+    }
+  `;
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      <style>{estilosGlobales}</style>
-
+      <style>{css}</style>
       <div className="layout-container">
-        {/* Fondo oscuro cuando el menú está abierto en móviles */}
         {esMovil && menuAbierto && (
-          <div className="overlay" onClick={() => setMenuAbierto(false)}></div>
+          <div className="overlay" onClick={() => setMenuAbierto(false)} />
         )}
 
-        {/* Sidebar */}
+        {/* ── Sidebar ── */}
         <aside className={`sidebar ${menuAbierto ? "abierto" : ""}`}>
+          {/* Logo */}
           <div
             style={{
-              padding: "30px 20px",
-              textAlign: "center",
-              borderBottom: "1px solid #334155",
+              padding: "22px 16px 18px",
+              borderBottom: "1px solid #1e293b",
             }}
           >
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "800",
-                letterSpacing: "1px",
-                color: "#3b82f6",
-                margin: 0,
-              }}
-            >
-              SISTEMA ÓPTICA
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: "linear-gradient(135deg,#3b82f6,#1d4ed8)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                >
+                  <circle cx="11" cy="11" r="6" />
+                  <circle cx="11" cy="11" r="2.5" />
+                  <path d="M20 20l-3-3" />
+                </svg>
+              </div>
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#f1f5f9",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Divino NiÑo Del Milagro
+                </p>
+                <p style={{ margin: 0, fontSize: 11, color: "#475569" }}>
+                  Panel de Control
+                </p>
+              </div>
+            </div>
           </div>
 
-          <nav style={{ flex: 1, padding: "20px 10px", overflowY: "auto" }}>
+          {/* Nav */}
+          <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
             <Link
               to="/dashboard"
-              style={navLinkStyle(location.pathname === "/dashboard")}
+              className={`nav-link ${isActive("/dashboard") ? "active" : ""}`}
             >
-              <span style={{ marginRight: "10px" }}>🏠</span> Dashboard
+              <IconDashboard /> Dashboard
             </Link>
             <Link
               to="/dashboard/clientes"
-              style={navLinkStyle(location.pathname === "/dashboard/clientes")}
+              className={`nav-link ${isActive("/dashboard/clientes") ? "active" : ""}`}
             >
-              <span style={{ marginRight: "10px" }}>👥</span> Clientes
+              <IconClientes /> Clientes
             </Link>
 
             {rol === "ADMINISTRADOR" && (
               <>
-                <p
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: "700",
-                    color: "#475569",
-                    textTransform: "uppercase",
-                    padding: "10px 15px 4px",
-                    marginTop: "8px",
-                  }}
-                >
-                  Administración
-                </p>
+                <p className="nav-section-label">Administración</p>
                 <Link
                   to="/dashboard/empleados"
-                  style={navLinkStyle(
-                    location.pathname === "/dashboard/empleados",
-                  )}
+                  className={`nav-link ${isActive("/dashboard/empleados") ? "active" : ""}`}
                 >
-                  <span style={{ marginRight: "10px" }}>👤</span> Empleados
+                  <IconEmpleados /> Empleados
                 </Link>
                 <Link
                   to="/dashboard/perfiles"
-                  style={navLinkStyle(
-                    location.pathname === "/dashboard/perfiles",
-                  )}
+                  className={`nav-link ${isActive("/dashboard/perfiles") ? "active" : ""}`}
                 >
-                  <span style={{ marginRight: "10px" }}>🛡️</span> Perfiles
+                  <IconPerfiles /> Perfiles
                 </Link>
               </>
             )}
           </nav>
 
-          <div style={{ padding: "20px", borderTop: "1px solid #334155" }}>
+          {/* Usuario + logout */}
+          <div style={{ padding: "14px 10px", borderTop: "1px solid #1e293b" }}>
+            <div
+              style={{
+                padding: "10px 12px",
+                borderRadius: 8,
+                background: "rgba(255,255,255,0.04)",
+                marginBottom: 8,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#e2e8f0",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {username}
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  color: "#475569",
+                  marginTop: 2,
+                }}
+              >
+                {rol}
+              </p>
+            </div>
             <button
               onClick={handleLogout}
               style={{
-                background: "#ef4444",
-                color: "white",
-                border: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
                 width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
+                padding: "9px 12px",
+                borderRadius: 8,
+                border: "none",
+                background: "transparent",
+                color: "#64748b",
+                fontSize: 13,
+                fontWeight: 500,
                 cursor: "pointer",
-                fontWeight: "600",
+                transition: "all 150ms",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(239,68,68,0.1)";
+                e.currentTarget.style.color = "#f87171";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#64748b";
               }}
             >
-              Cerrar Sesión
+              <IconLogout /> Cerrar Sesión
             </button>
           </div>
         </aside>
 
-        {/* Contenido Principal */}
+        {/* ── Contenido principal ── */}
         <main className="main-content">
+          {/* Header */}
           <header
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              padding: "15px 20px",
-              backgroundColor: "#fff",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+              padding: "13px 24px",
+              background: "#fff",
+              borderBottom: "1px solid #e2e8f0",
               position: "sticky",
               top: 0,
               zIndex: 10,
             }}
           >
-            {/* Botón Hamburguesa (solo visible en móviles) */}
             {esMovil ? (
               <button
                 onClick={() => setMenuAbierto(true)}
                 style={{
                   background: "none",
                   border: "none",
-                  fontSize: "24px",
                   cursor: "pointer",
+                  color: "#334155",
+                  display: "flex",
+                  padding: 4,
                 }}
               >
-                ☰
+                <IconMenu />
               </button>
             ) : (
               <div />
-            )}{" "}
-            {/* Espaciador si no es móvil */}
-            <div style={{ fontSize: "13px", color: "#64748b" }}>
-              Usuario: <strong style={{ color: "#1e293b" }}>{username}</strong>
+            )}
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  background: "#1e40af",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>
+                  {username?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#0f172a",
+                  }}
+                >
+                  {username}
+                </p>
+              </div>
               <span
                 style={{
-                  marginLeft: "10px",
-                  padding: "4px 10px",
-                  background: "#dcfce7",
-                  color: "#166534",
-                  borderRadius: "12px",
-                  fontWeight: "bold",
+                  padding: "3px 9px",
+                  background: "#eff6ff",
+                  color: "#1d4ed8",
+                  borderRadius: 20,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  border: "1px solid #bfdbfe",
                 }}
               >
                 {rol}
@@ -228,8 +418,12 @@ const MainLayout = () => {
             </div>
           </header>
 
+          {/* Página */}
           <section
-            style={{ padding: esMovil ? "15px" : "30px", overflowX: "hidden" }}
+            style={{
+              padding: esMovil ? "16px" : "28px 32px",
+              overflowX: "hidden",
+            }}
           >
             <Outlet />
           </section>

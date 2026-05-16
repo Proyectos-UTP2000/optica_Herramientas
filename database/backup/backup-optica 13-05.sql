@@ -1,6 +1,6 @@
--- MySQL dump 10.13  Distrib 8.0.45, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
 --
--- Host: localhost    Database: optica  
+-- Host: localhost    Database: optica
 -- ------------------------------------------------------
 -- Server version	8.0.45
 
@@ -32,8 +32,8 @@ CREATE TABLE `caja` (
   `monto_final_esperado` decimal(10,2) DEFAULT '0.00',
   `monto_final_real` decimal(10,2) DEFAULT '0.00',
   `diferencia` decimal(10,2) DEFAULT '0.00',
-  `estado` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `observaciones` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `observaciones` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_usuario` bigint NOT NULL,
   PRIMARY KEY (`id_caja`),
   KEY `FK_Usuario_Caja` (`id_usuario`),
@@ -85,17 +85,17 @@ DROP TABLE IF EXISTS `cliente`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cliente` (
   `id_cliente` bigint NOT NULL AUTO_INCREMENT,
-  `cli_nombre` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_apellido_paterno` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_apellido_materno` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_correo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_telefono` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_direccion` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `cli_nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_apellido_paterno` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_apellido_materno` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_correo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_telefono` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_direccion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `cli_estado` int NOT NULL DEFAULT '1',
-  `cli_ndocumento` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `cli_ndocumento` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_tipodocumento` bigint NOT NULL,
-  `cli_nombre_empresa` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_direccion_empresa` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_nombre_empresa` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_direccion_empresa` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_cliente`),
@@ -132,10 +132,10 @@ CREATE TABLE `compra` (
   `cuotas` int DEFAULT NULL,
   `deuda` decimal(10,2) DEFAULT NULL,
   `fecha_vencimiento` date DEFAULT NULL,
-  `forma_pago` enum('CONTADO','CREDITO') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `forma_pago` enum('CONTADO','CREDITO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `pago_inicial` decimal(10,2) DEFAULT NULL,
-  `nota_recepcion` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nota_recepcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id_compra`),
   KEY `FKo158ix00ljn91uet4xv15fq7o` (`id_proveedor`),
   KEY `FKmxy9j2xp5r9tt8b9glmt2eyax` (`id_tipo_comprobante`),
@@ -164,11 +164,11 @@ DROP TABLE IF EXISTS `compra_pagos_credito_detalle`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `compra_pagos_credito_detalle` (
   `id_compra_pago_detalle` bigint NOT NULL AUTO_INCREMENT,
-  `comentarios` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `estado` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `comentarios` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `fecha_pago` datetime(6) DEFAULT NULL,
   `fecha_vencimiento` date NOT NULL,
-  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `monto` decimal(10,2) NOT NULL,
   `monto_pagado` decimal(10,2) DEFAULT NULL,
   `numero_cuota` int NOT NULL,
@@ -197,9 +197,9 @@ DROP TABLE IF EXISTS `cotizacion`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cotizacion` (
   `id_cotizacion` bigint NOT NULL AUTO_INCREMENT,
-  `estado` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `fecha` datetime(6) NOT NULL,
-  `telefono_contacto` varchar(15) COLLATE utf8mb4_general_ci NOT NULL,
+  `telefono_contacto` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `total` decimal(10,2) NOT NULL,
   `id_cliente` bigint NOT NULL,
   PRIMARY KEY (`id_cotizacion`),
@@ -319,20 +319,20 @@ DROP TABLE IF EXISTS `empleado`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `empleado` (
   `id_empleado` bigint NOT NULL AUTO_INCREMENT,
-  `emple_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_nombreuser` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_apellido_paterno` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_apellido_materno` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_correo` varchar(60) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_contrasena` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_telefono` varchar(9) COLLATE utf8mb4_general_ci NOT NULL,
-  `emple_direccion` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_nombreuser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_apellido_paterno` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_apellido_materno` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_correo` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_contrasena` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_telefono` varchar(9) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_direccion` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `emple_estado` int NOT NULL DEFAULT '1',
-  `emple_ndocumento` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `emple_ndocumento` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_tipodocumento` bigint NOT NULL,
   `id_perfil` bigint NOT NULL,
   `id_empresa` bigint NOT NULL DEFAULT '1',
-  `token_reseteo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `token_reseteo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `token_reseteo_expira` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id_empleado`),
   UNIQUE KEY `emple_nombreuser` (`emple_nombreuser`),
@@ -367,11 +367,11 @@ DROP TABLE IF EXISTS `empresa`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `empresa` (
   `id_empresa` bigint NOT NULL,
-  `empresa_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `empresa_direccion` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `empresa_ruc` varchar(11) COLLATE utf8mb4_general_ci NOT NULL,
-  `empresa_logo` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `empresa_sidebar` text COLLATE utf8mb4_general_ci NOT NULL,
+  `empresa_nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `empresa_direccion` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `empresa_ruc` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `empresa_logo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `empresa_sidebar` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -395,7 +395,7 @@ DROP TABLE IF EXISTS `empresa_sidebar_imagen`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `empresa_sidebar_imagen` (
   `id_imagen` bigint NOT NULL AUTO_INCREMENT,
-  `ruta_imagen` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `ruta_imagen` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_empresa` bigint NOT NULL,
   PRIMARY KEY (`id_imagen`),
   KEY `FK_Empresa_Sidebar` (`id_empresa`),
@@ -421,7 +421,7 @@ DROP TABLE IF EXISTS `forma_pago`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `forma_pago` (
   `id_fpago` bigint NOT NULL AUTO_INCREMENT,
-  `fpago_metodo` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `fpago_metodo` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fpago_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_fpago`),
   UNIQUE KEY `fpago_metodo` (`fpago_metodo`)
@@ -447,7 +447,7 @@ DROP TABLE IF EXISTS `gasto`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `gasto` (
   `id_gasto` bigint NOT NULL AUTO_INCREMENT,
-  `descripcion` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `monto` decimal(10,2) NOT NULL,
   `fecha` datetime(6) NOT NULL,
   `id_caja` bigint NOT NULL,
@@ -478,8 +478,7 @@ CREATE TABLE `marca` (
   `marca_nombre` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `marca_fecha` date DEFAULT NULL,
   `marca_estado` int NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id_marca`),
-  UNIQUE KEY `marca_nombre` (`marca_nombre`)
+  PRIMARY KEY (`id_marca`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -501,11 +500,11 @@ DROP TABLE IF EXISTS `opcion`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `opcion` (
   `id_opcion` bigint NOT NULL AUTO_INCREMENT,
-  `opcion_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `opcion_ruta` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `opcion_icon` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `opcion_nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `opcion_ruta` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `opcion_icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id_opcion`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -514,7 +513,7 @@ CREATE TABLE `opcion` (
 
 LOCK TABLES `opcion` WRITE;
 /*!40000 ALTER TABLE `opcion` DISABLE KEYS */;
-INSERT INTO `opcion` VALUES (1,'Dashboard','/',NULL),(2,'Configuración','/empresa/configuracion',NULL),(3,'Listar Empleados','/api/v1/empleados',NULL),(4,'Perfiles','/api/v1/perfiles',NULL),(5,'Clientes','/api/v1/clientes',NULL),(6,'Listar Productos','/productos/listar',NULL),(7,'Categorías','/productos/categorias/listar',NULL),(8,'Marcas','/productos/marcas/listar',NULL),(9,'Unidad','/productos/unidades/listar',NULL),(10,'Listar Proveedores','/proveedores/listar',NULL),(11,'Ordenes de Compra','/compras/listar',NULL),(12,'Movimientos','/inventario/listar',NULL),(13,'Ventas','/ventas/listar',NULL),(14,'Gestión de Cotizacion','/ventas/cotizacion/listar',NULL);
+INSERT INTO `opcion` VALUES (1,'Dashboard','/',NULL),(2,'Configuración','/empresa/configuracion',NULL),(3,'Listar Empleados','/api/v1/empleados',NULL),(4,'Perfiles','/api/v1/perfiles',NULL),(5,'Clientes','/api/v1/clientes',NULL);
 /*!40000 ALTER TABLE `opcion` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -529,10 +528,10 @@ CREATE TABLE `orden_laboratorio` (
   `id_orden` bigint NOT NULL AUTO_INCREMENT,
   `id_venta` bigint NOT NULL,
   `id_receta` bigint NOT NULL,
-  `estado_orden` enum('PENDIENTE','ENVIADO_LABORATORIO','RECIBIDO_TIENDA','ENTREGADO_CLIENTE') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDIENTE',
+  `estado_orden` enum('PENDIENTE','ENVIADO_LABORATORIO','RECIBIDO_TIENDA','ENTREGADO_CLIENTE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDIENTE',
   `fecha_promesa_entrega` date DEFAULT NULL,
-  `laboratorio_nombre` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `notas` text COLLATE utf8mb4_general_ci,
+  `laboratorio_nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notas` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id_orden`),
   KEY `FK_OrdenLab_Venta` (`id_venta`),
   KEY `FK_OrdenLab_Receta` (`id_receta`),
@@ -559,11 +558,11 @@ DROP TABLE IF EXISTS `pagos_credito_detalle`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pagos_credito_detalle` (
   `id_pago_detalle` bigint NOT NULL AUTO_INCREMENT,
-  `comentarios` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `estado` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `comentarios` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `fecha_pago` datetime(6) DEFAULT NULL,
   `fecha_vencimiento` date NOT NULL,
-  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `monto` decimal(10,2) NOT NULL,
   `monto_pagado` decimal(10,2) DEFAULT NULL,
   `numero_cuota` int NOT NULL,
@@ -592,12 +591,12 @@ DROP TABLE IF EXISTS `perfil`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `perfil` (
   `id_perfil` bigint NOT NULL AUTO_INCREMENT,
-  `perfil_nombre` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `perfil_descripcion` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `perfil_nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `perfil_descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `perfil_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_perfil`),
   UNIQUE KEY `perfil_nombre` (`perfil_nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -606,7 +605,7 @@ CREATE TABLE `perfil` (
 
 LOCK TABLES `perfil` WRITE;
 /*!40000 ALTER TABLE `perfil` DISABLE KEYS */;
-INSERT INTO `perfil` VALUES (1,'Administrador','Acceso total al sistema.',1),(2,'Editor','Puede gestionar usuarios pero no perfiles.',1),(3,'Supervisor','Solo puede visualizar información.',1),(4,'Cliente','Solo puede ver los catálogos y realizar compras.',2);
+INSERT INTO `perfil` VALUES (1,'Administrador','Acceso total al sistema.',1),(2,'Editor','Puede gestionar usuarios pero no perfiles.',1);
 /*!40000 ALTER TABLE `perfil` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -633,7 +632,7 @@ CREATE TABLE `perfil_opcion` (
 
 LOCK TABLES `perfil_opcion` WRITE;
 /*!40000 ALTER TABLE `perfil_opcion` DISABLE KEYS */;
-INSERT INTO `perfil_opcion` VALUES (1,1),(2,1),(3,1),(1,2),(1,3),(2,3),(1,4),(1,5),(2,5),(1,6),(1,7),(4,7),(1,8),(4,8),(1,9),(1,10),(1,11),(1,12),(2,12),(1,13),(1,14);
+INSERT INTO `perfil_opcion` VALUES (1,1),(2,1),(1,2),(1,3),(2,3),(1,4),(1,5),(2,5);
 /*!40000 ALTER TABLE `perfil_opcion` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -646,10 +645,10 @@ DROP TABLE IF EXISTS `producto`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `producto` (
   `id_producto` bigint NOT NULL AUTO_INCREMENT,
-  `produc_nombre` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `produc_codigo` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `produc_modelo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `produc_descripcion` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `produc_nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `produc_codigo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `produc_modelo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `produc_descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `produc_precio` decimal(38,2) DEFAULT NULL,
   `produc_costo` decimal(10,2) DEFAULT '0.00',
   `produc_fecha_creacion` date DEFAULT NULL,
@@ -657,7 +656,7 @@ CREATE TABLE `producto` (
   `produc_stock` int DEFAULT '0',
   `produc_stock_minimo` int DEFAULT '1',
   `produc_estado` int NOT NULL DEFAULT '1',
-  `tipo_producto` enum('ARMAZON','CRISTAL','LENTE_CONTACTO','ACCESORIO','CUIDADO_VISUAL') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ARMAZON',
+  `tipo_producto` enum('ARMAZON','CRISTAL','LENTE_CONTACTO','ACCESORIO','CUIDADO_VISUAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ARMAZON',
   `id_categoria` bigint NOT NULL,
   `id_marca` bigint NOT NULL,
   `id_unidad_venta` int NOT NULL COMMENT 'Unidad en la que se vende al cliente (ej. Frasco, Unidad, Par)',
@@ -672,8 +671,8 @@ CREATE TABLE `producto` (
   KEY `FK_UnidadCompra_Produc` (`id_unidad_compra`),
   CONSTRAINT `FK_Catego_Produc` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id_categoria`),
   CONSTRAINT `FK_Marca_Produc` FOREIGN KEY (`id_marca`) REFERENCES `marca` (`id_marca`),
-  CONSTRAINT `FK_UnidadVenta_Produc` FOREIGN KEY (`id_unidad_venta`) REFERENCES `unidad` (`id_unidad`),
-  CONSTRAINT `FK_UnidadCompra_Produc` FOREIGN KEY (`id_unidad_compra`) REFERENCES `unidad` (`id_unidad`)
+  CONSTRAINT `FK_UnidadCompra_Produc` FOREIGN KEY (`id_unidad_compra`) REFERENCES `unidad` (`id_unidad`),
+  CONSTRAINT `FK_UnidadVenta_Produc` FOREIGN KEY (`id_unidad_venta`) REFERENCES `unidad` (`id_unidad`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -696,7 +695,7 @@ DROP TABLE IF EXISTS `producto_imagen`;
 CREATE TABLE `producto_imagen` (
   `id_imagen` bigint NOT NULL AUTO_INCREMENT,
   `id_producto` bigint NOT NULL,
-  `ruta_imagen` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `ruta_imagen` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `es_principal` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 si es la portada, 0 si es galería',
   PRIMARY KEY (`id_imagen`),
   KEY `FK_Imagen_Producto` (`id_producto`),
@@ -722,15 +721,15 @@ DROP TABLE IF EXISTS `proveedor`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `proveedor` (
   `id_proveedor` bigint NOT NULL AUTO_INCREMENT,
-  `provee_nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `provee_nombre_comercial` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `provee_nacionalidad` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `provee_direccion` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `provee_telefono` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `provee_correo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `provee_correo_adicional` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `provee_nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `provee_nombre_comercial` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `provee_nacionalidad` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `provee_direccion` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `provee_telefono` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `provee_correo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `provee_correo_adicional` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `provee_estado` int NOT NULL DEFAULT '1',
-  `provee_ndocumento` varchar(11) COLLATE utf8mb4_general_ci NOT NULL,
+  `provee_ndocumento` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_tipodocumento` bigint NOT NULL,
   PRIMARY KEY (`id_proveedor`),
   UNIQUE KEY `provee_nombre` (`provee_nombre`),
@@ -768,7 +767,7 @@ CREATE TABLE `receta_clinica` (
   `oi_eje` int DEFAULT NULL COMMENT 'Ojo Izquierdo Eje',
   `distancia_pupilar` decimal(5,2) DEFAULT NULL,
   `adicion` decimal(5,2) DEFAULT NULL COMMENT 'Para lentes bifocales/progresivos',
-  `observaciones` text COLLATE utf8mb4_general_ci,
+  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id_receta`),
   KEY `FK_Receta_Cliente` (`id_cliente`),
   KEY `FK_Receta_Empleado` (`id_empleado`),
@@ -797,8 +796,8 @@ CREATE TABLE `tipo_comprobante` (
   `id` int NOT NULL AUTO_INCREMENT,
   `correlativo_actual` int DEFAULT NULL,
   `estado` int DEFAULT NULL,
-  `nombre` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `serie` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `serie` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -822,7 +821,7 @@ DROP TABLE IF EXISTS `tipo_documento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipo_documento` (
   `id_tipodocumento` bigint NOT NULL AUTO_INCREMENT,
-  `tipodoc_nombre` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tipodoc_nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tipodoc_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_tipodocumento`),
   UNIQUE KEY `tipodoc_nombre` (`tipodoc_nombre`)
@@ -848,7 +847,7 @@ DROP TABLE IF EXISTS `tipo_venta`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipo_venta` (
   `id_tipoventa` bigint NOT NULL AUTO_INCREMENT,
-  `tipoventa_nombre` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `tipoventa_nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tipoventa_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_tipoventa`),
   UNIQUE KEY `tipoventa_nombre` (`tipoventa_nombre`)
@@ -874,7 +873,7 @@ DROP TABLE IF EXISTS `unidad`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `unidad` (
   `id_unidad` int NOT NULL AUTO_INCREMENT,
-  `uni_nombre` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `uni_nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `uni_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_unidad`),
   UNIQUE KEY `uni_nombre` (`uni_nombre`)
@@ -906,9 +905,9 @@ CREATE TABLE `venta` (
   `estado` int NOT NULL,
   `fecha` datetime(6) DEFAULT NULL,
   `fecha_vencimiento` date DEFAULT NULL,
-  `forma_pago` enum('CONTADO','CREDITO') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `numero_documento` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `forma_pago` enum('CONTADO','CREDITO') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `medio_pago` enum('EFECTIVO','TARJETA','TRANSFERENCIA','YAPE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `numero_documento` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `pago_inicial` decimal(10,2) DEFAULT NULL,
   `total` decimal(10,2) DEFAULT NULL,
   `id_tipo_comprobante` int DEFAULT NULL,
@@ -916,7 +915,7 @@ CREATE TABLE `venta` (
   `venta_fecha` datetime(6) DEFAULT NULL,
   `id_cotizacion` bigint DEFAULT NULL,
   `tasa_interes` decimal(5,2) DEFAULT '0.00',
-  `evaluacion_crediticia` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `evaluacion_crediticia` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_venta`),
@@ -939,6 +938,10 @@ LOCK TABLES `venta` WRITE;
 /*!40000 ALTER TABLE `venta` DISABLE KEYS */;
 /*!40000 ALTER TABLE `venta` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'optica'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -949,4 +952,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-21 19:32:03
+-- Dump completed on 2026-05-13 12:46:20
