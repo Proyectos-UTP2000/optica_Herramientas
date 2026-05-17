@@ -9,6 +9,7 @@ import Perfiles from './pages/Perfiles';
 import Clientes from './pages/Clientes';
 import ConfiguracionMenu from './pages/ConfiguracionMenu';
 import { getMisOpciones } from './api/authService';
+import Productos from "./pages/Productos";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -58,6 +59,11 @@ function App() {
           <Route path="empleados" element={<Empleados />} />
           <Route path="perfiles" element={<Perfiles />} />
           <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
+
+          <Route path="clientes" element={<Clientes />} />
+          <Route path="empleados" element={<Empleados />} />
+          <Route path="perfiles" element={<Perfiles />} />
+          <Route path="productos" element={<Productos />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
