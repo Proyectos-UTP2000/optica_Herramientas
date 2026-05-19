@@ -15,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
+import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
 import com.herramientas.optica.security.jwt.DynamicAuthorizationFilter;
 import com.herramientas.optica.security.jwt.JwtAuthenticationFilter;
 import com.herramientas.optica.security.service.CustomUserDetailsService;
@@ -26,16 +27,19 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
     private final EmpleadoRepository empleadoRepository;
+    private final OpcionRepository opcionRepository;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomUserDetailsService userDetailsService, EmpleadoRepository empleadoRepository) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomUserDetailsService userDetailsService, 
+                        EmpleadoRepository empleadoRepository, OpcionRepository opcionRepository) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
         this.empleadoRepository = empleadoRepository;
+        this.opcionRepository = opcionRepository;
     }
 
     @Bean
     public DynamicAuthorizationFilter dynamicAuthorizationFilter() {
-        return new DynamicAuthorizationFilter(empleadoRepository);
+        return new DynamicAuthorizationFilter(empleadoRepository, opcionRepository);
     }
 
     @Bean
