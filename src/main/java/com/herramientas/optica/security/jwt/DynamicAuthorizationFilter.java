@@ -18,10 +18,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.time.LocalDateTime;
+
 public class DynamicAuthorizationFilter extends OncePerRequestFilter {
 
     private final EmpleadoRepository empleadoRepository;
     private final OpcionRepository opcionRepository;
+    
+    // Cache para evitar consultas constantes a la DB
+    private Map<String, List<Opcion>> cacheOpcionesPorRuta = new ConcurrentHashMap<>();
+    private LocalDateTime ultimaActualizacionCache = LocalDateTime.MIN;
+    private static final int CACHE_EXPIRATION_MINUTES = 5;
 
     public DynamicAuthorizationFilter(EmpleadoRepository empleadoRepository, OpcionRepository opcionRepository) {
         this.empleadoRepository = empleadoRepository;
@@ -32,28 +41,23 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // a. Permitir peticiones OPTIONS (CORS preflight) sin validación
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String path = request.getRequestURI();
-
-        // b. Rutas públicas de autenticación se permiten siempre
         if (path.startsWith("/api/v1/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // b. Obtén la autenticación del SecurityContextHolder
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // c. Obtén el nombre de usuario y busca al Empleado
         String username = authentication.getName();
         Empleado empleado = empleadoRepository.findByUsername(username).orElse(null);
 
@@ -62,30 +66,21 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // d. El Dashboard básico (stats) es accesible para todos los autenticados
         if (path.equals("/api/v1/dashboard/stats")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Normalizamos la URI
         final String finalPath = normalizePath(path);
         
-        // Caso especial: La API de /opciones se permite si el usuario tiene acceso a /configuracion-menu
-        boolean accessToConfigMenu = empleado.getPerfil().getOpciones().stream()
-                .anyMatch(o -> "/configuracion-menu".equals(normalizePath(o.getRuta())));
-        
-        if (finalPath.startsWith("/opciones") && accessToConfigMenu) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        
+        // Refrescamos cache si es necesario
+        refreshCacheIfNeeded();
+
+        // 1. Verificar acceso explícito (Directo o por prefijo de ruta gestionada)
         boolean hasExplicitAccess = empleado.getPerfil().getOpciones().stream()
                 .anyMatch(opcion -> {
                     String compareRuta = normalizePath(opcion.getRuta());
-                    if (compareRuta.equals("/")) return finalPath.equals("/");
-                    
-                    // Si la ruta es exactamente igual o si es un prefijo (ej: /clientes permite /clientes/1)
+                    if ("/".equals(compareRuta)) return "/".equals(finalPath);
                     return finalPath.equals(compareRuta) || finalPath.startsWith(compareRuta + "/");
                 });
 
@@ -94,60 +89,58 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // NUEVA LÓGICA: Herencia para GET
+        // 2. Lógica de Herencia (Solo para GET)
         if ("GET".equalsIgnoreCase(request.getMethod())) {
-            boolean hasParentAccess = empleado.getPerfil().getOpciones().stream().anyMatch(opcionAutorizada -> 
-                esHijoDeOpcionAutorizada(opcionAutorizada, finalPath)
-            );
+            List<Opcion> opcionesEnPath = cacheOpcionesPorRuta.getOrDefault(finalPath, List.of());
             
-            if (hasParentAccess) {
-                filterChain.doFilter(request, response);
-                return;
+            for (Opcion op : opcionesEnPath) {
+                if (tieneAncestroAutorizado(op, empleado.getPerfil().getOpciones())) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
             }
         }
 
-        // f. Si NO tiene acceso
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
         response.getWriter().write("{\"message\": \"No tiene permisos para acceder a este módulo (" + finalPath + ")\"}");
     }
 
+    private synchronized void refreshCacheIfNeeded() {
+        if (ultimaActualizacionCache.isBefore(LocalDateTime.now().minusMinutes(CACHE_EXPIRATION_MINUTES))) {
+            List<Opcion> todas = opcionRepository.findAll();
+            Map<String, List<Opcion>> nuevoMapa = new ConcurrentHashMap<>();
+            for (Opcion op : todas) {
+                String r = normalizePath(op.getRuta());
+                nuevoMapa.computeIfAbsent(r, k -> new java.util.ArrayList<>()).add(op);
+            }
+            this.cacheOpcionesPorRuta = nuevoMapa;
+            this.ultimaActualizacionCache = LocalDateTime.now();
+        }
+    }
+
+    private boolean tieneAncestroAutorizado(Opcion hijo, java.util.Collection<Opcion> autorizadas) {
+        Opcion actual = hijo.getPadre();
+        while (actual != null) {
+            final Long idAncestro = actual.getId();
+            if (autorizadas.stream().anyMatch(a -> a.getId().equals(idAncestro))) {
+                return true;
+            }
+            actual = actual.getPadre();
+        }
+        return false;
+    }
+
     private String normalizePath(String ruta) {
-        if (ruta == null || ruta.isEmpty()) return "/";
-        String normalized = ruta.replace("/api/v1", "");
+        if (ruta == null || ruta.isEmpty() || "/".equals(ruta)) return "/";
+        String normalized = ruta;
+        if (normalized.startsWith("/api/v1")) normalized = normalized.substring(7);
+        else if (normalized.startsWith("api/v1")) normalized = normalized.substring(6);
+        
         if (!normalized.startsWith("/")) normalized = "/" + normalized;
         if (normalized.length() > 1 && normalized.endsWith("/")) {
             normalized = normalized.substring(0, normalized.length() - 1);
         }
-        return normalized;
-    }
-
-    private boolean esHijoDeOpcionAutorizada(Opcion opcionAutorizada, String pathSolicitado) {
-        // Buscamos la opción en la DB que corresponde al path solicitado
-        // Como no sabemos si en la DB está como /marcas o marcas, usamos findAll y filtramos
-        // En una app real con miles de opciones esto se optimizaría con un Map cacheado
-        List<Opcion> opcionesEnEsePath = opcionRepository.findAll().stream()
-                .filter(o -> pathSolicitado.equals(normalizePath(o.getRuta())))
-                .collect(Collectors.toList());
-
-        for (Opcion op : opcionesEnEsePath) {
-            if (esDescendiente(op, opcionAutorizada)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean esDescendiente(Opcion hijo, Opcion ancestroPosible) {
-        Opcion padre = hijo.getPadre();
-        while (padre != null) {
-            if (padre.getId().equals(ancestroPosible.getId())) {
-                return true;
-            }
-            // Importante: Asegurar que el padre esté cargado si es Lazy, 
-            // aunque aquí estamos en la misma transacción/sesión de Spring Security usualmente
-            padre = padre.getPadre();
-        }
-        return false;
+        return normalized.isEmpty() ? "/" : normalized;
     }
 }

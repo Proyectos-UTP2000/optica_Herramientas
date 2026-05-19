@@ -58,47 +58,49 @@ public class OpcionController {
 
     @PostMapping("/init-defaults")
     public ResponseEntity<String> initDefaults() {
-        // 1. Crear o buscar Categoría "Administración"
-        Opcion adminCat = opcionRepository.findByNombre("Administración")
-                .orElseGet(() -> opcionRepository.save(Opcion.builder()
-                        .nombre("Administración")
-                        .icono("IconPerfiles")
-                        .orden(10)
-                        .build()));
+        // 1. Categorías Principales (Padres Raíz)
+        Opcion adminCat = buscarOCrear("Administración", null, "IconPerfiles", 10, null);
+        Opcion inventarioCat = buscarOCrear("Inventario", null, "IconDashboard", 20, null);
+        Opcion clientesCat = buscarOCrear("Clientes y Ventas", null, "IconClientes", 30, null);
 
-        // 2. Crear o buscar Opción "Configuración Menú"
-        Opcion configMenu = opcionRepository.findByNombre("Configuración Menú")
-                .orElseGet(() -> opcionRepository.save(Opcion.builder()
-                        .nombre("Configuración Menú")
-                        .ruta("/configuracion-menu")
-                        .icono("IconDashboard")
-                        .padre(adminCat)
-                        .orden(3)
-                        .build()));
+        // 2. Opciones de Administración
+        Opcion configMenu = buscarOCrear("Configuración Menú", "/configuracion-menu", "IconDashboard", 3, adminCat);
+        Opcion listarEmpleados = buscarOCrear("Listar Empleados", "/empleados", "IconEmpleados", 1, adminCat);
+        Opcion perfiles = buscarOCrear("Perfiles", "/perfiles", "IconPerfiles", 2, adminCat);
 
-        // 3. Organizar Empleados y Perfiles
-        opcionRepository.findByNombre("Listar Empleados").ifPresent(op -> {
-            op.setPadre(adminCat);
-            op.setOrden(1);
-            opcionRepository.save(op);
-        });
-        opcionRepository.findByNombre("Perfiles").ifPresent(op -> {
-            op.setPadre(adminCat);
-            op.setOrden(2);
-            opcionRepository.save(op);
-        });
+        // 3. Opciones de Inventario (Jerarquía)
+        Opcion productos = buscarOCrear("Productos", "/productos", "IconDashboard", 1, inventarioCat);
+        Opcion marcas = buscarOCrear("Marcas", "/marcas", "IconDashboard", 2, productos);
+        Opcion categorias = buscarOCrear("Categorías", "/categorias", "IconDashboard", 3, productos);
+        Opcion unidades = buscarOCrear("Unidades", "/unidades", "IconDashboard", 4, productos);
 
-        // 4. Asignar al Perfil ADMINISTRADOR
+        // 4. Opciones de Clientes
+        Opcion gestionClientes = buscarOCrear("Gestión Clientes", "/clientes", "IconClientes", 1, clientesCat);
+
+        // 5. Asignar al Perfil ADMINISTRADOR (Limpieza y Recarga Total)
         perfilRepository.findByNombre("ADMINISTRADOR").ifPresent(perfil -> {
-            boolean hasAdminCat = perfil.getOpciones().stream().anyMatch(o -> o.getNombre().equals("Administración"));
-            boolean hasConfigMenu = perfil.getOpciones().stream().anyMatch(o -> o.getNombre().equals("Configuración Menú"));
+            List<Opcion> todas = List.of(
+                adminCat, inventarioCat, clientesCat, 
+                configMenu, listarEmpleados, perfiles, 
+                productos, marcas, categorias, unidades, 
+                gestionClientes
+            );
             
-            if (!hasAdminCat) perfil.getOpciones().add(adminCat);
-            if (!hasConfigMenu) perfil.getOpciones().add(configMenu);
-            
+            perfil.getOpciones().clear();
+            perfil.getOpciones().addAll(todas);
             perfilRepository.save(perfil);
         });
 
-        return ResponseEntity.ok("Estructura inicial creada y asignada al administrador");
+        return ResponseEntity.ok("Estructura jerárquica escalable creada y asignada al administrador");
+    }
+
+    private Opcion buscarOCrear(String nombre, String ruta, String icono, Integer orden, Opcion padre) {
+        Opcion op = opcionRepository.findByNombre(nombre).orElse(new Opcion());
+        op.setNombre(nombre);
+        op.setRuta(ruta);
+        op.setIcono(icono);
+        op.setOrden(orden);
+        op.setPadre(padre);
+        return opcionRepository.save(op);
     }
 }
