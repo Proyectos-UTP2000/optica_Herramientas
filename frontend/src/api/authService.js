@@ -10,7 +10,7 @@ export const login = async (username, password) => {
         const response = await axios.post(`${AUTH_URL}/login`, { username, password });
         return response.data; 
     } catch (error) {
-        throw error.response ? error.response.data : new Error("Error de conexión");
+        throw error;
     }
 };
 
@@ -19,6 +19,6 @@ export const getMisOpciones = async () => {
         const response = await api.get(`${AUTH_URL}/mis-opciones`);
         return response.data;
     } catch (error) {
-        throw error.response ? error.response.data : new Error("Error al obtener opciones");
+        throw error;
     }
 };

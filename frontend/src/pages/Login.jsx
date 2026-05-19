@@ -35,7 +35,7 @@ const Login = ({ onLoginSuccess }) => {
       navigate("/");
     } catch (err) {
       const mensajeError =
-        err.message || "Credenciales inválidas. Intente de nuevo.";
+        err.response?.data?.message || err.message || "Credenciales inválidas. Intente de nuevo.";
       setError(mensajeError);
       Toast.fire({
         icon: "error",

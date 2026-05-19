@@ -8,4 +8,5 @@ import com.herramientas.optica.modules.empleados.model.Opcion;
 @Repository
 public interface OpcionRepository extends JpaRepository<Opcion, Long> {
     java.util.Optional<Opcion> findByNombre(String nombre);
+    java.util.List<Opcion> findByRuta(String ruta);
 }

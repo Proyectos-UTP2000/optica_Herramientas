@@ -1,61 +1,68 @@
-# Sistema de Gestion de Optica
+# Sistema de Gestión Óptica
 
-Este es un proyecto integral para la gestion de una optica, desarrollado con un backend en Spring Boot y un frontend en React.
+Solución integral diseñada para la gestión total de una óptica, dividida en dos fases estratégicas: ERP Interno (en desarrollo) y Catálogo Web B2C (futura extensión).
 
-## Tecnologias Utilizadas
+## Arquitectura y Módulos Core
+
+El sistema sigue una arquitectura modular en Spring Boot y React, con un enfoque en la seguridad dinámica y la integridad de los datos.
+
+### Módulos Principales
+
+*   **Gestión de Inventario:** Control de productos con generación de códigos inteligentes, soporte para múltiples imágenes y gestión de Marcas, Categorías y Unidades.
+*   **Clientes:** Validación automática de datos mediante servicios externos (RENIEC/SUNAT).
+*   **Empleados y Seguridad:** Sistema de control de acceso basado en roles (RBAC) con permisos dinámicos y jerárquicos.
+*   **Seguridad Dinámica:** Implementación de un filtro de autorización dinámica que valida cada petición API contra las opciones asignadas al perfil del usuario en la base de datos.
+
+## Tecnologías Utilizadas
 
 ### Backend
-
-- Java 22
-- Spring Boot 4.0.5 (Nota: Revisar version, posiblemente 3.x)
-- Spring Security con JWT
-- Spring Data JPA (MySQL / H2)
-- Lombok
-- Validation Starter
-- Java Mail Sender
+*   Java 22
+*   Spring Boot 3.4.x
+*   Spring Security con JWT (Stateless)
+*   Spring Data JPA (MySQL)
+*   Lombok y Bean Validation
 
 ### Frontend
+*   React con Vite
+*   Axios (Instancia centralizada para consumo de API)
+*   Vanilla CSS para máxima flexibilidad y rendimiento
 
-- React con Vite
-- Axios para consumo de APIs
-- Tailwind CSS (o estilos personalizados segun global.css)
+### Infraestructura
+*   Docker Compose para despliegue de base de datos
+*   MySQL como motor principal de persistencia
 
-### Infraestructura y Otros
+## Configuración y Ejecución
 
-- Docker Compose
-- MySQL (Base de Datos principal)
-- H2 (Base de Datos para pruebas/consola)
+### Requisitos Previos
+*   Java 22 o superior
+*   Node.js y npm
+*   Docker y Docker Compose
 
-## Estructura del Proyecto
+### Instalación
 
-El backend esta organizado por modulos funcionales:
+1.  **Base de Datos:**
+    Levantar el contenedor de MySQL utilizando Docker Compose:
+    ```bash
+    docker-compose up -d
+    ```
 
-- **api**: Integracion con servicios externos (RENIEC/SUNAT).
-- **clientes**: Gestion de clientes con validacion automatica de DNI/RUC.
-- **empleados**: Gestion de personal, perfiles y permisos.
-- **productos**: Inventario completo con gestion de Marcas, Categorias y Unidades.
-  - Autogeneracion de codigos inteligentes (ej: ARM-00001).
-  - Soporte para multiples imagenes por producto.
-  - Manejo de integridad referencial mediante estado "En Desuso" (Estado 2).
-- **security**: Autenticacion y control de acceso.
+2.  **Servidor Backend:**
+    Configurar las credenciales en `src/main/resources/application.yml` y ejecutar:
+    ```bash
+    ./mvnw spring-boot:run
+    ```
 
-## Configuracion y Ejecucion
+3.  **Cliente Frontend:**
+    Navegar al directorio del frontend e instalar las dependencias:
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
 
-1. **Backend**:
-   - Configurar variables de entorno o ajustar application.yml.
-   - Ejecutar con ./mvnw spring-boot:run.
-2. **Frontend**:
-   - Navegar a cd frontend.
-   - Instalar dependencias: npm install.
-   - Ejecutar en desarrollo: npm run dev.
+## Mejores Prácticas Implementadas
 
-## Observaciones y Mejores Practicas (Evaluacion)
-
-He realizado una revision inicial del proyecto siguiendo las mejores practicas de Java-SpringBoot:
-
-### Puntos Positivos
-
-- **Inyeccion por Constructor**: Los controladores y servicios utilizan inyeccion por constructor de forma correcta.
-- **Uso de DTOs**: Se utilizan objetos de transferencia de datos para desacoplar las entidades de la API.
-- **Manejo Global de Excepciones**: Implementado mediante @RestControllerAdvice.
-- **Estructura por Caracteristicas**: Organizacion modular que facilita el escalado.
+*   **Seguridad Escalable:** Uso de caché thread-safe para la validación de permisos en el filtro de seguridad, evitando consultas excesivas a la base de datos.
+*   **Desacoplamiento:** Uso extensivo de DTOs para separar la lógica de negocio de la capa de presentación.
+*   **Jerarquía de Menú Dinámica:** Interfaz administrativa para organizar el menú y los accesos visualmente sin modificar código.
+*   **Validación de Datos:** Restricciones de integridad referencial y validaciones de entrada en DTOs.
