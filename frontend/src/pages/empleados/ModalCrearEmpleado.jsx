@@ -123,7 +123,10 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
               {},
               { headers },
             );
-            Toast.fire({ icon: "success", title: "Empleado reactivado correctamente" });
+            Toast.fire({
+              icon: "success",
+              title: "Empleado reactivado correctamente",
+            });
             recargarTabla();
             cerrarModal();
           } catch (err2) {
@@ -147,7 +150,6 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
           `Este empleado se encuentra registrado con estado: ${estadoTexto}. Si desea modificarlo, búsquelo en la lista.`,
           "info",
         );
-
       } else {
         mostrarAlerta(
           "Error de Registro",
@@ -260,7 +262,7 @@ const ModalCrearEmpleado = ({ cerrarModal, recargarTabla, perfiles }) => {
             fontWeight: "bold",
           }}
         >
-          ✅ {nombre} {apePaterno} {apeMaterno}
+          {nombre} {apePaterno} {apeMaterno}
         </div>
       )}
 

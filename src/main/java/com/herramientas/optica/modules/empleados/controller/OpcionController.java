@@ -53,6 +53,11 @@ public class OpcionController {
             }
         }
 
+        if (data.containsKey("icono")) {
+            Object iconoObj = data.get("icono");
+            opcion.setIcono(iconoObj != null ? iconoObj.toString() : null);
+        }
+
         return ResponseEntity.ok(opcionRepository.save(opcion));
     }
 

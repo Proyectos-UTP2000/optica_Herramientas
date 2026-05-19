@@ -42,7 +42,8 @@ const ConfiguracionMenu = () => {
       
       await api.put(`/api/v1/opciones/${opcion.id}/estructura`, {
         idPadre: opcion.idPadre !== undefined ? (opcion.idPadre === "" ? null : opcion.idPadre) : (opcion.padre ? opcion.padre.id : null),
-        orden: opcion.orden
+        orden: opcion.orden,
+        icono: opcion.icono
       });
       
       Toast.fire({ icon: "success", title: "Estructura actualizada" });
@@ -146,6 +147,25 @@ const ConfiguracionMenu = () => {
                   </td>
                   <td style={{ padding: "12px" }}>
                     <button
+                      className="btn-primary"
+                      style={{ padding: "6px 12px", fontSize: "12px" }}
+                      onClick={() => guardarCambios(op)}
+                    >
+                      Guardar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default ConfiguracionMenu;
+<button
                       className="btn-primary"
                       style={{ padding: "6px 12px", fontSize: "12px" }}
                       onClick={() => guardarCambios(op)}

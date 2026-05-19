@@ -95,6 +95,16 @@ const Perfiles = () => {
     return ids;
   };
 
+  const obtenerAncestros = (idOpcion) => {
+    const ids = [];
+    let actual = opciones.find(o => o.id === idOpcion);
+    while (actual && actual.padre) {
+      ids.push(actual.padre.id);
+      actual = opciones.find(o => o.id === actual.padre.id);
+    }
+    return ids;
+  };
+
   const toggleOpcion = (opcion) => {
     const estaSeleccionado = opcionesSeleccionadas.includes(opcion.id);
     const descendientes = obtenerDescendientes(opcion);
@@ -105,8 +115,9 @@ const Perfiles = () => {
         const aQuitar = [opcion.id, ...descendientes];
         return prev.filter((id) => !aQuitar.includes(id));
       } else {
-        // Marcar opción y todos sus hijos
-        const aAgregar = [opcion.id, ...descendientes];
+        // Marcar opción, todos sus hijos Y todos sus ancestros
+        const ancestros = obtenerAncestros(opcion.id);
+        const aAgregar = [opcion.id, ...descendientes, ...ancestros];
         // Evitar duplicados
         const nuevoSet = new Set([...prev, ...aAgregar]);
         return Array.from(nuevoSet);
