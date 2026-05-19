@@ -73,6 +73,17 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
 
         final String finalPath = normalizePath(path);
         
+        // --- RUTAS DE UTILIDAD COMPARTIDAS ---
+        // Se permiten para cualquier usuario autenticado (GET) para soporte de módulos
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            if (finalPath.equals("/opciones") || 
+                finalPath.startsWith("/dni") || 
+                finalPath.startsWith("/ruc")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+        
         // Refrescamos cache si es necesario
         refreshCacheIfNeeded();
 
