@@ -32,7 +32,7 @@ function App() {
       setOpciones(data);
     } catch (error) {
       console.error("Error al cargar opciones:", error);
-      if (error.status === 401 || error.status === 403) {
+      if (error.response?.status === 401) {
         localStorage.clear();
         setToken(null);
       }
