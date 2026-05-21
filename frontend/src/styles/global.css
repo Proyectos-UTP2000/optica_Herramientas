@@ -236,3 +236,18 @@
 .toggle-switch:hover .toggle-track {
   border-color: #93c5fd;
 }
+
+.btn-icon.view {
+  background: #eff6ff;
+  color: #3b82f6;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.btn-icon.view:hover {
+  background: #dbeafe;
+}

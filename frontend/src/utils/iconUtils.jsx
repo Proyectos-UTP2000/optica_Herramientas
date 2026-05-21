@@ -6,7 +6,10 @@ import {
   IconInventario,
   IconVentas,
   IconCompras,
-  IconConfig
+  IconConfig,
+  IconMarcas,
+  IconCategorias,
+  IconUnidades
 } from '../components/ui/IconCatalog';
 
 export const iconMap = {
@@ -18,4 +21,7 @@ export const iconMap = {
   IconVentas: <IconVentas />,
   IconCompras: <IconCompras />,
   IconConfig: <IconConfig />,
+  IconMarcas: <IconMarcas />,
+  IconCategorias: <IconCategorias />,
+  IconUnidades: <IconUnidades />,
 };

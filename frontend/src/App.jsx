@@ -10,6 +10,9 @@ import Clientes from "./pages/Clientes";
 import ConfiguracionMenu from "./pages/ConfiguracionMenu";
 import { getMisOpciones } from "./api/authService";
 import Productos from "./pages/Productos";
+import Marcas from "./pages/Marcas";
+import Categorias from "./pages/Categorias";
+import Unidades from "./pages/Unidades";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -67,6 +70,9 @@ function App() {
           <Route path="perfiles" element={<Perfiles />} />
           <Route path="productos" element={<Productos />} />
           <Route path="configuracion-menu" element={<ConfiguracionMenu />} />
+          <Route path="marcas" element={<Marcas />} />
+          <Route path="categorias" element={<Categorias />} />
+          <Route path="unidades" element={<Unidades />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
