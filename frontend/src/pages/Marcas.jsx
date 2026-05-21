@@ -135,8 +135,20 @@ const Marcas = () => {
                                     <td style={{ padding: "12px", color: "#64748b" }}>
                                         {m.cantidadProductosRelacionados ?? 0} producto(s)
                                     </td>
-                                    <td style={{ padding: "12px", cursor: "pointer" }} onClick={() => cambiarEstado(m)}>
-                                        {badgeEstado(m.estado)}
+                                    <td style={{ padding: "12px" }}>
+                                        <label
+                                            className="toggle-switch"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                cambiarEstado(m);
+                                            }}
+                                        >
+                                            <input type="checkbox" readOnly checked={m.estado === 1} />
+                                            <span className="toggle-track" />
+                                            <span className="toggle-label">
+                                                {m.estado === 1 ? "Activo" : m.estado === 2 ? "En Desuso" : "Inactivo"}
+                                            </span>
+                                        </label>
                                     </td>
                                     <td style={{ padding: "12px" }}>
                                         <div style={{ display: "flex", gap: "6px" }}>

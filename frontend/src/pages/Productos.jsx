@@ -4,6 +4,7 @@ import { Plus, ListTask, ArrowRepeat } from "react-bootstrap-icons";
 import TablaProductos from "./productos/TablaProductos";
 import ModalCrearProducto from "./productos/ModalCrearProducto";
 import ModalEditarProducto from "./productos/ModalEditarProducto";
+import ModalVerProducto from "./productos/ModalVerProducto";
 import { Toast } from "../utils/alerts";
 
 const Productos = () => {
@@ -11,7 +12,9 @@ const Productos = () => {
   const [cargando, setCargando] = useState(false);
   const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+  const [modalVerAbierto, setModalVerAbierto] = useState(false);
   const [productoAEditar, setProductoAEditar] = useState(null);
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
   const cargarProductos = async () => {
     setCargando(true);
@@ -39,6 +42,11 @@ const Productos = () => {
   const handleAbrirEditar = (producto) => {
     setProductoAEditar(producto);
     setModalEditarAbierto(true);
+  };
+
+  const handleAbrirVer = (producto) => {
+    setProductoSeleccionado(producto);
+    setModalVerAbierto(true);
   };
 
   return (
@@ -82,6 +90,7 @@ const Productos = () => {
           cargando={cargando} 
           recargarTabla={cargarProductos} 
           onEditarProducto={handleAbrirEditar}
+          onVerProducto={handleAbrirVer}
         />
       </div>
 
@@ -100,6 +109,16 @@ const Productos = () => {
             setProductoAEditar(null);
           }}
           recargarTabla={cargarProductos}
+        />
+      )}
+
+      {modalVerAbierto && productoSeleccionado && (
+        <ModalVerProducto
+          producto={productoSeleccionado}
+          cerrarModal={() => {
+            setModalVerAbierto(false);
+            setProductoSeleccionado(null);
+          }}
         />
       )}
     </div>

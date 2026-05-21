@@ -136,8 +136,20 @@ const Unidades = () => {
                   <td style={{ padding: "12px", color: "#64748b" }}>
                     {u.cantidadProductosRelacionados ?? 0} producto(s)
                   </td>
-                  <td style={{ padding: "12px", cursor: "pointer" }} onClick={() => cambiarEstado(u)}>
-                    {badgeEstado(u.estado)}
+                  <td style={{ padding: "12px" }}>
+                    <label
+                      className="toggle-switch"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cambiarEstado(u);
+                      }}
+                    >
+                      <input type="checkbox" readOnly checked={u.estado === 1} />
+                      <span className="toggle-track" />
+                      <span className="toggle-label">
+                        {u.estado === 1 ? "Activo" : u.estado === 2 ? "En Desuso" : "Inactivo"}
+                      </span>
+                    </label>
                   </td>
                   <td style={{ padding: "12px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>

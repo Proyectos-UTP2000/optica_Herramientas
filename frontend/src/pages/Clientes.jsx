@@ -21,6 +21,22 @@ const Clientes = () => {
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
 
+  const [showFiltros, setShowFiltros] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroTipoPersona, setFiltroTipoPersona] = useState("");
+  const [filtroContacto, setFiltroContacto] = useState("");
+
+  const filtrosActivosCount = 
+    (filtroEstado ? 1 : 0) + 
+    (filtroTipoPersona ? 1 : 0) + 
+    (filtroContacto ? 1 : 0);
+
+  const limpiarFiltros = () => {
+    setFiltroEstado("");
+    setFiltroTipoPersona("");
+    setFiltroContacto("");
+  };
+
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -98,14 +114,32 @@ const Clientes = () => {
     setShowModalVer(true);
   };
 
-  // ───────────── FILTRO Y PAGINACIÓN ─────────────
   const filtrados = clientes.filter((c) => {
     const t = busqueda.toLowerCase();
-    return (
+    const matchesSearch =
+      !busqueda ||
       c.nombreCompleto?.toLowerCase().includes(t) ||
       c.correo?.toLowerCase().includes(t) ||
-      c.numeroDocumento?.includes(t)
-    );
+      c.numeroDocumento?.includes(t);
+    const matchesEstado = !filtroEstado || String(c.estado) === filtroEstado;
+    
+    let matchesTipoPersona = true;
+    if (filtroTipoPersona === "NATURAL") {
+      matchesTipoPersona = c.numeroDocumento?.trim().length === 8;
+    } else if (filtroTipoPersona === "JURIDICA") {
+      matchesTipoPersona = c.numeroDocumento?.trim().length === 11;
+    }
+
+    let matchesContacto = true;
+    if (filtroContacto === "CORREO") {
+      matchesContacto = !!c.correo?.trim();
+    } else if (filtroContacto === "TELEFONO") {
+      matchesContacto = !!c.telefono?.trim();
+    } else if (filtroContacto === "SIN_CONTACTO") {
+      matchesContacto = !c.correo?.trim() && !c.telefono?.trim();
+    }
+
+    return matchesSearch && matchesEstado && matchesTipoPersona && matchesContacto;
   });
 
   const totalPaginas = Math.max(
@@ -131,9 +165,31 @@ const Clientes = () => {
         <h2 style={{ color: "var(--text-main)", margin: 0 }}>
           Lista de Clientes
         </h2>
-        <button className="btn-primary" onClick={() => setShowModalCrear(true)}>
-          + Nuevo Cliente
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className={`btn-secondary ${showFiltros ? "active" : ""}`}
+            onClick={() => setShowFiltros(!showFiltros)}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+            {showFiltros ? "Ocultar Filtros" : "Filtros"}
+            {filtrosActivosCount > 0 && (
+              <span style={{
+                background: "var(--primary-color, #3b82f6)",
+                color: "white",
+                borderRadius: "50%",
+                padding: "1px 6px",
+                fontSize: "11px",
+                fontWeight: "bold"
+              }}>
+                {filtrosActivosCount}
+              </span>
+            )}
+          </button>
+          <button className="btn-primary" onClick={() => setShowModalCrear(true)}>
+            + Nuevo Cliente
+          </button>
+        </div>
       </div>
 
       {/* Controles */}
@@ -167,6 +223,63 @@ const Clientes = () => {
           />
         </div>
       </div>
+
+      {showFiltros && (
+        <div style={{
+          background: "#f8fafc",
+          border: "1px solid var(--border-color)",
+          borderRadius: "8px",
+          padding: "16px",
+          marginBottom: "15px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "16px",
+          alignItems: "end"
+        }}>
+          <div>
+            <label className="label-control">Estado</label>
+            <select
+              className="input-control"
+              value={filtroEstado}
+              onChange={(e) => { setFiltroEstado(e.target.value); setPaginaActual(1); }}
+            >
+              <option value="">Todos</option>
+              <option value="1">Activos</option>
+              <option value="0">Inactivos</option>
+            </select>
+          </div>
+          <div>
+            <label className="label-control">Tipo de Persona</label>
+            <select
+              className="input-control"
+              value={filtroTipoPersona}
+              onChange={(e) => { setFiltroTipoPersona(e.target.value); setPaginaActual(1); }}
+            >
+              <option value="">Todos</option>
+              <option value="NATURAL">Persona Natural (DNI)</option>
+              <option value="JURIDICA">Persona Jurídica (RUC)</option>
+            </select>
+          </div>
+          <div>
+            <label className="label-control">Datos de Contacto</label>
+            <select
+              className="input-control"
+              value={filtroContacto}
+              onChange={(e) => { setFiltroContacto(e.target.value); setPaginaActual(1); }}
+            >
+              <option value="">Todos</option>
+              <option value="CORREO">Tiene Correo Registrado</option>
+              <option value="TELEFONO">Tiene Teléfono Registrado</option>
+              <option value="SIN_CONTACTO">Sin Datos de Contacto</option>
+            </select>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button className="btn-secondary" onClick={limpiarFiltros} style={{ width: "100%", height: "38px" }}>
+              Limpiar Filtros
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tabla */}
       <div

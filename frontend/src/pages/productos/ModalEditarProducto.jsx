@@ -16,10 +16,10 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
   const [fechaVencimiento, setFechaVencimiento] = useState(producto?.fechaVencimiento || "");
 
   const [tipoProducto, setTipoProducto] = useState(producto?.tipoProducto || "ARMAZON");
-  const [idMarca, setIdMarca] = useState(producto?.marca?.id || "");
-  const [idCategoria, setIdCategoria] = useState(producto?.categoria?.id || "");
-  const [idUnidadCompra, setIdUnidadCompra] = useState(producto?.unidadCompra?.id || "");
-  const [idUnidadVenta, setIdUnidadVenta] = useState(producto?.unidadVenta?.id || "");
+  const [idMarca, setIdMarca] = useState(producto?.idMarca || "");
+  const [idCategoria, setIdCategoria] = useState(producto?.idCategoria || "");
+  const [idUnidadCompra, setIdUnidadCompra] = useState(producto?.idUnidadCompra || "");
+  const [idUnidadVenta, setIdUnidadVenta] = useState(producto?.idUnidadVenta || "");
   const [factorConversion, setFactorConversion] = useState(producto?.factorConversion || "1");
 
   const [marcas, setMarcas] = useState([]);
@@ -27,7 +27,7 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
   const [unidades, setUnidades] = useState([]);
 
   const [imagenArchivo, setImagenArchivo] = useState(null);
-  const [imagenPreview, setImagenPreview] = producto?.imagenes?.length > 0 ? producto.imagenes[0].url : null;
+  const [imagenPreview, setImagenPreview] = useState(producto?.rutasImagenes?.length > 0 ? producto.rutasImagenes[0] : null);
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState({});
 
