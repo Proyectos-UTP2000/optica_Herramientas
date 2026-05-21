@@ -33,10 +33,12 @@ build/
 .vscode/
 
 ### Agents ###
-skills-lock.json
+.gemini/
 GEMINI.md
-.gemini
-.agents
-
-/graphify-out/
+.agents/
+skills-lock.json
 docs/
+
+## Graphify ##
+graphify-out/
+.graphifyignore
