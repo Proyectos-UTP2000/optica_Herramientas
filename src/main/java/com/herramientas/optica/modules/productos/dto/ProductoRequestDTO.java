@@ -3,6 +3,7 @@ package com.herramientas.optica.modules.productos.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.herramientas.optica.modules.productos.model.TipoProducto;
 
 import jakarta.validation.constraints.NotBlank;
@@ -24,7 +25,8 @@ public class ProductoRequestDTO {
     private BigDecimal precio;
     private BigDecimal costo;
     private LocalDate fechaVencimiento;
-    private Integer stock;
+    @JsonAlias("stock")
+    private Integer stockInicial;
     private Integer stockMinimo;
 
     @NotNull(message = "El tipo de producto es obligatorio")

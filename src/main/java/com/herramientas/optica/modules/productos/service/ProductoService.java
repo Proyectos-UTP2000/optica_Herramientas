@@ -1,25 +1,27 @@
 package com.herramientas.optica.modules.productos.service;
 
+import java.math.BigDecimal;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.herramientas.optica.modules.inventario.service.InventarioService;
 import com.herramientas.optica.modules.productos.dto.ProductoRequestDTO;
 import com.herramientas.optica.modules.productos.dto.ProductoResponseDTO;
 import com.herramientas.optica.modules.productos.model.Categoria;
 import com.herramientas.optica.modules.productos.model.Marca;
 import com.herramientas.optica.modules.productos.model.Producto;
-import com.herramientas.optica.modules.productos.model.Unidad;
 import com.herramientas.optica.modules.productos.model.ProductoImagen;
+import com.herramientas.optica.modules.productos.model.Unidad;
 import com.herramientas.optica.modules.productos.repository.CategoriaRepository;
 import com.herramientas.optica.modules.productos.repository.MarcaRepository;
+import com.herramientas.optica.modules.productos.repository.ProductoImagenRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoRepository;
 import com.herramientas.optica.modules.productos.repository.UnidadRepository;
-import com.herramientas.optica.modules.productos.repository.ProductoImagenRepository;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 
 @Service
 public class ProductoService {
@@ -30,6 +32,7 @@ public class ProductoService {
     private final UnidadRepository unidadRepository;
     private final ProductoImagenRepository productoImagenRepository;
     private final CloudinaryService cloudinaryService;
+    private final InventarioService inventarioService;
 
     private static final int ESTADO_ACTIVO = 1;
     private static final int ESTADO_INACTIVO = 2;
@@ -38,13 +41,15 @@ public class ProductoService {
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository,
             MarcaRepository marcaRepository, UnidadRepository unidadRepository,
             ProductoImagenRepository productoImagenRepository,
-            CloudinaryService cloudinaryService) {
+            CloudinaryService cloudinaryService,
+            InventarioService inventarioService) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.marcaRepository = marcaRepository;
         this.unidadRepository = unidadRepository;
         this.productoImagenRepository = productoImagenRepository;
         this.cloudinaryService = cloudinaryService;
+        this.inventarioService = inventarioService;
     }
 
     public List<ProductoResponseDTO> listarTodos() {
@@ -84,7 +89,7 @@ public class ProductoService {
                 .precio(dto.getPrecio())
                 .costo(dto.getCosto())
                 .fechaVencimiento(dto.getFechaVencimiento())
-                .stock(dto.getStock() != null ? dto.getStock() : 0)
+                .stock(0)
                 .stockMinimo(dto.getStockMinimo() != null ? dto.getStockMinimo() : 1)
                 .tipoProducto(dto.getTipoProducto())
                 .categoria(categoria)
@@ -96,6 +101,10 @@ public class ProductoService {
                 .build();
 
         Producto guardado = productoRepository.save(producto);
+        inventarioService.inicializarProducto(
+                guardado,
+                dto.getStockInicial() != null ? BigDecimal.valueOf(dto.getStockInicial()) : BigDecimal.ZERO,
+                dto.getStockMinimo() != null ? dto.getStockMinimo() : 1);
 
         // Guardar imágenes en Cloudinary
         if (imagenes != null && !imagenes.isEmpty()) {
@@ -157,7 +166,6 @@ public class ProductoService {
         producto.setPrecio(dto.getPrecio());
         producto.setCosto(dto.getCosto());
         producto.setFechaVencimiento(dto.getFechaVencimiento());
-        producto.setStock(dto.getStock());
         producto.setStockMinimo(dto.getStockMinimo());
         producto.setTipoProducto(dto.getTipoProducto());
         producto.setCategoria(categoria);
