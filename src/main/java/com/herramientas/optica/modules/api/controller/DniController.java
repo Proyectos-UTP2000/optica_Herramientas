@@ -8,7 +8,6 @@ import com.herramientas.optica.modules.api.service.DNI_RUC_Service;
 
 @RestController
 @RequestMapping("/api/v1/dni")
-@CrossOrigin(origins = "*")
 public class DniController {
 
     private final DNI_RUC_Service dniRucService;
