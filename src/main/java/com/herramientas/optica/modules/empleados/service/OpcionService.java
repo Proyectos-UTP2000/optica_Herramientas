@@ -78,9 +78,10 @@ public class OpcionService {
         // 3. Opciones de Inventario (Jerarquía)
         Opcion productos = buscarOCrear("Productos", "/productos", "IconDashboard", 1, inventarioCat);
         Opcion inventario = buscarOCrear("Inventario Operativo", "/inventario", "IconDashboard", 2, inventarioCat);
-        Opcion marcas = buscarOCrear("Marcas", "/marcas", "IconDashboard", 3, productos);
-        Opcion categorias = buscarOCrear("Categorías", "/categorias", "IconDashboard", 4, productos);
-        Opcion unidades = buscarOCrear("Unidades", "/unidades", "IconDashboard", 5, productos);
+        Opcion proveedores = buscarOCrear("Proveedores", "/proveedores", "IconDashboard", 3, inventarioCat);
+        Opcion marcas = buscarOCrear("Marcas", "/marcas", "IconDashboard", 4, productos);
+        Opcion categorias = buscarOCrear("Categorías", "/categorias", "IconDashboard", 5, productos);
+        Opcion unidades = buscarOCrear("Unidades", "/unidades", "IconDashboard", 6, productos);
 
         // 4. Opciones de Clientes
         Opcion gestionClientes = buscarOCrear("Gestión Clientes", "/clientes", "IconClientes", 1, clientesCat);
@@ -91,7 +92,7 @@ public class OpcionService {
             List<Opcion> todas = List.of(
                 adminCat, inventarioCat, clientesCat, 
                 configMenu, listarEmpleados, perfiles, 
-                productos, inventario, marcas, categorias, unidades, 
+                productos, inventario, proveedores, marcas, categorias, unidades,
                 gestionClientes, caja
             );
             
