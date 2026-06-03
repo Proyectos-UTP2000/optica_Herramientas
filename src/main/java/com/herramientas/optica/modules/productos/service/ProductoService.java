@@ -189,7 +189,9 @@ public class ProductoService {
             }
         }
 
-        return mapearAResponse(productoRepository.save(producto));
+        Producto actualizado = productoRepository.save(producto);
+        inventarioService.actualizarStockMinimoProducto(actualizado.getId(), dto.getStockMinimo());
+        return mapearAResponse(actualizado);
     }
 
     @Transactional

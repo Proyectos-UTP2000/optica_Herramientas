@@ -117,6 +117,31 @@ public class InventarioService {
     }
 
     /**
+     * Updates the minimum stock threshold for a product without creating inventory
+     * movements because it is an alert setting, not a physical stock change.
+     */
+    @Transactional
+    public InventarioSaldoResponseDTO actualizarStockMinimoProducto(Long productoId, Integer stockMinimo) {
+        InventarioSaldo saldo = inventarioSaldoRepository.findByProductoIdForUpdate(productoId)
+                .orElse(null);
+        if (saldo == null) {
+            Producto producto = productoRepository.findById(productoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
+            return inicializarProducto(
+                    producto,
+                    BigDecimal.valueOf(producto.getStock() != null ? producto.getStock() : 0),
+                    stockMinimo);
+        }
+
+        BigDecimal stockMinimoNormalizado = normalizarCantidadNoNegativa(
+                stockMinimo != null ? BigDecimal.valueOf(stockMinimo) : BigDecimal.ZERO);
+        saldo.setStockMinimo(stockMinimoNormalizado);
+        saldo.getProducto().setStockMinimo(stockMinimoNormalizado.intValueExact());
+        productoRepository.save(saldo.getProducto());
+        return mapearSaldo(inventarioSaldoRepository.save(saldo));
+    }
+
+    /**
      * Registers a received purchase quantity in purchase units and converts it to
      * sale/base inventory units using Producto.factorConversion.
      */

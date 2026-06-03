@@ -134,6 +134,40 @@ class InventarioServiceTest {
     }
 
     @Test
+    void actualizarStockMinimoNoCreaMovimientoDeInventario() {
+        Producto producto = crearProducto("INV-MINIMO", 1, 1);
+        inventarioService.inicializarProducto(producto, new BigDecimal("4"), 1);
+
+        InventarioSaldoResponseDTO saldo = inventarioService.actualizarStockMinimoProducto(producto.getId(), 3);
+
+        assertThat(saldo.getStockActual()).isEqualByComparingTo("4.000");
+        assertThat(saldo.getStockMinimo()).isEqualByComparingTo("3.000");
+        assertThat(movimientoInventarioRepository.findByProductoIdOrderByFechaAsc(producto.getId()))
+                .hasSize(1)
+                .first()
+                .satisfies(mov -> assertThat(mov.getReferenciaTipo()).isEqualTo(ReferenciaInventario.PRODUCTO_INICIAL));
+    }
+
+    @Test
+    void actualizarStockMinimoInicializaInventarioFaltanteDesdeProducto() {
+        Producto producto = crearProducto("INV-MINIMO-LEGADO", 2, 1);
+        producto.setStock(8);
+        productoRepository.save(producto);
+
+        InventarioSaldoResponseDTO saldo = inventarioService.actualizarStockMinimoProducto(producto.getId(), 5);
+
+        assertThat(saldo.getStockActual()).isEqualByComparingTo("8.000");
+        assertThat(saldo.getStockMinimo()).isEqualByComparingTo("5.000");
+        assertThat(movimientoInventarioRepository.findByProductoIdOrderByFechaAsc(producto.getId()))
+                .hasSize(1)
+                .first()
+                .satisfies(mov -> {
+                    assertThat(mov.getReferenciaTipo()).isEqualTo(ReferenciaInventario.PRODUCTO_INICIAL);
+                    assertThat(mov.getStockNuevo()).isEqualByComparingTo("8.000");
+                });
+    }
+
+    @Test
     void ajusteManualPositivoRequiereMotivoYEmpleadoActivo() {
         Producto producto = crearProducto("INV-AJUSTE-POS", 1, 1);
         Empleado empleado = crearEmpleado("inventario_ajuste_pos");
