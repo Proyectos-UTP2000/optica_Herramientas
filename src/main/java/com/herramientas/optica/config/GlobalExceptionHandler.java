@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -49,6 +50,22 @@ public class GlobalExceptionHandler {
         respuesta.put("error", "Error de Validación");
         respuesta.put("validations", errores);
         
+        return new ResponseEntity<>(respuesta, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> manejarValidacionesManual(ConstraintViolationException ex) {
+        Map<String, String> errores = new HashMap<>();
+        ex.getConstraintViolations().forEach(error ->
+            errores.put(error.getPropertyPath().toString(), error.getMessage())
+        );
+
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("timestamp", LocalDateTime.now());
+        respuesta.put("status", HttpStatus.BAD_REQUEST.value());
+        respuesta.put("error", "Error de Validación");
+        respuesta.put("validations", errores);
+
         return new ResponseEntity<>(respuesta, HttpStatus.BAD_REQUEST);
     }
 
