@@ -17,6 +17,7 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
           <tr style={{ borderBottom: "2px solid #e2e8f0", textAlign: "left", color: "#475569" }}>
             <th style={{ padding: "12px 8px" }}>ID</th>
             <th style={{ padding: "12px 8px" }}>Producto</th>
+            <th style={{ padding: "12px 8px", textAlign: "center" }}>Stock Mínimo</th>
             <th style={{ padding: "12px 8px", textAlign: "center" }}>Stock Actual</th>
             <th style={{ padding: "12px 8px", textAlign: "right" }}>Acciones de Ajuste</th>
           </tr>
@@ -24,13 +25,19 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
         <tbody>
           {saldos.length === 0 ? (
             <tr>
-              <td colSpan="4" style={{ textAlign: "center", padding: "30px", color: "#94a3b8" }}>
+              <td colSpan="5" style={{ textAlign: "center", padding: "30px", color: "#94a3b8" }}>
                 No hay registros de inventario disponibles.
               </td>
             </tr>
           ) : (
             saldos.map((item) => (
-              <tr key={item.productoId} style={{ borderBottom: "1px solid #f1f5f9" }}>
+              <tr 
+                key={item.productoId} 
+                style={{ 
+                  borderBottom: "1px solid #f1f5f9",
+                  backgroundColor: item.bajoStock ? "#ffff1a10" : "transparent" // Un ligero fondo si está en alerta
+                }}
+              >
                 <td style={{ padding: "12px 8px", color: "#64748b" }}>#{item.productoId}</td>
                 
                 <td style={{ padding: "12px 8px" }}>
@@ -44,6 +51,11 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
                   )}
                 </td>
 
+                {/* Columna nueva para visualizar la meta mínima */}
+                <td style={{ padding: "12px 8px", textAlign: "center", color: "#64748b", fontWeight: 500 }}>
+                  {item.stockMinimo ?? 0} uds
+                </td>
+
                 <td style={{ padding: "12px 8px", textAlign: "center" }}>
                   <span 
                     style={{
@@ -51,12 +63,12 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
                       borderRadius: "6px",
                       fontWeight: 600,
                       fontSize: "12px",
-                      backgroundColor: item.stockActual <= 3 ? "#fef2f2" : "#f0fdf4",
-                      color: item.stockActual <= 3 ? "#ef4444" : "#22c55e",
-                      border: item.stockActual <= 3 ? "1px solid #fca5a5" : "1px solid #bbf7d0"
+                      backgroundColor: item.bajoStock ? "#fef2f2" : "#f0fdf4",
+                      color: item.bajoStock ? "#ef4444" : "#22c55e",
+                      border: item.bajoStock ? "1px solid #fca5a5" : "1px solid #bbf7d0"
                     }}
                   >
-                    {item.stockActual} uds
+                    {item.stockActual} {item.unidadVentaNombre || "uds"}
                   </span>
                 </td>
                 

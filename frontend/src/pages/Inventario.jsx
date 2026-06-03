@@ -20,13 +20,12 @@ const Inventario = () => {
   const [modalHistorialAbierto, setModalHistorialAbierto] = useState(false);
   const [productoHistorial, setProductoHistorial] = useState(null);
 
+  
   const cargarInventario = async () => {
     setCargando(true);
     const token = localStorage.getItem("token");
     try {
-      const url = soloBajoStock 
-        ? "/api/v1/inventario/saldos?bajoStock=true" 
-        : "/api/v1/inventario/saldos";
+      const url = "http://localhost:8080/api/v1/inventario/saldos";
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -41,7 +40,7 @@ const Inventario = () => {
 
   useEffect(() => {
     cargarInventario();
-  }, [soloBajoStock]);
+  }, []); 
 
   const handleAbrirAjuste = (producto, tipo) => {
     setTipoAjuste(tipo);
@@ -53,6 +52,15 @@ const Inventario = () => {
     setProductoHistorial(producto);
     setModalHistorialAbierto(true);
   };
+
+  
+  const saldosAExhibir = soloBajoStock
+    ? saldos.filter((item) => {
+        const actual = parseFloat(item.stockActual) || 0;
+        const minimo = parseFloat(item.stockMinimo) || 0;
+        return actual <= minimo && minimo > 0;
+      })
+    : saldos;
 
   return (
     <div className="container-fluid" style={{ padding: "10px 0" }}>
@@ -98,7 +106,7 @@ const Inventario = () => {
       {/* TABLA PRINCIPAL */}
       <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0", padding: "20px" }}>
         <TablaInventario
-          saldos={saldos}
+          saldos={saldosAExhibir} 
           cargando={cargando}
           onAjuste={handleAbrirAjuste}
           onVerHistorial={handleAbrirHistorial}

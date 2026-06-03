@@ -8,14 +8,11 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
   const [movimientos, setMovimientos] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // 1. Filtro de Tipo (En tiempo real)
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
 
-  // 2. Estados temporales para los inputs de fecha
   const [fechaDesdeInput, setFechaDesdeInput] = useState("");
   const [fechaHastaInput, setFechaHastaInput] = useState("");
 
-  // 3. Estados reales de filtrado aplicados a la lista
   const [fechaDesdeAplicada, setFechaDesdeAplicada] = useState("");
   const [fechaHastaAplicada, setFechaHastaAplicada] = useState("");
 
@@ -73,7 +70,6 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
     };
   };
 
-  // CONTROLADORES DE ENTRADA CON CORRECCIÓN AUTOMÁTICA
   const cambiarFechaDesde = (valor) => {
     if (valor > hoyString) {
       Toast.fire({ icon: "warning", title: "La fecha inicial no puede ser mayor a hoy" });
@@ -102,11 +98,7 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
     setFechaHastaInput(valor);
   };
 
-  // Manejador para aplicar el rango de fechas con Doble Validación de Seguridad
-  const manejarFiltrarFechas = (e) => {
-    e.preventDefault();
-
-    // Validación explícita de seguridad antes de procesar el filtro
+  const manejarFiltrarFechas = () => {
     if (fechaDesdeInput && fechaHastaInput && fechaDesdeInput > fechaHastaInput) {
       Toast.fire({
         icon: "error",
@@ -135,7 +127,6 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
     setFechaHastaAplicada("");
   };
 
-  // Lógica de filtrado combinada en memoria de React
   const movimientosFiltrados = movimientos.filter((mov) => {
     const badge = obtenerBadgeMovimiento(mov.tipo);
     
@@ -143,7 +134,7 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
     if (filtroTipo === "SALIDA" && badge.esIngreso) return false;
 
     if (mov.fecha) {
-      const fechaMovimiento = new Date(mov.fecha).toISOString().split("T")[0];
+      const fechaMovimiento = mov.fecha.split("T")[0];
       
       if (fechaDesdeAplicada && fechaMovimiento < fechaDesdeAplicada) return false;
       if (fechaHastaAplicada && fechaMovimiento > fechaHastaAplicada) return false;
@@ -171,7 +162,6 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
         Stock actual en tienda: <strong>{producto?.stockActual ?? 0} uds</strong>
       </div>
 
-      {/* BLOQUE DE FILTROS BLINDADO */}
       <SeccionLabel text="Filtros de Búsqueda" />
       <div 
         style={{ 
@@ -210,7 +200,7 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
             className="input-control"
             value={fechaDesdeInput}
             max={fechaHastaInput || hoyString}
-            onChange={(e) => cambiarFechaDesde(e.target.value)} // 👈 Lógica con control interactivo
+            onChange={(e) => cambiarFechaDesde(e.target.value)} 
             style={{ padding: "4px 8px", fontSize: "12px", height: "32px" }}
           />
         </div>
@@ -225,7 +215,7 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
             value={fechaHastaInput}
             min={fechaDesdeInput}
             max={hoyString}
-            onChange={(e) => cambiarFechaHasta(e.target.value)} // 👈 Lógica con control interactivo
+            onChange={(e) => cambiarFechaHasta(e.target.value)} 
             style={{ padding: "4px 8px", fontSize: "12px", height: "32px" }}
           />
         </div>
