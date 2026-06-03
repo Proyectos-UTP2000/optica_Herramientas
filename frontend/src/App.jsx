@@ -13,6 +13,7 @@ import Productos from "./pages/Productos";
 import Marcas from "./pages/Marcas";
 import Categorias from "./pages/Categorias";
 import Unidades from "./pages/Unidades";
+import Inventario from "./pages/Inventario"; 
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -73,6 +74,7 @@ function App() {
           <Route path="marcas" element={<Marcas />} />
           <Route path="categorias" element={<Categorias />} />
           <Route path="unidades" element={<Unidades />} />
+          <Route path="/inventario" element={<Inventario />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
