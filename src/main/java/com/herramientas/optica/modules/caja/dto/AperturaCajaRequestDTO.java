@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import lombok.Data;
 public class AperturaCajaRequestDTO {
 
     @NotNull(message = "El empleado responsable es obligatorio")
+    @Positive(message = "El empleado responsable debe ser válido")
     private Long empleadoId;
 
     @NotNull(message = "El monto inicial es obligatorio")

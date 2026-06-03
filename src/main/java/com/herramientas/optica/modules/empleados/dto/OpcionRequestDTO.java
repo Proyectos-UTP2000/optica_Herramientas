@@ -1,6 +1,8 @@
 package com.herramientas.optica.modules.empleados.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +25,9 @@ public class OpcionRequestDTO {
     @Size(max = 100, message = "El icono no puede exceder los 100 caracteres")
     private String icono;
 
+    @Positive(message = "La opción padre debe ser válida")
     private Long idPadre;
 
+    @PositiveOrZero(message = "El orden no puede ser negativo")
     private Integer orden;
 }

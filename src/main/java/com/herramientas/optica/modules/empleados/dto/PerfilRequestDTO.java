@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -18,5 +19,5 @@ public class PerfilRequestDTO {
     private String descripcion;
 
     @NotEmpty(message = "Debe seleccionar al menos una opción para el perfil")
-    private List<Long> idsOpciones;
+    private List<@Positive(message = "Cada opción debe ser válida") Long> idsOpciones;
 }

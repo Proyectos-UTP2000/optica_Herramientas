@@ -3,6 +3,7 @@ package com.herramientas.optica.modules.clientes.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class ClienteRequestDTO {
     private String numeroDocumento;
 
     @NotNull(message = "El tipo de documento es obligatorio")
+    @Positive(message = "El tipo de documento debe ser válido")
     private Long idTipoDocumento;
 
     @Email(message = "El formato del correo electrónico no es válido")
@@ -22,5 +24,6 @@ public class ClienteRequestDTO {
     @Size(min = 9, max = 15, message = "El teléfono debe tener entre 9 y 15 caracteres")
     private String telefono;
 
+    @Size(max = 255, message = "La dirección no debe superar 255 caracteres")
     private String direccion;
 }
