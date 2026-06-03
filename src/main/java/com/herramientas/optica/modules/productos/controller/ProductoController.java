@@ -1,6 +1,7 @@
 package com.herramientas.optica.modules.productos.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +18,10 @@ import com.herramientas.optica.modules.productos.dto.ProductoRequestDTO;
 import com.herramientas.optica.modules.productos.dto.ProductoResponseDTO;
 import com.herramientas.optica.modules.productos.service.ProductoService;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,9 +32,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ProductoController {
 
     private final ProductoService productoService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
-    public ProductoController(ProductoService productoService) {
+    public ProductoController(ProductoService productoService, Validator validator) {
         this.productoService = productoService;
+        this.objectMapper = new ObjectMapper().findAndRegisterModules();
+        this.validator = validator;
     }
 
     @GetMapping
@@ -49,9 +56,7 @@ public class ProductoController {
             @RequestPart("producto") String productoJson,
             @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        ProductoRequestDTO dto = mapper.readValue(productoJson, ProductoRequestDTO.class);
+        ProductoRequestDTO dto = leerYValidarProducto(productoJson);
 
         return new ResponseEntity<>(productoService.crear(dto, imagenes), HttpStatus.CREATED);
     }
@@ -62,9 +67,7 @@ public class ProductoController {
             @RequestPart("producto") String productoJson,
             @RequestPart(value = "imagenes", required = false) List<MultipartFile> imagenes) throws Exception {
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        ProductoRequestDTO dto = mapper.readValue(productoJson, ProductoRequestDTO.class);
+        ProductoRequestDTO dto = leerYValidarProducto(productoJson);
 
         return ResponseEntity.ok(productoService.actualizar(id, dto, imagenes));
     }
@@ -78,5 +81,14 @@ public class ProductoController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         productoService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private ProductoRequestDTO leerYValidarProducto(String productoJson) throws Exception {
+        ProductoRequestDTO dto = objectMapper.readValue(productoJson, ProductoRequestDTO.class);
+        Set<ConstraintViolation<ProductoRequestDTO>> errores = validator.validate(dto);
+        if (!errores.isEmpty()) {
+            throw new ConstraintViolationException(errores);
+        }
+        return dto;
     }
 }
