@@ -31,6 +31,8 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState({});
 
+  const hoyStr = new Date().toISOString().split("T")[0];
+
   useEffect(() => {
     const cargarDatosSoporte = async () => {
       const tokenInicial = localStorage.getItem("token");
@@ -94,6 +96,10 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
     if (costo === "" || parseFloat(costo) < 0) err.costo = "El costo no puede ser negativo";
     if (parseInt(stock) < 0) err.stock = "El stock no puede ser negativo";
     if (parseInt(stockMinimo) < 0) err.stockMinimo = "El stock mínimo no puede ser negativo";
+
+    if (fechaVencimiento && fechaVencimiento < hoyStr) {
+      err.fechaVencimiento = "La fecha de vencimiento no puede ser anterior a hoy";
+    }
 
     setErrores(err);
     return Object.keys(err).length === 0;
@@ -214,7 +220,14 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
         </div>
         <div>
           <label className="label-control">Fecha Vencimiento</label>
-          <input type="date" className="input-control" value={fechaVencimiento} onChange={(e) => setFechaVencimiento(e.target.value)} />
+          <input 
+            type="date" 
+            className={inputError("fechaVencimiento")} 
+            min={hoyStr} 
+            value={fechaVencimiento} 
+            onChange={(e) => setFechaVencimiento(e.target.value)} 
+          />
+          {msgError("fechaVencimiento")}
         </div>
       </div>
 
@@ -223,22 +236,68 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
       <div className="form-grid">
         <div>
           <label className="label-control">Costo Compra Base</label>
-          <input type="number" className={inputError("costo")} value={costo} onChange={(e) => setCosto(e.target.value)} />
+          <input 
+            type="number" 
+            min="0" 
+            step="0.01" 
+            className={inputError("costo")} 
+            value={costo} 
+            onChange={(e) => {
+              const valor = e.target.value;
+              if (valor === "" || valor.endsWith(".")) {
+                setCosto(valor);
+              } else {
+                setCosto(parseFloat(valor).toString());
+              }
+            }} 
+          />
           {msgError("costo")}
         </div>
         <div>
           <label className="label-control">Precio Venta Público</label>
-          <input type="number" className={inputError("precio")} value={precio} onChange={(e) => setPrecio(e.target.value)} />
+          <input 
+            type="number" 
+            min="0" 
+            step="0.01" 
+            className={inputError("precio")} 
+            value={precio} 
+            onChange={(e) => {
+              const valor = e.target.value;
+              if (valor === "" || valor.endsWith(".")) {
+                setPrecio(valor);
+              } else {
+                setPrecio(parseFloat(valor).toString());
+              }
+            }} 
+          />
           {msgError("precio")}
         </div>
         <div>
           <label className="label-control">Stock Actual</label>
-          <input type="number" className={inputError("stock")} value={stock} onChange={(e) => setStock(e.target.value)} />
+          <input 
+            type="number" 
+            min="0" 
+            className={inputError("stock")} 
+            value={stock} 
+            onChange={(e) => {
+              const valor = e.target.value;
+              setStock(valor === "" ? "" : parseInt(valor).toString());
+            }} 
+          />
           {msgError("stock")}
         </div>
         <div>
           <label className="label-control">Stock Mínimo (Alerta)</label>
-          <input type="number" className={inputError("stockMinimo")} value={stockMinimo} onChange={(e) => setStockMinimo(e.target.value)} />
+          <input 
+            type="number" 
+            min="0" 
+            className={inputError("stockMinimo")} 
+            value={stockMinimo} 
+            onChange={(e) => {
+              const valor = e.target.value;
+              setStockMinimo(valor === "" ? "" : parseInt(valor).toString());
+            }} 
+          />
           {msgError("stockMinimo")}
         </div>
       </div>
@@ -264,7 +323,16 @@ const ModalEditarProducto = ({ producto, cerrarModal, recargarTabla }) => {
         </div>
         <div>
           <label className="label-control">Factor de Conversión</label>
-          <input type="number" className={inputError("factorConversion")} value={factorConversion} onChange={(e) => setFactorConversion(e.target.value)} />
+          <input 
+            type="number" 
+            min="1" 
+            className={inputError("factorConversion")} 
+            value={factorConversion} 
+            onChange={(e) => {
+              const valor = e.target.value;
+              setFactorConversion(valor === "" ? "" : parseInt(valor).toString());
+            }} 
+          />
           {msgError("factorConversion")}
         </div>
       </div>
