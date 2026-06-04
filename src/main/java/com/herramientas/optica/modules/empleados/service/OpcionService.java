@@ -89,18 +89,28 @@ public class OpcionService {
             10,
             null
         );
-        Opcion inventarioCat = buscarOCrear(
-            "Inventario",
-            null,
-            "IconDashboard",
-            20,
-            null
-        );
+
         Opcion clientesCat = buscarOCrear(
             "Clientes y Ventas",
             null,
             "IconClientes",
+            20,
+            null
+        );
+
+        Opcion inventarioCat = buscarOCrear(
+            "Inventario",
+            null,
+            "IconDashboard",
             30,
+            null
+        );
+
+        Opcion proveedor_compraCat = buscarOCrear(
+            "Proveedor/Compras",
+            null,
+            "IconCompras",
+            40,
             null
         );
 
@@ -128,53 +138,42 @@ public class OpcionService {
         );
 
         // 3. Opciones de Inventario (Jerarquía)
-        Opcion productos = buscarOCrear(
-            "Productos",
-            "/productos",
-            "IconDashboard",
-            1,
-            inventarioCat
-        );
         Opcion inventario = buscarOCrear(
             "Inventario Operativo",
             "/inventario",
             "IconDashboard",
+            1,
+            inventarioCat
+        );
+        Opcion productos = buscarOCrear(
+            "Productos",
+            "/productos",
+            "IconDashboard",
             2,
             inventarioCat
         );
-        Opcion proveedores = buscarOCrear(
-            "Proveedores",
-            "/proveedores",
-            "IconDashboard",
-            3,
-            inventarioCat
-        );
-        Opcion compras = buscarOCrear(
-            "Compras",
-            "/compras",
-            "IconDashboard",
-            4,
-            inventarioCat
-        );
-        Opcion marcas = buscarOCrear(
-            "Marcas",
-            "/marcas",
-            "IconDashboard",
-            5,
-            productos
-        );
+
         Opcion categorias = buscarOCrear(
             "Categorías",
             "/categorias",
             "IconDashboard",
-            6,
+            3,
             productos
         );
+
+        Opcion marcas = buscarOCrear(
+            "Marcas",
+            "/marcas",
+            "IconDashboard",
+            4,
+            productos
+        );
+
         Opcion unidades = buscarOCrear(
             "Unidades",
             "/unidades",
             "IconDashboard",
-            7,
+            5,
             productos
         );
 
@@ -192,6 +191,23 @@ public class OpcionService {
             "IconDashboard",
             2,
             clientesCat
+        );
+
+        // Proveedor/Compras
+        Opcion proveedores = buscarOCrear(
+            "Proveedor",
+            "/proveedores",
+            "IconDashboard",
+            1,
+            proveedor_compraCat
+        );
+
+        Opcion compras = buscarOCrear(
+            "Compras",
+            "/compras",
+            "IconDashboard",
+            2,
+            inventarioCat
         );
 
         // 5. Asignar al Perfil ADMINISTRADOR (Limpieza y Recarga Total)
