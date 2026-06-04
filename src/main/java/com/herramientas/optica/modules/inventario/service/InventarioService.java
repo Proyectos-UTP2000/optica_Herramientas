@@ -157,6 +157,21 @@ public class InventarioService {
     }
 
     /**
+     * Registra una salida de inventario por devolucion/anulacion de compra en unidades
+     * de compra y las convierte a unidades base/venta.
+     */
+    @Transactional
+    public MovimientoInventarioResponseDTO registrarSalidaCompra(Long productoId, BigDecimal cantidadCompra,
+            String motivo, ReferenciaInventario referenciaTipo, Long referenciaId, Long empleadoId) {
+        InventarioSaldo saldo = obtenerSaldoBloqueado(productoId);
+        BigDecimal cantidadInventario = normalizarCantidadPositiva(cantidadCompra)
+                .multiply(BigDecimal.valueOf(obtenerFactorConversion(saldo.getProducto())));
+        MovimientoInventario movimiento = aplicarMovimiento(saldo, TipoMovimientoInventario.SALIDA,
+                cantidadInventario, motivo, referenciaTipo, referenciaId, obtenerEmpleadoOpcional(empleadoId));
+        return mapearMovimiento(movimiento);
+    }
+
+    /**
      * Registers an inventory exit, rejecting any movement that would leave negative
      * stock.
      */

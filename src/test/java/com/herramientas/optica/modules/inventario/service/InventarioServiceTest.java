@@ -100,6 +100,26 @@ class InventarioServiceTest {
     }
 
     @Test
+    void salidaCompraNormalizaCantidadYDescuentaSaldo() {
+        Producto producto = crearProducto("INV-SALIDA-COMPRA", 1, 12);
+        inventarioService.inicializarProducto(producto, new BigDecimal("48"), 1);
+
+        MovimientoInventarioResponseDTO movimiento = inventarioService.registrarSalidaCompra(
+                producto.getId(),
+                new BigDecimal("2"),
+                "Compra anulada",
+                ReferenciaInventario.COMPRA,
+                77L,
+                null);
+
+        assertThat(movimiento.getTipo()).isEqualTo(TipoMovimientoInventario.SALIDA);
+        assertThat(movimiento.getCantidad()).isEqualByComparingTo("24.000");
+        assertThat(movimiento.getStockPrevio()).isEqualByComparingTo("48.000");
+        assertThat(movimiento.getStockNuevo()).isEqualByComparingTo("24.000");
+        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(24);
+    }
+
+    @Test
     void salidaConStockSuficienteDescuentaSaldo() {
         Producto producto = crearProducto("INV-SALIDA", 1, 1);
         inventarioService.inicializarProducto(producto, new BigDecimal("10"), 1);
