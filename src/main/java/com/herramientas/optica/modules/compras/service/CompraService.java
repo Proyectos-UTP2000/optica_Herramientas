@@ -166,6 +166,52 @@ public class CompraService {
     }
 
     /**
+     * Anula una compra. Si ya fue recibida, reversa los stocks e impacta en la caja.
+     */
+    @Transactional
+    public CompraResponseDTO anularCompra(Long compraId, Long empleadoId) {
+        Compra compra = obtenerCompra(compraId);
+        if (compra.getEstado() == EstadoCompra.ANULADA.getCodigo()) {
+            throw new IllegalStateException("La compra ya se encuentra anulada.");
+        }
+        Empleado empleado = obtenerEmpleadoActivo(empleadoId);
+
+        if (compra.getEstado() == EstadoCompra.RECIBIDA.getCodigo()) {
+            // Validar caja abierta para la devolución de dinero
+            Caja caja = cajaRepository.findByEmpleadoIdAndEstado(empleado.getId(), com.herramientas.optica.modules.caja.model.EstadoCaja.ABIERTA)
+                    .orElseThrow(() -> new IllegalStateException("El empleado debe tener una caja abierta para anular una compra recibida."));
+
+            // Reversar inventario (salida)
+            for (CompraDetalle detalle : compra.getDetalles()) {
+                inventarioService.registrarSalidaCompra(
+                        detalle.getProducto().getId(),
+                        detalle.getCantidadCompra(),
+                        "Anulación de compra #" + compra.getId(),
+                        ReferenciaInventario.COMPRA,
+                        compra.getId(),
+                        empleado.getId());
+            }
+
+            // Contra-movimiento en caja (Ingreso para balancear el egreso anterior)
+            MovimientoCajaRequestDTO contraMovimiento = new MovimientoCajaRequestDTO();
+            contraMovimiento.setEmpleadoId(empleado.getId());
+            contraMovimiento.setTipo(TipoMovimientoCaja.INGRESO);
+            contraMovimiento.setOrigen(OrigenMovimientoCaja.COMPRA);
+            contraMovimiento.setMetodoPago(MetodoPagoCaja.valueOf(compra.getMedioPago().name()));
+            contraMovimiento.setMonto(compra.getTotal());
+            contraMovimiento.setDescripcion("Devolución por anulación de compra #" + compra.getId());
+            contraMovimiento.setReferenciaTipo("COMPRA");
+            contraMovimiento.setReferenciaId(compra.getId());
+
+            cajaService.registrarMovimiento(caja.getId(), contraMovimiento);
+        }
+
+        compra.setEstado(EstadoCompra.ANULADA.getCodigo());
+        return mapearCompra(compraRepository.save(compra));
+    }
+
+
+    /**
      * Lista compras registradas y anuladas no borradas, ordenadas de la mas reciente
      * a la mas antigua.
      */

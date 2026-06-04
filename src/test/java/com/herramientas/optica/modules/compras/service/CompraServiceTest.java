@@ -227,6 +227,138 @@ class CompraServiceTest {
         });
     }
 
+    @Test
+    void anularCompraRegistradaExitosa() {
+        Empleado empleado = crearEmpleado("anular_compra_registrada");
+        Proveedor proveedor = crearProveedor("20600000005", "Proveedor Anular Registrada");
+        Producto producto = crearProducto("ANULAR-REGISTRADA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "1000.00"));
+
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "3",
+                "20.00"));
+
+        // Anular la compra que está en estado REGISTRADA
+        CompraResponseDTO anulada = compraService.anularCompra(compra.getId(), empleado.getId());
+
+        assertThat(anulada.getEstado()).isEqualTo(EstadoCompra.ANULADA);
+
+        // El stock no debió cambiar (sigue siendo 0 porque nunca fue RECIBIDA)
+        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(0);
+
+        // No debe haber movimientos de inventario por la compra/anulación
+        var movimientosInv = movimientoInventarioRepository.findByProductoIdOrderByFechaAsc(producto.getId());
+        assertThat(movimientosInv).filteredOn(mov -> mov.getReferenciaTipo() == ReferenciaInventario.COMPRA)
+                .isEmpty();
+
+        // No debe haber movimientos de caja por la compra/anulación
+        var movimientosCaja = movimientoCajaRepository.findByCajaIdOrderByFechaAsc(caja.getId());
+        assertThat(movimientosCaja).filteredOn(mov -> mov.getOrigen() == OrigenMovimientoCaja.COMPRA)
+                .isEmpty();
+    }
+
+    @Test
+    void anularCompraRecibidaExitosa() {
+        Empleado empleado = crearEmpleado("anular_compra_recibida");
+        Proveedor proveedor = crearProveedor("20600000006", "Proveedor Anular Recibida");
+        Producto producto = crearProducto("ANULAR-RECIBIDA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "1000.00"));
+
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "4",
+                "15.00"));
+
+        // Recibir la compra
+        compraService.recibirCompra(compra.getId(), empleado.getId());
+
+        // Verificar stock subió a 40 (4 * 10)
+        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(40);
+
+        // Anular la compra recibida
+        CompraResponseDTO anulada = compraService.anularCompra(compra.getId(), empleado.getId());
+
+        assertThat(anulada.getEstado()).isEqualTo(EstadoCompra.ANULADA);
+
+        // El stock debió regresar a 0
+        assertThat(productoRepository.findById(producto.getId()).orElseThrow().getStock()).isEqualTo(0);
+
+        // Verificar movimientos de inventario: debe haber una entrada (por la recepción) y una salida (por la anulación)
+        var movimientosInv = movimientoInventarioRepository.findByProductoIdOrderByFechaAsc(producto.getId());
+        assertThat(movimientosInv).filteredOn(mov -> mov.getReferenciaTipo() == ReferenciaInventario.COMPRA)
+                .hasSize(2);
+
+        // Verificar movimientos de caja: debe haber un egreso (por la recepción) y un ingreso (por la anulación)
+        var movimientosCaja = movimientoCajaRepository.findByCajaIdOrderByFechaAsc(caja.getId());
+        var compraMovimientos = movimientosCaja.stream()
+                .filter(mov -> mov.getOrigen() == OrigenMovimientoCaja.COMPRA)
+                .toList();
+        assertThat(compraMovimientos).hasSize(2);
+        assertThat(compraMovimientos.get(0).getTipo()).isEqualTo(TipoMovimientoCaja.EGRESO);
+        assertThat(compraMovimientos.get(0).getMonto()).isEqualByComparingTo("60.00");
+        assertThat(compraMovimientos.get(1).getTipo()).isEqualTo(TipoMovimientoCaja.INGRESO);
+        assertThat(compraMovimientos.get(1).getMonto()).isEqualByComparingTo("60.00");
+    }
+
+    @Test
+    void anularCompraRecibidaFallaSiEmpleadoNoTieneCajaAbierta() {
+        Empleado empleadoConCaja = crearEmpleado("anular_emp_con_caja");
+        Empleado empleadoSinCaja = crearEmpleado("anular_emp_sin_caja");
+        Proveedor proveedor = crearProveedor("20600000007", "Proveedor Anular Sin Caja");
+        Producto producto = crearProducto("ANULAR-SIN-CAJA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleadoConCaja.getId(), "1000.00"));
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleadoConCaja.getId(),
+                caja.getId(),
+                producto.getId(),
+                "2",
+                "15.00"));
+        compraService.recibirCompra(compra.getId(), empleadoConCaja.getId());
+
+        // Intentar anular la compra recibida usando al empleado sin caja abierta
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            compraService.anularCompra(compra.getId(), empleadoSinCaja.getId());
+        });
+    }
+
+    @Test
+    void anularCompraFallaSiYaEstaAnulada() {
+        Empleado empleado = crearEmpleado("anular_repetida");
+        Proveedor proveedor = crearProveedor("20600000008", "Proveedor Anular Repetida");
+        Producto producto = crearProducto("ANULAR-REPETIDA", 10);
+        inventarioService.inicializarProducto(producto, BigDecimal.ZERO, 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "1000.00"));
+
+        CompraResponseDTO compra = compraService.registrarCompra(compraRequest(
+                proveedor.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "2",
+                "15.00"));
+
+        // Anular por primera vez
+        compraService.anularCompra(compra.getId(), empleado.getId());
+
+        // Intentar anular por segunda vez
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            compraService.anularCompra(compra.getId(), empleado.getId());
+        });
+    }
+
+
     private CompraRequestDTO compraRequest(Long proveedorId, Long empleadoId, Long cajaId, Long productoId,
             String cantidad, String costoUnitario) {
         CompraDetalleRequestDTO detalle = new CompraDetalleRequestDTO();
