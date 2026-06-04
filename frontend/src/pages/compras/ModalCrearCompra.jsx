@@ -1,0 +1,318 @@
+import { useState, useEffect } from 'react';
+import { registrarCompra, listarProveedores, getEmpleadoActual } from '../../api/comprasService';
+
+const FORMAS_PAGO = ['CONTADO', 'CREDITO'];
+const MEDIOS_PAGO = ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'YAPE', 'PLIN', 'OTRO'];
+const TIPOS_COMPROBANTE = [
+    { id: 1, nombre: 'BOLETA' },
+    { id: 2, nombre: 'FACTURA' },
+    { id: 3, nombre: 'NOTA DE COMPRA' },
+];
+const DETALLE_VACIO = { idProducto: '', cantidad: 1, precio: '' };
+
+function generarNumeroComprobante() {
+    const ahora = new Date();
+    const anio = ahora.getFullYear().toString().slice(-2);
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const rand = String(Math.floor(Math.random() * 9000) + 1000);
+    return `C${anio}${mes}${dia}-${rand}`;
+}
+
+function calcularTotal(detalles) {
+    return detalles
+        .reduce((acc, d) => acc + (Number(d.cantidad) * Number(d.precio) || 0), 0)
+        .toFixed(2);
+}
+
+export default function ModalCrearCompra({ onCerrar, onGuardado }) {
+    const [form, setForm] = useState({
+        idProveedor: '',
+        idTipoComprobante: '',
+        compraNumeroCombrobante: generarNumeroComprobante(),
+        formaPago: 'CONTADO',
+        medioPago: '',
+        pagoInicial: '',
+        cuotas: '',
+        fechaVencimiento: '',
+        notaRecepcion: '',
+        detalles: [{ ...DETALLE_VACIO }],
+    });
+    const [proveedores, setProveedores] = useState([]);
+    const [empleadoId, setEmpleadoId] = useState(null);
+    const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        listarProveedores()
+            .then(data => setProveedores(Array.isArray(data) ? data : []))
+            .catch(() => setError('No se pudieron cargar los proveedores.'));
+
+        getEmpleadoActual()
+            .then(id => setEmpleadoId(id))
+            .catch(() => setError('No se pudo obtener el empleado actual.'));
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm(prev => {
+            const next = { ...prev, [name]: value };
+            if (name === 'formaPago' && value === 'CONTADO') {
+                next.cuotas = '';
+                next.fechaVencimiento = '';
+            }
+            return next;
+        });
+    };
+
+    const handleDetalleChange = (index, e) => {
+        const { name, value } = e.target;
+        setForm(prev => ({
+            ...prev,
+            detalles: prev.detalles.map((d, i) => i === index ? { ...d, [name]: value } : d),
+        }));
+    };
+
+    const agregarDetalle = () =>
+        setForm(prev => ({ ...prev, detalles: [...prev.detalles, { ...DETALLE_VACIO }] }));
+
+    const eliminarDetalle = (index) =>
+        setForm(prev => ({ ...prev, detalles: prev.detalles.filter((_, i) => i !== index) }));
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setCargando(true);
+        setError(null);
+
+        if (!empleadoId) {
+            setError('No se pudo obtener el empleado. Vuelve a iniciar sesión.');
+            setCargando(false);
+            return;
+        }
+
+        try {
+            const payload = {
+                empleadoId,
+                proveedorId: Number(form.idProveedor),
+                formaPago: form.formaPago,
+                medioPago: form.medioPago,
+                cajaId: 1,
+                pagoInicial: form.pagoInicial !== '' ? Number(form.pagoInicial) : 0,
+                cuotas: form.formaPago === 'CREDITO' && form.cuotas ? Number(form.cuotas) : null,
+                fechaVencimiento: form.formaPago === 'CREDITO' ? form.fechaVencimiento || null : null,
+                notaRecepcion: form.notaRecepcion || null,
+                numeroComprobante: form.compraNumeroCombrobante,
+                tipoComprobanteId: form.idTipoComprobante ? Number(form.idTipoComprobante) : null,
+                detalles: form.detalles.map(d => ({
+                    productoId: Number(d.idProducto),
+                    cantidadCompra: Number(d.cantidad),
+                    costoUnitario: Number(d.precio),
+                })),
+            };
+            await registrarCompra(payload);
+            onGuardado();
+            onCerrar();
+        } catch (err) {
+            setError(
+                JSON.stringify(err.response?.data?.validations, null, 2)
+                || JSON.stringify(err.response?.data, null, 2)
+                || err.message
+                || 'Error al registrar la compra.'
+            );
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onCerrar}>
+            <div className="modal-content" style={{ width: '780px' }} onClick={e => e.stopPropagation()}>
+
+                <div className="modal-header">
+                    <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                        Nueva Compra
+                    </h2>
+                    <button className="btn-icon delete" type="button" onClick={onCerrar}>✕</button>
+                </div>
+
+                {error && (
+                    <div style={{
+                        margin: '0 1.25rem', padding: '0.65rem 1rem', borderRadius: 6,
+                        background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5',
+                        fontSize: '0.875rem', whiteSpace: 'pre-wrap'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                    <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+                        {/* COMPROBANTE */}
+                        <fieldset style={fieldsetStyle}>
+                            <legend style={legendStyle}>Datos del Comprobante</legend>
+                            <div className="form-grid">
+                                <div>
+                                    <label className="label-control">Proveedor *</label>
+                                    <select name="idProveedor" value={form.idProveedor}
+                                        onChange={handleChange} className="input-control" required>
+                                        <option value="">-- Selecciona proveedor --</option>
+                                        {proveedores.map(p => (
+                                            <option key={p.id ?? p.idProveedor} value={p.id ?? p.idProveedor}>
+                                                {p.proveedorNombre ?? p.proveeNombre ?? p.nombre ?? `ID ${p.id ?? p.idProveedor}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="label-control">Tipo de Comprobante</label>
+                                    <select name="idTipoComprobante" value={form.idTipoComprobante}
+                                        onChange={handleChange} className="input-control">
+                                        <option value="">-- Sin tipo --</option>
+                                        {TIPOS_COMPROBANTE.map(t => (
+                                            <option key={t.id} value={t.id}>
+                                                {t.nombre}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="label-control">N° Comprobante</label>
+                                    <div style={{
+                                        padding: '9px 12px', borderRadius: 6,
+                                        border: '1px solid var(--border-color)',
+                                        background: '#f1f5f9', fontSize: '13px',
+                                        color: 'var(--text-muted)', fontWeight: 600,
+                                        letterSpacing: '0.03em', userSelect: 'none',
+                                    }}>
+                                        {form.compraNumeroCombrobante}
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        {/* PAGO */}
+                        <fieldset style={fieldsetStyle}>
+                            <legend style={legendStyle}>Datos del Pago</legend>
+                            <div className="form-grid">
+                                <div>
+                                    <label className="label-control">Forma de Pago *</label>
+                                    <select name="formaPago" value={form.formaPago}
+                                        onChange={handleChange} className="input-control" required>
+                                        {FORMAS_PAGO.map(fp => <option key={fp} value={fp}>{fp}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="label-control">Medio de Pago *</label>
+                                    <select name="medioPago" value={form.medioPago}
+                                        onChange={handleChange} className="input-control" required>
+                                        <option value="">-- Selecciona --</option>
+                                        {MEDIOS_PAGO.map(mp => <option key={mp} value={mp}>{mp}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="label-control">Pago Inicial (S/)</label>
+                                    <input type="number" name="pagoInicial" value={form.pagoInicial}
+                                        onChange={handleChange} className="input-control"
+                                        min={0} step="0.01" placeholder="0.00" />
+                                </div>
+                                {form.formaPago === 'CREDITO' && (<>
+                                    <div>
+                                        <label className="label-control">N° de Cuotas *</label>
+                                        <input type="number" name="cuotas" value={form.cuotas}
+                                            onChange={handleChange} className="input-control"
+                                            min={1} required placeholder="Ej: 3" />
+                                    </div>
+                                    <div>
+                                        <label className="label-control">Fecha de Vencimiento *</label>
+                                        <input type="date" name="fechaVencimiento" value={form.fechaVencimiento}
+                                            onChange={handleChange} className="input-control" required />
+                                    </div>
+                                </>)}
+                            </div>
+                        </fieldset>
+
+                        {/* DETALLE PRODUCTOS */}
+                        <fieldset style={fieldsetStyle}>
+                            <legend style={legendStyle}>Detalle de Productos</legend>
+                            <div style={{
+                                display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
+                                gap: '0.5rem', marginBottom: '0.375rem'
+                            }}>
+                                {['ID Producto', 'Cantidad', 'Precio Unit. (S/)', 'Subtotal', ''].map((h, i) => (
+                                    <span key={i} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                                        {h}
+                                    </span>
+                                ))}
+                            </div>
+                            {form.detalles.map((d, i) => (
+                                <div key={i} style={{
+                                    display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
+                                    gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'
+                                }}>
+                                    <input type="number" name="idProducto" value={d.idProducto}
+                                        onChange={e => handleDetalleChange(i, e)}
+                                        className="input-control" placeholder="ID" min={1} required />
+                                    <input type="number" name="cantidad" value={d.cantidad}
+                                        onChange={e => handleDetalleChange(i, e)}
+                                        className="input-control" min={1} step="0.001" required />
+                                    <input type="number" name="precio" value={d.precio}
+                                        onChange={e => handleDetalleChange(i, e)}
+                                        className="input-control" min={0} step="0.01" placeholder="0.00" required />
+                                    <span style={{ fontWeight: 600, textAlign: 'right', fontSize: '0.875rem' }}>
+                                        S/ {(Number(d.cantidad) * Number(d.precio) || 0).toFixed(2)}
+                                    </span>
+                                    <button type="button" className="btn-icon delete"
+                                        onClick={() => eliminarDetalle(i)}
+                                        disabled={form.detalles.length === 1}>✕</button>
+                                </div>
+                            ))}
+                            <button type="button" className="btn-secondary"
+                                style={{ marginTop: '0.5rem', padding: '6px 14px', fontSize: '0.8125rem' }}
+                                onClick={agregarDetalle}>
+                                + Agregar producto
+                            </button>
+                            <div style={{
+                                display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+                                gap: '1rem', marginTop: '0.75rem', paddingTop: '0.75rem',
+                                borderTop: '2px solid var(--border-color)', fontWeight: 700
+                            }}>
+                                <span>TOTAL:</span>
+                                <span>S/ {calcularTotal(form.detalles)}</span>
+                            </div>
+                        </fieldset>
+
+                        {/* OBSERVACIONES */}
+                        <fieldset style={fieldsetStyle}>
+                            <legend style={legendStyle}>Observaciones</legend>
+                            <label className="label-control">Nota de Recepción</label>
+                            <textarea name="notaRecepcion" value={form.notaRecepcion}
+                                onChange={handleChange} className="input-control"
+                                rows={3} maxLength={255}
+                                placeholder="Observaciones sobre la recepción del pedido..." />
+                        </fieldset>
+
+                    </div>
+
+                    <div className="modal-footer">
+                        <button type="button" className="btn-secondary" onClick={onCerrar}>
+                            Cancelar
+                        </button>
+                        <button type="submit" className="btn-primary" disabled={cargando}>
+                            {cargando ? 'Registrando...' : 'Registrar Compra'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+const fieldsetStyle = {
+    border: '1px solid var(--border-color)',
+    borderRadius: 8, padding: '1rem 1.125rem'
+};
+const legendStyle = {
+    fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)',
+    textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0 0.375rem'
+};

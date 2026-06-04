@@ -13,10 +13,11 @@ import Productos from "./pages/Productos";
 import Marcas from "./pages/Marcas";
 import Categorias from "./pages/Categorias";
 import Unidades from "./pages/Unidades";
-import Inventario from "./pages/Inventario"; 
+import Inventario from "./pages/Inventario";
 import Proveedores from "./pages/Proveedores";
 import Ventas from "./pages/Ventas";
 import ReporteDiarioCaja from "./pages/caja/ReporteDiarioCaja";
+import Compras from "./pages/Compras";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -84,6 +85,7 @@ function App() {
           <Route path="proveedores" element={<Proveedores />} />
           <Route path="ventas" element={<Ventas />} />
           <Route path="cajas/reporte-diario" element={<ReporteDiarioCaja />} />
+          <Route path="compras" element={<Compras />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
