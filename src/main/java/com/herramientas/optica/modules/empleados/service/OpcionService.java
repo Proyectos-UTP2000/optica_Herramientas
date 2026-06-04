@@ -3,9 +3,7 @@ package com.herramientas.optica.modules.empleados.service;
 import com.herramientas.optica.modules.empleados.dto.OpcionRequestDTO;
 import com.herramientas.optica.modules.empleados.dto.OpcionResponseDTO;
 import com.herramientas.optica.modules.empleados.model.Opcion;
-import com.herramientas.optica.modules.empleados.model.Perfil;
 import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
-import com.herramientas.optica.modules.empleados.repository.PerfilRepository;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class OpcionService {
 
     private final OpcionRepository opcionRepository;
-    private final PerfilRepository perfilRepository;
+    private final OpcionDataLoader opcionDataLoader;
+    private final PerfilOpcionDataLoader perfilOpcionDataLoader;
 
     @Transactional(readOnly = true)
     public List<OpcionResponseDTO> listarTodas() {
@@ -81,177 +80,9 @@ public class OpcionService {
 
     @Transactional
     public String initDefaults() {
-        // 1. Categorías Principales (Padres Raíz)
-        Opcion adminCat = buscarOCrear(
-            "Administración",
-            null,
-            "IconPerfiles",
-            10,
-            null
-        );
-
-        Opcion clientesCat = buscarOCrear(
-            "Clientes y Ventas",
-            null,
-            "IconClientes",
-            20,
-            null
-        );
-
-        Opcion inventarioCat = buscarOCrear(
-            "Inventario",
-            null,
-            "IconDashboard",
-            30,
-            null
-        );
-
-        Opcion proveedor_compraCat = buscarOCrear(
-            "Proveedor/Compras",
-            null,
-            "IconCompras",
-            40,
-            null
-        );
-
-        // 2. Opciones de Administración
-        Opcion configMenu = buscarOCrear(
-            "Configuración Menú",
-            "/configuracion-menu",
-            "IconDashboard",
-            3,
-            adminCat
-        );
-        Opcion listarEmpleados = buscarOCrear(
-            "Listar Empleados",
-            "/empleados",
-            "IconEmpleados",
-            1,
-            adminCat
-        );
-        Opcion perfiles = buscarOCrear(
-            "Perfiles",
-            "/perfiles",
-            "IconPerfiles",
-            2,
-            adminCat
-        );
-
-        // 3. Opciones de Inventario (Jerarquía)
-        Opcion inventario = buscarOCrear(
-            "Inventario Operativo",
-            "/inventario",
-            "IconDashboard",
-            1,
-            inventarioCat
-        );
-        Opcion productos = buscarOCrear(
-            "Productos",
-            "/productos",
-            "IconDashboard",
-            2,
-            inventarioCat
-        );
-
-        Opcion categorias = buscarOCrear(
-            "Categorías",
-            "/categorias",
-            "IconDashboard",
-            3,
-            productos
-        );
-
-        Opcion marcas = buscarOCrear(
-            "Marcas",
-            "/marcas",
-            "IconDashboard",
-            4,
-            productos
-        );
-
-        Opcion unidades = buscarOCrear(
-            "Unidades",
-            "/unidades",
-            "IconDashboard",
-            5,
-            productos
-        );
-
-        // 4. Opciones de Clientes
-        Opcion gestionClientes = buscarOCrear(
-            "Gestión Clientes",
-            "/clientes",
-            "IconClientes",
-            1,
-            clientesCat
-        );
-        Opcion caja = buscarOCrear(
-            "Caja",
-            "/cajas",
-            "IconDashboard",
-            2,
-            clientesCat
-        );
-
-        // Proveedor/Compras
-        Opcion proveedores = buscarOCrear(
-            "Proveedor",
-            "/proveedores",
-            "IconDashboard",
-            1,
-            proveedor_compraCat
-        );
-
-        Opcion compras = buscarOCrear(
-            "Compras",
-            "/compras",
-            "IconDashboard",
-            2,
-            inventarioCat
-        );
-
-        // 5. Asignar al Perfil ADMINISTRADOR (Limpieza y Recarga Total)
-        perfilRepository.findByNombre("ADMINISTRADOR").ifPresent(perfil -> {
-            List<Opcion> todas = List.of(
-                adminCat,
-                inventarioCat,
-                clientesCat,
-                configMenu,
-                listarEmpleados,
-                perfiles,
-                productos,
-                inventario,
-                proveedores,
-                compras,
-                marcas,
-                categorias,
-                unidades,
-                gestionClientes,
-                caja
-            );
-
-            perfil.getOpciones().clear();
-            perfil.getOpciones().addAll(todas);
-            perfilRepository.save(perfil);
-        });
-
-        return "Estructura jerárquica escalable creada y asignada al administrador";
-    }
-
-    private Opcion buscarOCrear(
-        String nombre,
-        String ruta,
-        String icono,
-        Integer orden,
-        Opcion padre
-    ) {
-        Opcion op = opcionRepository.findByNombre(nombre).orElse(new Opcion());
-        op.setNombre(nombre);
-        op.setRuta(ruta);
-        op.setIcono(icono);
-        op.setOrden(orden);
-        op.setPadre(padre);
-        return opcionRepository.save(op);
+        String opciones = opcionDataLoader.verificarOpciones();
+        String relaciones = perfilOpcionDataLoader.verificarRelacionesPerfilOpcion();
+        return opciones + ". " + relaciones;
     }
 
     private OpcionResponseDTO mapToDTO(Opcion opcion) {
