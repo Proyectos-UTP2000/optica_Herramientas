@@ -2,7 +2,8 @@ package com.herramientas.optica.modules.compras.model;
 
 public enum EstadoCompra {
     ANULADA(0),
-    REGISTRADA(1);
+    REGISTRADA(1),
+    RECIBIDA(2);
 
     private final int codigo;
 
