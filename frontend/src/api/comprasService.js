@@ -36,3 +36,12 @@ export const getEmpleadoActual = () =>
         );
         return emp?.id ?? emp?.idEmpleado ?? null;
     });
+
+export const listarProductos = () =>
+    api.get('/api/v1/productos').then(r => extraerArray(r.data));
+
+export const recibirCompra = (id, empleadoId) =>
+    api.put(`/api/v1/compras/${id}/recibir?empleadoId=${empleadoId}`).then(r => r.data);
+
+export const anularCompra = (id, empleadoId) =>
+    api.put(`/api/v1/compras/${id}/anular?empleadoId=${empleadoId}`).then(r => r.data);
