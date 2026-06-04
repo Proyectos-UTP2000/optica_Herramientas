@@ -48,29 +48,25 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
 
     const [productosDB, setProductosDB] = useState([]);
     const [prodBusqueda, setProdBusqueda] = useState(['']); // array de textos de búsqueda por línea
-    const [mostrarDropdownProd, setMostrarDropdownProd] = useState([false]); // array de flags por línea
+    const [activeDropdownIndex, setActiveDropdownIndex] = useState(null); // índice del dropdown activo
 
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setMostrarDropdownProv(false);
             }
-            const containers = document.querySelectorAll('.product-dropdown-container');
-            let clickedInside = false;
-            containers.forEach(c => {
-                if (c.contains(event.target)) {
-                    clickedInside = true;
+            if (activeDropdownIndex !== null) {
+                const activeDropdown = document.querySelector(`.product-dropdown-container[data-index="${activeDropdownIndex}"]`);
+                if (activeDropdown && !activeDropdown.contains(event.target)) {
+                    setActiveDropdownIndex(null);
                 }
-            });
-            if (!clickedInside) {
-                setMostrarDropdownProd(prev => prev.map(() => false));
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [activeDropdownIndex]);
 
     useEffect(() => {
         listarProveedores()
@@ -109,18 +105,21 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
     const agregarDetalle = () => {
         setForm(prev => ({ ...prev, detalles: [...prev.detalles, { ...DETALLE_VACIO }] }));
         setProdBusqueda(prev => [...prev, '']);
-        setMostrarDropdownProd(prev => [...prev, false]);
     };
 
     const eliminarDetalle = (index) => {
         setForm(prev => ({ ...prev, detalles: prev.detalles.filter((_, i) => i !== index) }));
         setProdBusqueda(prev => prev.filter((_, i) => i !== index));
-        setMostrarDropdownProd(prev => prev.filter((_, i) => i !== index));
+        if (activeDropdownIndex === index) {
+            setActiveDropdownIndex(null);
+        } else if (activeDropdownIndex > index) {
+            setActiveDropdownIndex(activeDropdownIndex - 1);
+        }
     };
 
     const handleProdBusquedaChange = (index, value) => {
         setProdBusqueda(prev => prev.map((val, i) => i === index ? value : val));
-        setMostrarDropdownProd(prev => prev.map((val, i) => i === index ? true : val));
+        setActiveDropdownIndex(index);
         setForm(prev => ({
             ...prev,
             detalles: prev.detalles.map((d, i) => i === index ? { ...d, idProducto: '' } : d)
@@ -128,12 +127,12 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
     };
 
     const handleProdFocus = (index) => {
-        setMostrarDropdownProd(prev => prev.map((val, i) => i === index ? true : val));
+        setActiveDropdownIndex(index);
     };
 
     const seleccionarProducto = (index, prod) => {
         setProdBusqueda(prev => prev.map((val, i) => i === index ? (prod.nombre || '') : val));
-        setMostrarDropdownProd(prev => prev.map((val, i) => i === index ? false : val));
+        setActiveDropdownIndex(null);
         setForm(prev => ({
             ...prev,
             detalles: prev.detalles.map((d, i) => {
@@ -374,7 +373,7 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                                     display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
                                     gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'
                                 }}>
-                                    <div className="product-dropdown-container" style={{ position: 'relative' }}>
+                                    <div className="product-dropdown-container" data-index={i} style={{ position: 'relative' }}>
                                         <input
                                             type="text"
                                             placeholder="Buscar producto..."
@@ -384,7 +383,7 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                                             className="input-control"
                                             required={!d.idProducto}
                                         />
-                                        {mostrarDropdownProd[i] && (
+                                        {activeDropdownIndex === i && (
                                             <div className="autocomplete-dropdown" style={{
                                                 position: 'absolute', top: '100%', left: 0, right: 0,
                                                 zIndex: 1000, background: '#fff', border: '1px solid var(--border-color)',
