@@ -101,8 +101,12 @@ const Ventas = () => {
       Toast.fire({ icon: "warning", title: "El producto ya está agregado" });
       return;
     }
-    if (cantidadNumero <= 0 || precioNumero <= 0 || descuentoNumero < 0) {
-      Toast.fire({ icon: "warning", title: "Revise cantidad, precio y descuento" });
+    if (!Number.isInteger(cantidadNumero) || cantidadNumero <= 0) {
+      Toast.fire({ icon: "warning", title: "La cantidad debe ser un número entero mayor a 0" });
+      return;
+    }
+    if (precioNumero <= 0 || descuentoNumero < 0) {
+      Toast.fire({ icon: "warning", title: "Revise precio y descuento" });
       return;
     }
     if (Number(producto.stock || 0) <= 0) {
@@ -477,7 +481,7 @@ const Ventas = () => {
               <div className="form-grid" style={{ marginTop: 10 }}>
                 <div>
                   <label className="label-control">Cantidad</label>
-                  <input className="input-control" type="number" min="0.001" step="0.001" value={cantidad} onChange={(e) => setCantidad(e.target.value)} />
+                  <input className="input-control" type="number" min="1" step="1" value={cantidad} onChange={(e) => setCantidad(e.target.value)} />
                 </div>
                 <div>
                   <label className="label-control">Precio</label>
