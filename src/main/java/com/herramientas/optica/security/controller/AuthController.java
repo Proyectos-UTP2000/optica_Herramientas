@@ -58,10 +58,15 @@ public class AuthController {
 
         // Devolvemos el token y los datos basicos del usuario
         String rol = userDetails.getAuthorities().iterator().next().getAuthority();
+
+        Empleado empleado = empleadoRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+
         return ResponseEntity.ok(AuthResponse.builder()
                 .token(token)
                 .username(userDetails.getUsername())
                 .rol(rol)
+                .empleadoId(empleado.getId())
                 .build());
     }
 
