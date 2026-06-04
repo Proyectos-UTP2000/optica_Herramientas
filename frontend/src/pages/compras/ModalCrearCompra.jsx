@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { registrarCompra, listarProveedores, getEmpleadoActual } from '../../api/comprasService';
 
 const FORMAS_PAGO = ['CONTADO', 'CREDITO'];
@@ -28,7 +28,7 @@ function calcularTotal(detalles) {
 export default function ModalCrearCompra({ onCerrar, onGuardado }) {
     const [form, setForm] = useState({
         idProveedor: '',
-        idTipoComprobante: '',
+        idTipoComprobante: '2', // Por defecto FACTURA
         compraNumeroCombrobante: generarNumeroComprobante(),
         formaPago: 'CONTADO',
         medioPago: '',
@@ -42,6 +42,21 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
     const [empleadoId, setEmpleadoId] = useState(null);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState(null);
+    const [provBusqueda, setProvBusqueda] = useState('');
+    const [mostrarDropdownProv, setMostrarDropdownProv] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setMostrarDropdownProv(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         listarProveedores()
@@ -83,6 +98,12 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
         e.preventDefault();
         setCargando(true);
         setError(null);
+
+        if (!form.idProveedor) {
+            setError('Debes seleccionar un proveedor válido de la lista.');
+            setCargando(false);
+            return;
+        }
 
         if (!empleadoId) {
             setError('No se pudo obtener el empleado. Vuelve a iniciar sesión.');
@@ -152,17 +173,58 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                         <fieldset style={fieldsetStyle}>
                             <legend style={legendStyle}>Datos del Comprobante</legend>
                             <div className="form-grid">
-                                <div>
+                                <div ref={dropdownRef} style={{ position: 'relative' }}>
                                     <label className="label-control">Proveedor *</label>
-                                    <select name="idProveedor" value={form.idProveedor}
-                                        onChange={handleChange} className="input-control" required>
-                                        <option value="">-- Selecciona proveedor --</option>
-                                        {proveedores.map(p => (
-                                            <option key={p.id ?? p.idProveedor} value={p.id ?? p.idProveedor}>
-                                                {p.proveedorNombre ?? p.proveeNombre ?? p.nombre ?? `ID ${p.id ?? p.idProveedor}`}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar proveedor por nombre..."
+                                        value={provBusqueda}
+                                        onFocus={() => setMostrarDropdownProv(true)}
+                                        onChange={(e) => {
+                                            setProvBusqueda(e.target.value);
+                                            setMostrarDropdownProv(true);
+                                            setForm(prev => ({ ...prev, idProveedor: '' }));
+                                        }}
+                                        className="input-control"
+                                        required={!form.idProveedor}
+                                    />
+                                    {mostrarDropdownProv && (
+                                        <div className="autocomplete-dropdown" style={{
+                                            position: 'absolute', top: '100%', left: 0, right: 0,
+                                            zIndex: 1000, background: '#fff', border: '1px solid var(--border-color)',
+                                            maxHeight: '200px', overflowY: 'auto', borderRadius: '6px', marginTop: '4px',
+                                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                                        }}>
+                                            {proveedores
+                                                .filter(p => {
+                                                    const nombre = (p.razonSocial || p.proveedorNombre || p.nombre || p.proveeNombre || '').toLowerCase();
+                                                    const doc = (p.numeroDocumento || p.ruc || p.dni || '').toLowerCase();
+                                                    const query = provBusqueda.toLowerCase();
+                                                    return nombre.includes(query) || doc.includes(query);
+                                                })
+                                                .map(p => (
+                                                    <div
+                                                        key={p.id ?? p.idProveedor}
+                                                        onClick={() => {
+                                                            setForm(prev => ({ ...prev, idProveedor: String(p.id ?? p.idProveedor) }));
+                                                            setProvBusqueda(p.razonSocial ?? p.proveedorNombre ?? p.nombre ?? p.proveeNombre ?? '');
+                                                            setMostrarDropdownProv(false);
+                                                        }}
+                                                        style={{
+                                                            padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9',
+                                                            fontSize: '13px'
+                                                        }}
+                                                        className="autocomplete-item"
+                                                    >
+                                                        <strong>{p.razonSocial ?? p.proveedorNombre ?? p.nombre ?? p.proveeNombre}</strong> 
+                                                        <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '6px' }}>
+                                                            ({p.numeroDocumento ?? p.ruc ?? p.dni ?? 'Sin Doc'})
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            }
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="label-control">Tipo de Comprobante</label>
