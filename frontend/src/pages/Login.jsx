@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, ShieldCheck } from "react-bootstrap-icons";
 import { login } from "../api/authService";
 import { Toast } from "../utils/alerts";
 
@@ -9,7 +10,7 @@ const Login = ({ onLoginSuccess }) => {
     password: "",
   });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // Estado para feedback visual
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -48,119 +49,76 @@ const Login = ({ onLoginSuccess }) => {
     }
   };
 
-  // Estilos modernos en objetos
-  const styles = {
-    container: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-      backgroundColor: "#f0f2f5", // Fondo gris claro moderno
-      fontFamily: "Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
-    },
-    card: {
-      backgroundColor: "#ffffff",
-      padding: "40px",
-      borderRadius: "16px",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-      width: "100%",
-      maxWidth: "400px",
-      textAlign: "center",
-    },
-    title: {
-      margin: "0 0 10px 0",
-      color: "#1a73e8",
-      fontSize: "28px",
-      fontWeight: "bold",
-    },
-    subtitle: {
-      color: "#5f6368",
-      marginBottom: "30px",
-      fontSize: "14px",
-    },
-    inputGroup: {
-      marginBottom: "20px",
-      textAlign: "left",
-    },
-    input: {
-      width: "100%",
-      padding: "12px 15px",
-      borderRadius: "8px",
-      border: "1px solid #dadce0",
-      fontSize: "16px",
-      boxSizing: "border-box",
-      outline: "none",
-      transition: "border 0.3s",
-    },
-    button: {
-      width: "100%",
-      padding: "12px",
-      backgroundColor: "#1a73e8",
-      color: "white",
-      border: "none",
-      borderRadius: "8px",
-      fontSize: "16px",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "background-color 0.3s",
-      marginTop: "10px",
-    },
-    errorMsg: {
-      backgroundColor: "#fce8e6",
-      color: "#d93025",
-      padding: "10px",
-      borderRadius: "6px",
-      fontSize: "13px",
-      marginBottom: "20px",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>
-          OPTICA DIVINO <br /> NIÑO DEL MILAGRO
-        </h2>
-        <p style={styles.subtitle}>Gestión de Usuarios y Clientes</p>
+    <main className="login-shell">
+      <section className="login-brand-panel" aria-label="Óptica Divino Niño Del Milagro">
+        <div className="login-brand-mark">
+          <Eye />
+        </div>
+        <div>
+          <p className="login-eyebrow">Sistema interno</p>
+          <h1>Óptica Divino Niño Del Milagro</h1>
+          <p>
+            Acceso privado para administrar ventas, inventario, caja y atención al cliente.
+          </p>
+        </div>
+        <div className="login-brand-strip">
+          <span>Clientes</span>
+          <span>Inventario</span>
+          <span>Reportes</span>
+        </div>
+      </section>
 
-        {error && <div style={styles.errorMsg}>{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div style={styles.inputGroup}>
-            <input
-              type="text"
-              name="username"
-              placeholder="Usuario"
-              style={styles.input}
-              onChange={handleChange}
-              required
-            />
+      <section className="login-form-panel">
+        <div className="login-card">
+          <div className="login-card-header">
+            <div className="login-security-icon">
+              <ShieldCheck />
+            </div>
+            <div>
+              <h2>Iniciar sesión</h2>
+              <p>Ingresa tus credenciales para continuar.</p>
+            </div>
           </div>
 
-          <div style={styles.inputGroup}>
-            <input
-              type="password"
-              name="password"
-              placeholder="Contraseña"
-              style={styles.input}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          {error && <div className="login-error">{error}</div>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              ...styles.button,
-              backgroundColor: loading ? "#80b1f3" : "#1a73e8",
-            }}
-          >
-            {loading ? "Cargando..." : "Ingresar al Sistema"}
-          </button>
-        </form>
-      </div>
-    </div>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div>
+              <label className="form-label" htmlFor="username">Usuario</label>
+              <input
+                id="username"
+                type="text"
+                name="username"
+                className="input-control login-input"
+                value={credentials.username}
+                onChange={handleChange}
+                autoComplete="username"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="form-label" htmlFor="password">Contraseña</label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                className="input-control login-input"
+                value={credentials.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-primary login-submit">
+              {loading ? "Validando..." : "Ingresar"}
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
   );
 };
 
