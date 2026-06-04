@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.herramientas.optica.modules.compras.dto.CompraRequestDTO;
@@ -40,5 +42,15 @@ public class CompraController {
     @PostMapping
     public ResponseEntity<CompraResponseDTO> registrarCompra(@Valid @RequestBody CompraRequestDTO dto) {
         return new ResponseEntity<>(compraService.registrarCompra(dto), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}/recibir")
+    public ResponseEntity<CompraResponseDTO> recibirCompra(@PathVariable Long id, @RequestParam Long empleadoId) {
+        return ResponseEntity.ok(compraService.recibirCompra(id, empleadoId));
+    }
+
+    @PutMapping("/{id}/anular")
+    public ResponseEntity<CompraResponseDTO> anularCompra(@PathVariable Long id, @RequestParam Long empleadoId) {
+        return ResponseEntity.ok(compraService.anularCompra(id, empleadoId));
     }
 }
