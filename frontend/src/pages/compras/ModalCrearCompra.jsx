@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { registrarCompra, listarProveedores, getEmpleadoActual } from '../../api/comprasService';
+import { registrarCompra, listarProveedores, getEmpleadoActual, listarProductos } from '../../api/comprasService';
 
 const FORMAS_PAGO = ['CONTADO', 'CREDITO'];
 const MEDIOS_PAGO = ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'YAPE', 'PLIN', 'OTRO'];
@@ -46,10 +46,24 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
     const [mostrarDropdownProv, setMostrarDropdownProv] = useState(false);
     const dropdownRef = useRef(null);
 
+    const [productosDB, setProductosDB] = useState([]);
+    const [prodBusqueda, setProdBusqueda] = useState(['']); // array de textos de búsqueda por línea
+    const [mostrarDropdownProd, setMostrarDropdownProd] = useState([false]); // array de flags por línea
+
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setMostrarDropdownProv(false);
+            }
+            const containers = document.querySelectorAll('.product-dropdown-container');
+            let clickedInside = false;
+            containers.forEach(c => {
+                if (c.contains(event.target)) {
+                    clickedInside = true;
+                }
+            });
+            if (!clickedInside) {
+                setMostrarDropdownProd(prev => prev.map(() => false));
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
@@ -66,6 +80,10 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
         getEmpleadoActual()
             .then(id => setEmpleadoId(id))
             .catch(() => setError('No se pudo obtener el empleado actual.'));
+
+        listarProductos()
+            .then(data => setProductosDB(Array.isArray(data) ? data : []))
+            .catch(() => setError('No se pudieron cargar los productos.'));
     }, []);
 
     const handleChange = (e) => {
@@ -88,11 +106,48 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
         }));
     };
 
-    const agregarDetalle = () =>
+    const agregarDetalle = () => {
         setForm(prev => ({ ...prev, detalles: [...prev.detalles, { ...DETALLE_VACIO }] }));
+        setProdBusqueda(prev => [...prev, '']);
+        setMostrarDropdownProd(prev => [...prev, false]);
+    };
 
-    const eliminarDetalle = (index) =>
+    const eliminarDetalle = (index) => {
         setForm(prev => ({ ...prev, detalles: prev.detalles.filter((_, i) => i !== index) }));
+        setProdBusqueda(prev => prev.filter((_, i) => i !== index));
+        setMostrarDropdownProd(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleProdBusquedaChange = (index, value) => {
+        setProdBusqueda(prev => prev.map((val, i) => i === index ? value : val));
+        setMostrarDropdownProd(prev => prev.map((val, i) => i === index ? true : val));
+        setForm(prev => ({
+            ...prev,
+            detalles: prev.detalles.map((d, i) => i === index ? { ...d, idProducto: '' } : d)
+        }));
+    };
+
+    const handleProdFocus = (index) => {
+        setMostrarDropdownProd(prev => prev.map((val, i) => i === index ? true : val));
+    };
+
+    const seleccionarProducto = (index, prod) => {
+        setProdBusqueda(prev => prev.map((val, i) => i === index ? (prod.nombre || '') : val));
+        setMostrarDropdownProd(prev => prev.map((val, i) => i === index ? false : val));
+        setForm(prev => ({
+            ...prev,
+            detalles: prev.detalles.map((d, i) => {
+                if (i === index) {
+                    return {
+                        ...d,
+                        idProducto: String(prod.id),
+                        precio: prod.costo !== null && prod.costo !== undefined ? String(prod.costo) : ''
+                    };
+                }
+                return d;
+            })
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -107,6 +162,13 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
 
         if (!empleadoId) {
             setError('No se pudo obtener el empleado. Vuelve a iniciar sesión.');
+            setCargando(false);
+            return;
+        }
+
+        const tieneProductoInvalido = form.detalles.some(d => !d.idProducto);
+        if (tieneProductoInvalido) {
+            setError('Todos los detalles de la compra deben tener un producto seleccionado.');
             setCargando(false);
             return;
         }
@@ -301,7 +363,7 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                                 display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
                                 gap: '0.5rem', marginBottom: '0.375rem'
                             }}>
-                                {['ID Producto', 'Cantidad', 'Precio Unit. (S/)', 'Subtotal', ''].map((h, i) => (
+                                {['Producto', 'Cantidad', 'Precio Unit. (S/)', 'Subtotal', ''].map((h, i) => (
                                     <span key={i} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                                         {h}
                                     </span>
@@ -312,9 +374,57 @@ export default function ModalCrearCompra({ onCerrar, onGuardado }) {
                                     display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
                                     gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'
                                 }}>
-                                    <input type="number" name="idProducto" value={d.idProducto}
-                                        onChange={e => handleDetalleChange(i, e)}
-                                        className="input-control" placeholder="ID" min={1} required />
+                                    <div className="product-dropdown-container" style={{ position: 'relative' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar producto..."
+                                            value={prodBusqueda[i] || ''}
+                                            onFocus={() => handleProdFocus(i)}
+                                            onChange={(e) => handleProdBusquedaChange(i, e.target.value)}
+                                            className="input-control"
+                                            required={!d.idProducto}
+                                        />
+                                        {mostrarDropdownProd[i] && (
+                                            <div className="autocomplete-dropdown" style={{
+                                                position: 'absolute', top: '100%', left: 0, right: 0,
+                                                zIndex: 1000, background: '#fff', border: '1px solid var(--border-color)',
+                                                maxHeight: '200px', overflowY: 'auto', borderRadius: '6px', marginTop: '4px',
+                                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                                            }}>
+                                                {productosDB
+                                                    .filter(p => {
+                                                        const nombre = (p.nombre || '').toLowerCase();
+                                                        const codigo = (p.codigo || '').toLowerCase();
+                                                        const query = (prodBusqueda[i] || '').toLowerCase();
+                                                        return nombre.includes(query) || codigo.includes(query);
+                                                    })
+                                                    .map(p => (
+                                                        <div
+                                                            key={p.id}
+                                                            onClick={() => seleccionarProducto(i, p)}
+                                                            style={{
+                                                                padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9',
+                                                                fontSize: '13px', textAlign: 'left'
+                                                            }}
+                                                            className="autocomplete-item"
+                                                        >
+                                                            <strong>{p.nombre}</strong>
+                                                            {p.codigo && (
+                                                                <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '6px' }}>
+                                                                    ({p.codigo})
+                                                                </span>
+                                                            )}
+                                                            {p.costo !== null && p.costo !== undefined && (
+                                                                <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '6px' }}>
+                                                                    - Costo: S/ {Number(p.costo).toFixed(2)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                }
+                                            </div>
+                                        )}
+                                    </div>
                                     <input type="number" name="cantidad" value={d.cantidad}
                                         onChange={e => handleDetalleChange(i, e)}
                                         className="input-control" min={1} step="0.001" required />
