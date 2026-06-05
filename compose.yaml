@@ -4,10 +4,10 @@ services:
     container_name: optica_db
     restart: always
     environment:
-      - MYSQL_DATABASE=optica
-      - MYSQL_USER=admin_optica
-      - MYSQL_PASSWORD=123456
-      - MYSQL_ROOT_PASSWORD=root123456
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=America/Lima
     ports:
       - "3306:3306"

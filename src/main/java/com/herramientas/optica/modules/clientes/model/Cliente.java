@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -28,7 +31,7 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Long id;
 
-    @Column(name = "cli_nombre", nullable = false, length = 100)
+    @Column(name = "cli_nombre", length = 100)
     private String nombre;
 
     @Column(name = "cli_apellido_paterno", length = 255)
@@ -36,6 +39,12 @@ public class Cliente {
 
     @Column(name = "cli_apellido_materno", length = 255)
     private String apellidoMaterno;
+
+    @Column(name = "cli_nombre_empresa", length = 100)
+    private String nombreEmpresa;
+
+    @Column(name = "cli_direccion_empresa", length = 100)
+    private String direccionEmpresa;
 
     @Column(name = "cli_correo", length = 255)
     private String correo;
@@ -49,9 +58,13 @@ public class Cliente {
     @Column(name = "cli_ndocumento", nullable = false, length = 20)
     private String numeroDocumento;
 
-    @Column(name = "cli_estado", nullable = false)
     @Builder.Default
+    @Column(name = "cli_estado", nullable = false)
     private Integer estado = 1;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_tipodocumento", nullable = false)
+    private TipoDocumento tipoDocumento;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

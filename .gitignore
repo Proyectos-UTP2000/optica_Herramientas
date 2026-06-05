@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Agents ###
+.gemini/
+.codex/
+AGENTS.md
+GEMINI.md
+.agents/
+skills-lock.json
+docs/
+
+## Graphify ##
+graphify-out/
+.graphifyignore
+
+### Local environment ###
+.env
+.env.*
+!.env.example

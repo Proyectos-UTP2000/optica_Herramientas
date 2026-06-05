@@ -1,20 +1,61 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: optica
 
   datasource:
-    url: jdbc:mysql://localhost:3306/optica?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
-    username: admin_optica
-    password: 123456
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
+
+api:
+  peru:
+    url-dni: ${API_PERU_URL_DNI}
+    url-ruc: ${API_PERU_URL_RUC}
+    token: ${API_PERU_TOKEN}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+app:
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
