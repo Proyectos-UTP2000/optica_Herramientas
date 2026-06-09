@@ -43,10 +43,20 @@ public class CategoriaService {
     @Transactional
     public CategoriaResponseDTO crear(CategoriaRequestDTO dto) {
         String nombreLimpio = dto.getNombre().trim().toUpperCase();
-        if (categoriaRepository.existsByNombre(nombreLimpio)) {
-            throw new IllegalArgumentException("La categoría '" + nombreLimpio + "' ya existe.");
-        }
+        return categoriaRepository.findByNombre(nombreLimpio)
+                .map(this::reactivarCategoriaBorradaORechazar)
+                .orElseGet(() -> crearNuevaCategoria(nombreLimpio));
+    }
 
+    private CategoriaResponseDTO reactivarCategoriaBorradaORechazar(Categoria categoria) {
+        if (categoria.getEstado() != null && categoria.getEstado() == ESTADO_BORRADO) {
+            categoria.setEstado(ESTADO_ACTIVO);
+            return mapearAResponse(categoriaRepository.save(categoria));
+        }
+        throw new IllegalArgumentException("La categoría '" + categoria.getNombre() + "' ya existe.");
+    }
+
+    private CategoriaResponseDTO crearNuevaCategoria(String nombreLimpio) {
         Categoria categoria = Categoria.builder()
                 .nombre(nombreLimpio)
                 .estado(ESTADO_ACTIVO)
@@ -90,6 +100,43 @@ public class CategoriaService {
             categoria.setEstado(ESTADO_ACTIVO);
         }
         return mapearAResponse(categoriaRepository.save(categoria));
+    }
+
+
+    @Transactional
+    public CategoriaResponseDTO marcarEnDesuso(Long id) {
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
+
+        if (categoria.getEstado() == ESTADO_BORRADO) {
+            throw new IllegalStateException("No se puede desactivar una categoría eliminada.");
+        }
+
+        categoria.setEstado(ESTADO_INACTIVO);
+        return mapearAResponse(categoriaRepository.save(categoria));
+    }
+
+    @Transactional
+    public CategoriaResponseDTO migrarProductosYDesactivar(Long origenId, Long destinoId) {
+        if (origenId.equals(destinoId)) {
+            throw new IllegalArgumentException("La categoría destino debe ser diferente a la categoría origen.");
+        }
+
+        Categoria origen = categoriaRepository.findById(origenId)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría origen no encontrada."));
+        Categoria destino = categoriaRepository.findById(destinoId)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría destino no encontrada."));
+
+        if (origen.getEstado() == ESTADO_BORRADO) {
+            throw new IllegalStateException("No se puede migrar una categoría eliminada.");
+        }
+        if (destino.getEstado() != ESTADO_ACTIVO) {
+            throw new IllegalStateException("La categoría destino debe estar activa.");
+        }
+
+        productoRepository.reasignarCategoria(origenId, destinoId, ESTADO_BORRADO);
+        origen.setEstado(ESTADO_INACTIVO);
+        return mapearAResponse(categoriaRepository.save(origen));
     }
 
     @Transactional

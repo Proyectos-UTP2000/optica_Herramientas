@@ -1,6 +1,7 @@
 package com.herramientas.optica.modules.productos.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ public interface MarcaRepository extends JpaRepository<Marca, Long> {
     List<Marca> findByEstadoNot(Integer estado);
 
     boolean existsByNombre(String nombre);
+
+    Optional<Marca> findByNombre(String nombre);
 }

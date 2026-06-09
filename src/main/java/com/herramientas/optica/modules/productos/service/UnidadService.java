@@ -43,10 +43,20 @@ public class UnidadService {
     @Transactional
     public UnidadResponseDTO crear(UnidadRequestDTO dto) {
         String nombre = dto.getNombre().trim().toUpperCase();
-        if (unidadRepository.existsByNombre(nombre)) {
-            throw new IllegalArgumentException("La unidad '" + nombre + "' ya está registrada.");
-        }
+        return unidadRepository.findByNombre(nombre)
+                .map(this::reactivarUnidadBorradaORechazar)
+                .orElseGet(() -> crearNuevaUnidad(nombre));
+    }
 
+    private UnidadResponseDTO reactivarUnidadBorradaORechazar(Unidad unidad) {
+        if (unidad.getEstado() != null && unidad.getEstado() == ESTADO_BORRADO) {
+            unidad.setEstado(ESTADO_ACTIVO);
+            return mapearAResponse(unidadRepository.save(unidad));
+        }
+        throw new IllegalArgumentException("La unidad '" + unidad.getNombre() + "' ya está registrada.");
+    }
+
+    private UnidadResponseDTO crearNuevaUnidad(String nombre) {
         Unidad unidad = Unidad.builder()
                 .nombre(nombre)
                 .estado(ESTADO_ACTIVO)

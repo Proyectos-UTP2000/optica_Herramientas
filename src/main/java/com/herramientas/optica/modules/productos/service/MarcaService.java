@@ -43,10 +43,21 @@ public class MarcaService {
     @Transactional
     public MarcaResponseDTO crear(MarcaRequestDTO dto) {
         String nombre = dto.getNombre().trim().toUpperCase();
-        if (marcaRepository.existsByNombre(nombre)) {
-            throw new IllegalArgumentException("La marca '" + nombre + "' ya existe.");
-        }
+        return marcaRepository.findByNombre(nombre)
+                .map(existente -> reactivarMarcaBorradaORechazar(existente, dto))
+                .orElseGet(() -> crearNuevaMarca(dto, nombre));
+    }
 
+    private MarcaResponseDTO reactivarMarcaBorradaORechazar(Marca marca, MarcaRequestDTO dto) {
+        if (marca.getEstado() != null && marca.getEstado() == ESTADO_BORRADO) {
+            marca.setFecha(dto.getFecha());
+            marca.setEstado(ESTADO_ACTIVO);
+            return mapearAResponse(marcaRepository.save(marca));
+        }
+        throw new IllegalArgumentException("La marca '" + marca.getNombre() + "' ya existe.");
+    }
+
+    private MarcaResponseDTO crearNuevaMarca(MarcaRequestDTO dto, String nombre) {
         Marca marca = Marca.builder()
                 .nombre(nombre)
                 .fecha(dto.getFecha())
@@ -94,6 +105,43 @@ public class MarcaService {
         }
 
         return mapearAResponse(marcaRepository.save(marca));
+    }
+
+
+    @Transactional
+    public MarcaResponseDTO marcarEnDesuso(Long id) {
+        Marca marca = marcaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada."));
+
+        if (marca.getEstado() == ESTADO_BORRADO) {
+            throw new IllegalStateException("No se puede desactivar una marca eliminada.");
+        }
+
+        marca.setEstado(ESTADO_INACTIVO);
+        return mapearAResponse(marcaRepository.save(marca));
+    }
+
+    @Transactional
+    public MarcaResponseDTO migrarProductosYDesactivar(Long origenId, Long destinoId) {
+        if (origenId.equals(destinoId)) {
+            throw new IllegalArgumentException("La marca destino debe ser diferente a la marca origen.");
+        }
+
+        Marca origen = marcaRepository.findById(origenId)
+                .orElseThrow(() -> new IllegalArgumentException("Marca origen no encontrada."));
+        Marca destino = marcaRepository.findById(destinoId)
+                .orElseThrow(() -> new IllegalArgumentException("Marca destino no encontrada."));
+
+        if (origen.getEstado() == ESTADO_BORRADO) {
+            throw new IllegalStateException("No se puede migrar una marca eliminada.");
+        }
+        if (destino.getEstado() != ESTADO_ACTIVO) {
+            throw new IllegalStateException("La marca destino debe estar activa.");
+        }
+
+        productoRepository.reasignarMarca(origenId, destinoId, ESTADO_BORRADO);
+        origen.setEstado(ESTADO_INACTIVO);
+        return mapearAResponse(marcaRepository.save(origen));
     }
 
     @Transactional
