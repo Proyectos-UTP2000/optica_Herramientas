@@ -75,6 +75,10 @@ public class OpcionService {
             opcion.setRuta(dto.getRuta());
         }
 
+        if (dto.getVisibleEnMenu() != null) {
+            opcion.setVisibleEnMenu(dto.getVisibleEnMenu());
+        }
+
         return mapToDTO(opcionRepository.save(opcion));
     }
 
@@ -92,6 +96,7 @@ public class OpcionService {
             .ruta(opcion.getRuta())
             .icono(opcion.getIcono())
             .orden(opcion.getOrden())
+            .visibleEnMenu(Boolean.TRUE.equals(opcion.getVisibleEnMenu()))
             .idPadre(
                 opcion.getPadre() != null ? opcion.getPadre().getId() : null
             )

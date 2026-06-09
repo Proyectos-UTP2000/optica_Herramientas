@@ -125,6 +125,7 @@ public class PerfilService {
                         .id(opcion.getId())
                         .nombre(opcion.getNombre())
                         .ruta(opcion.getRuta())
+                        .visibleEnMenu(Boolean.TRUE.equals(opcion.getVisibleEnMenu()))
                         .build())
                 .collect(Collectors.toList());
 

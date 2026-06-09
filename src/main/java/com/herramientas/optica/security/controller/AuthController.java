@@ -90,6 +90,7 @@ public class AuthController {
                         .icono(opcion.getIcono())
                         .idPadre(opcion.getPadre() != null ? opcion.getPadre().getId() : null)
                         .orden(opcion.getOrden())
+                        .visibleEnMenu(Boolean.TRUE.equals(opcion.getVisibleEnMenu()))
                         .build())
                 .collect(Collectors.toList());
 
