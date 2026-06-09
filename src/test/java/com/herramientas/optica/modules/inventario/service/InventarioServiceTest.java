@@ -215,6 +215,28 @@ class InventarioServiceTest {
                 .hasMessageContaining("Stock insuficiente");
     }
 
+
+    @Test
+    void listarSaldosPriorizaProductosConCatalogosEnDesuso() {
+        Producto normal = crearProducto("INV-LISTA-NORMAL", 1, 1);
+        inventarioService.inicializarProducto(normal, BigDecimal.ZERO, 1);
+
+        Producto revisar = crearProducto("INV-LISTA-REVISION", 1, 1);
+        revisar.getCategoria().setEstado(2);
+        revisar.getMarca().setEstado(2);
+        categoriaRepository.save(revisar.getCategoria());
+        marcaRepository.save(revisar.getMarca());
+        inventarioService.inicializarProducto(revisar, BigDecimal.ZERO, 1);
+
+        var saldos = inventarioService.listarSaldos();
+
+        assertThat(saldos.get(0).getProductoId()).isEqualTo(revisar.getId());
+        assertThat(saldos.get(0).getCategoriaEstado()).isEqualTo(2);
+        assertThat(saldos.get(0).getMarcaEstado()).isEqualTo(2);
+        assertThat(saldos.get(0).getRequiereRevisionCatalogo()).isTrue();
+        assertThat(saldos).extracting(InventarioSaldoResponseDTO::getProductoId).contains(normal.getId());
+    }
+
     private AjusteInventarioRequestDTO ajusteRequest(Long empleadoId, String cantidad, String motivo) {
         AjusteInventarioRequestDTO dto = new AjusteInventarioRequestDTO();
         dto.setEmpleadoId(empleadoId);
