@@ -1,4 +1,4 @@
-/*M!999999\- enable the sandbox mode */ 
+/*M!999999\- enable the sandbox mode */
 -- MariaDB dump 10.19-12.2.2-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: optica
@@ -81,7 +81,7 @@ CREATE TABLE `categoria` (
   `categ_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_categoria`),
   UNIQUE KEY `categ_nombre` (`categ_nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -126,7 +126,7 @@ CREATE TABLE `cliente` (
   PRIMARY KEY (`id_cliente`),
   KEY `FK_TipoDoc_Cliente` (`id_tipodocumento`),
   CONSTRAINT `FK_TipoDoc_Cliente` FOREIGN KEY (`id_tipodocumento`) REFERENCES `tipo_documento` (`id_tipodocumento`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -369,7 +369,7 @@ CREATE TABLE `empleado` (
   CONSTRAINT `FK_Perfil_Empleado` FOREIGN KEY (`id_perfil`) REFERENCES `perfil` (`id_perfil`),
   CONSTRAINT `FK_TipoDoc_Empleado` FOREIGN KEY (`id_tipodocumento`) REFERENCES `tipo_documento` (`id_tipodocumento`),
   CONSTRAINT `FKaph0gjj93d3xrkx7ixnua3hny` FOREIGN KEY (`id_empresa`) REFERENCES `empresa` (`id_empresa`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -502,7 +502,7 @@ CREATE TABLE `forma_pago` (
   `fpago_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_fpago`),
   UNIQUE KEY `fpago_metodo` (`fpago_metodo`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,7 +585,7 @@ CREATE TABLE `inventario_saldo` (
   UNIQUE KEY `uk_inventario_saldo_producto` (`id_producto`),
   KEY `idx_inventario_saldo_stock_minimo` (`inv_stock_actual`,`inv_stock_minimo`),
   CONSTRAINT `fk_inventario_saldo_producto` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -594,12 +594,6 @@ CREATE TABLE `inventario_saldo` (
 
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `inventario_saldo` WRITE;
-/*!40000 ALTER TABLE `inventario_saldo` DISABLE KEYS */;
-INSERT INTO `inventario_saldo` VALUES
-(1,1,10.000,5.000,'2026-06-02 21:39:12.368831','2026-06-02 21:39:12.391166'),
-(2,2,1.000,7.000,'2026-06-02 21:46:56.863010','2026-06-03 11:14:00.208646'),
-(3,3,1.000,1.000,'2026-06-02 21:51:51.337880','2026-06-02 21:51:53.383367');
-/*!40000 ALTER TABLE `inventario_saldo` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -617,7 +611,7 @@ CREATE TABLE `marca` (
   `marca_fecha` date DEFAULT NULL,
   `marca_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_marca`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -626,10 +620,6 @@ CREATE TABLE `marca` (
 
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `marca` WRITE;
-/*!40000 ALTER TABLE `marca` DISABLE KEYS */;
-INSERT INTO `marca` VALUES
-(2,'NIKE',NULL,1);
-/*!40000 ALTER TABLE `marca` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -711,12 +701,6 @@ CREATE TABLE `movimiento_inventario` (
 
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `movimiento_inventario` WRITE;
-/*!40000 ALTER TABLE `movimiento_inventario` DISABLE KEYS */;
-INSERT INTO `movimiento_inventario` VALUES
-(1,1,'ENTRADA',10.000,0.000,10.000,'Stock inicial del producto','PRODUCTO_INICIAL',1,NULL,'2026-06-02 21:39:12.378162','2026-06-02 21:39:12.378948'),
-(2,2,'ENTRADA',1.000,0.000,1.000,'Stock inicial del producto','PRODUCTO_INICIAL',2,NULL,'2026-06-02 21:46:56.870265','2026-06-02 21:46:56.871069'),
-(3,3,'ENTRADA',1.000,0.000,1.000,'Stock inicial del producto','PRODUCTO_INICIAL',3,NULL,'2026-06-02 21:51:51.341948','2026-06-02 21:51:51.342225');
-/*!40000 ALTER TABLE `movimiento_inventario` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -738,7 +722,7 @@ CREATE TABLE `opcion` (
   PRIMARY KEY (`id_opcion`),
   KEY `FKnk9w0tcdett0y2qb8kyy25b2g` (`id_padre`),
   CONSTRAINT `FKnk9w0tcdett0y2qb8kyy25b2g` FOREIGN KEY (`id_padre`) REFERENCES `opcion` (`id_opcion`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -748,24 +732,6 @@ CREATE TABLE `opcion` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `opcion` WRITE;
 /*!40000 ALTER TABLE `opcion` DISABLE KEYS */;
-INSERT INTO `opcion` VALUES
-(1,'Dashboard','/',NULL,1,NULL),
-(2,'Administración',NULL,'IconPerfiles',10,NULL),
-(3,'Listar Empleados','/empleados',NULL,1,2),
-(4,'Perfiles','/perfiles',NULL,2,2),
-(5,'Configuración Menú','/configuracion-menu','',3,2),
-(6,'Clientes','/clientes','IconClientes',20,NULL),
-(7,'Inventario',NULL,'IconInventario',30,NULL),
-(8,'Listar','/inventario',NULL,1,7),
-(9,'Productos','/productos',NULL,2,7),
-(10,'Categorias','/categorias',NULL,3,7),
-(11,'Marca','/marcas',NULL,4,7),
-(12,'Unidad','/unidades',NULL,5,7),
-(13,'Caja','/cajas','IconVentas',6,NULL),
-(14,'Proveedor/Compras',NULL,'IconCompras',40,NULL),
-(15,'Proveedor','/proveedores',NULL,1,14),
-(16,'Compras','/compras',NULL,2,14);
-/*!40000 ALTER TABLE `opcion` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -855,7 +821,7 @@ CREATE TABLE `perfil` (
   `perfil_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_perfil`),
   UNIQUE KEY `perfil_nombre` (`perfil_nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -897,27 +863,6 @@ CREATE TABLE `perfil_opcion` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `perfil_opcion` WRITE;
 /*!40000 ALTER TABLE `perfil_opcion` DISABLE KEYS */;
-INSERT INTO `perfil_opcion` VALUES
-(1,1),
-(2,1),
-(1,2),
-(2,2),
-(1,3),
-(2,3),
-(1,4),
-(2,4),
-(1,5),
-(1,6),
-(1,7),
-(1,8),
-(1,9),
-(1,10),
-(1,11),
-(1,12),
-(1,13),
-(1,14),
-(1,15),
-(1,16);
 /*!40000 ALTER TABLE `perfil_opcion` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -969,12 +914,6 @@ CREATE TABLE `producto` (
 
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `producto` WRITE;
-/*!40000 ALTER TABLE `producto` DISABLE KEYS */;
-INSERT INTO `producto` VALUES
-(1,'PRUEBA1','ARM-00001','Prueba1','Prueba1',20.00,15.00,'2026-06-02',NULL,10,5,1,'ARMAZON',2,2,4,5,2,'2026-06-03 02:39:12','2026-06-03 02:39:12'),
-(2,'PREUBAS01','ARM-00002','Preubas01','Preubas01',15.00,15.00,'2026-06-02','2026-06-19',1,7,1,'ARMAZON',1,2,4,4,1,'2026-06-03 02:46:57','2026-06-03 16:14:00'),
-(3,'PREUBAS01','ARM-00003','Preubas01','Preubas01',15.00,15.00,'2026-06-02','2026-06-18',1,1,1,'ARMAZON',1,2,4,4,1,'2026-06-03 02:51:51','2026-06-03 06:01:45');
-/*!40000 ALTER TABLE `producto` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -994,7 +933,7 @@ CREATE TABLE `producto_imagen` (
   PRIMARY KEY (`id_imagen`),
   KEY `FK_Imagen_Producto` (`id_producto`),
   CONSTRAINT `FK_Imagen_Producto` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1003,12 +942,6 @@ CREATE TABLE `producto_imagen` (
 
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `producto_imagen` WRITE;
-/*!40000 ALTER TABLE `producto_imagen` DISABLE KEYS */;
-INSERT INTO `producto_imagen` VALUES
-(2,3,'https://res.cloudinary.com/dcagjocw2/image/upload/v1780455142/optica/productos/ARM-00003/a0umvuloeuaa6arleito.png',1),
-(3,2,'https://res.cloudinary.com/dcagjocw2/image/upload/v1780464339/optica/productos/ARM-00002/zof7snfobt0alfuvtsch.png',1),
-(4,1,'https://res.cloudinary.com/dcagjocw2/image/upload/v1780464358/optica/productos/ARM-00001/vkkphad0ccjgjhjzusim.png',1);
-/*!40000 ALTER TABLE `producto_imagen` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -1106,7 +1039,7 @@ CREATE TABLE `tipo_comprobante` (
   `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `serie` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1138,7 +1071,7 @@ CREATE TABLE `tipo_documento` (
   `tipodoc_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_tipodocumento`),
   UNIQUE KEY `tipodoc_nombre` (`tipodoc_nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1170,7 +1103,7 @@ CREATE TABLE `tipo_venta` (
   `tipoventa_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_tipoventa`),
   UNIQUE KEY `tipoventa_nombre` (`tipoventa_nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1201,7 +1134,7 @@ CREATE TABLE `unidad` (
   `uni_estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_unidad`),
   UNIQUE KEY `uni_nombre` (`uni_nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1212,8 +1145,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `unidad` WRITE;
 /*!40000 ALTER TABLE `unidad` DISABLE KEYS */;
 INSERT INTO `unidad` VALUES
-(4,'UNIDAD',1),
-(5,'CAJA',1);
+(1,'UNIDAD',1),
+(2,'CAJA',1);
 /*!40000 ALTER TABLE `unidad` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
