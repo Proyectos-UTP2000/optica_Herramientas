@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.herramientas.optica.modules.productos.dto.MarcaRequestDTO;
 import com.herramientas.optica.modules.productos.dto.MarcaResponseDTO;
+import com.herramientas.optica.modules.productos.dto.MigrarProductosRequestDTO;
 import com.herramientas.optica.modules.productos.service.MarcaService;
 
 import jakarta.validation.Valid;
@@ -53,6 +54,18 @@ public class MarcaController {
     @PatchMapping("/{id}/estado")
     public ResponseEntity<MarcaResponseDTO> cambiarEstado(@PathVariable Long id) {
         return ResponseEntity.ok(marcaService.cambiarEstado(id));
+    }
+
+    @PatchMapping("/{id}/en-desuso")
+    public ResponseEntity<MarcaResponseDTO> marcarEnDesuso(@PathVariable Long id) {
+        return ResponseEntity.ok(marcaService.marcarEnDesuso(id));
+    }
+
+    @PatchMapping("/{id}/migrar-productos")
+    public ResponseEntity<MarcaResponseDTO> migrarProductosYDesactivar(
+            @PathVariable Long id,
+            @Valid @RequestBody MigrarProductosRequestDTO dto) {
+        return ResponseEntity.ok(marcaService.migrarProductosYDesactivar(id, dto.getDestinoId()));
     }
 
     @DeleteMapping("/{id}")
