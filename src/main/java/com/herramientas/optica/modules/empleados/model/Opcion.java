@@ -39,6 +39,10 @@ public class Opcion {
     @Column(name = "opcion_orden")
     private Integer orden;
 
+    @Builder.Default
+    @Column(name = "visible_en_menu", nullable = false)
+    private Boolean visibleEnMenu = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_padre")
     private Opcion padre;
