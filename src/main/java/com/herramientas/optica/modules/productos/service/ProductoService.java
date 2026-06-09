@@ -2,6 +2,7 @@ package com.herramientas.optica.modules.productos.service;
 
 import java.math.BigDecimal;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,9 @@ public class ProductoService {
 
     public List<ProductoResponseDTO> listarTodos() {
         return productoRepository.findByEstadoNot(ESTADO_BORRADO).stream()
+                .sorted(Comparator
+                        .comparing((Producto p) -> !requiereRevisionCatalogo(p))
+                        .thenComparing(Producto::getNombre, Comparator.nullsLast(String::compareTo)))
                 .map(this::mapearAResponse)
                 .collect(Collectors.toList());
     }
@@ -215,6 +219,16 @@ public class ProductoService {
         productoRepository.save(producto);
     }
 
+    private boolean requiereRevisionCatalogo(Producto producto) {
+        return esCatalogoEnDesusoOIndefinido(producto.getCategoria().getEstado(), producto.getCategoria().getNombre())
+                || esCatalogoEnDesusoOIndefinido(producto.getMarca().getEstado(), producto.getMarca().getNombre());
+    }
+
+    private boolean esCatalogoEnDesusoOIndefinido(Integer estado, String nombre) {
+        return (estado != null && estado == ESTADO_INACTIVO)
+                || (nombre != null && "INDEFINIDO".equalsIgnoreCase(nombre.trim()));
+    }
+
     private ProductoResponseDTO mapearAResponse(Producto p) {
         List<String> imgs = productoImagenRepository.findByProductoId(p.getId()).stream()
                 .map(ProductoImagen::getRutaImagen)
@@ -236,8 +250,10 @@ public class ProductoService {
                 .tipoProducto(p.getTipoProducto())
                 .idCategoria(p.getCategoria().getId())
                 .categoriaNombre(p.getCategoria().getNombre())
+                .categoriaEstado(p.getCategoria().getEstado())
                 .idMarca(p.getMarca().getId())
                 .marcaNombre(p.getMarca().getNombre())
+                .marcaEstado(p.getMarca().getEstado())
                 .idUnidadVenta(p.getUnidadVenta().getId())
                 .unidadVentaNombre(p.getUnidadVenta().getNombre())
                 .idUnidadCompra(p.getUnidadCompra().getId())

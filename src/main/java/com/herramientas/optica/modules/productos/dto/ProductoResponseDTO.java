@@ -28,9 +28,11 @@ public class ProductoResponseDTO {
 
     private Long idCategoria;
     private String categoriaNombre;
+    private Integer categoriaEstado;
 
     private Long idMarca;
     private String marcaNombre;
+    private Integer marcaEstado;
 
     private Integer idUnidadVenta;
     private String unidadVentaNombre;
