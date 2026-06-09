@@ -166,6 +166,11 @@ const Categorias = () => {
             Toast.fire({ icon: "success", title: "Categoría eliminada" });
             cargarCategorias();
         } catch (e) {
+            const mensaje = e.response?.data?.message || "";
+            if (/producto/i.test(mensaje)) {
+                await retirarConProductos({ ...categoria, cantidadProductosRelacionados: Math.max(cantidadProductos, 1) });
+                return;
+            }
             mostrarAlerta("No se puede eliminar", e.response?.data?.message || "Error al eliminar.", "error");
         }
     };

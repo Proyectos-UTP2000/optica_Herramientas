@@ -166,6 +166,11 @@ const Marcas = () => {
             Toast.fire({ icon: "success", title: "Marca eliminada" });
             cargarMarcas();
         } catch (e) {
+            const mensaje = e.response?.data?.message || "";
+            if (/producto/i.test(mensaje)) {
+                await retirarConProductos({ ...marca, cantidadProductosRelacionados: Math.max(cantidadProductos, 1) });
+                return;
+            }
             mostrarAlerta("No se puede eliminar", e.response?.data?.message || "Error al eliminar.", "error");
         }
     };
