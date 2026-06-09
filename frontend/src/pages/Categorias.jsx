@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 import { PencilSquare, Trash3 } from "react-bootstrap-icons";
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 import ModalCrearCategoria from "./categorias/ModalCrearCategoria";
@@ -57,10 +58,90 @@ const Categorias = () => {
         }
     };
 
+    const seleccionarDestinoMigracion = async (categoria) => {
+        const opcionesDestino = categorias
+            .filter((item) => item.id !== categoria.id && item.estado === 1)
+            .reduce((opciones, item) => ({ ...opciones, [item.id]: item.nombre }), {});
+
+        if (Object.keys(opcionesDestino).length === 0) {
+            mostrarAlerta(
+                "Sin destino disponible",
+                "No hay otra categoría activa para migrar los productos. Puedes marcarla En Desuso.",
+                "warning",
+            );
+            return null;
+        }
+
+        const seleccion = await Swal.fire({
+            title: "Migrar productos",
+            text: `Selecciona la categoría destino para los productos de "${categoria.nombre}".`,
+            input: "select",
+            inputOptions: opcionesDestino,
+            inputPlaceholder: "Selecciona destino",
+            showCancelButton: true,
+            confirmButtonText: "Migrar y marcar En Desuso",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#ef4444",
+            inputValidator: (value) => (!value ? "Debes seleccionar un destino" : undefined),
+        });
+
+        return seleccion.isConfirmed ? seleccion.value : null;
+    };
+
+    const retirarConProductos = async (categoria) => {
+        const opcion = await Swal.fire({
+            title: `Retirar Categoría: ${categoria.nombre}`,
+            text: "Esta categoría tiene productos asociados. Elige cómo continuar.",
+            icon: "warning",
+            input: "radio",
+            inputOptions: {
+                migrar: "Migrar productos a otra categoría activa",
+                desuso: "Solo marcar En Desuso",
+            },
+            inputValidator: (value) => (!value ? "Debes elegir una opción" : undefined),
+            showCancelButton: true,
+            confirmButtonText: "Continuar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#ef4444",
+        });
+
+        if (!opcion.isConfirmed) return;
+
+        try {
+            if (opcion.value === "desuso") {
+                await axios.patch(`/api/v1/categorias/${categoria.id}/en-desuso`, {}, { headers });
+                Toast.fire({ icon: "success", title: "Marcado En Desuso" });
+                cargarCategorias();
+                return;
+            }
+
+            const destinoId = await seleccionarDestinoMigracion(categoria);
+            if (!destinoId) return;
+
+            await axios.patch(
+                `/api/v1/categorias/${categoria.id}/migrar-productos`,
+                { destinoId: Number(destinoId) },
+                { headers },
+            );
+            Toast.fire({ icon: "success", title: "Productos migrados y origen En Desuso" });
+            cargarCategorias();
+        } catch (e) {
+            mostrarAlerta("Error", e.response?.data?.message || "No se pudo retirar.", "error");
+        }
+    };
+
     const eliminar = async (categoria) => {
+        const cantidadProductos = categoria.cantidadProductosRelacionados ?? 0;
+        if (cantidadProductos > 0) {
+            await retirarConProductos(categoria);
+            return;
+        }
+
         const confirmacion = await confirmarAccion(
             "¿Eliminar categoría?",
-            `¿Está seguro de eliminar "${categoria.nombre}"? No se puede eliminar si tiene productos asociados.`,
+            `¿Está seguro de eliminar "${categoria.nombre}"?`,
             "Sí, eliminar",
             "warning",
         );

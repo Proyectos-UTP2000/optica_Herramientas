@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 import { PencilSquare, Trash3 } from "react-bootstrap-icons";
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 import ModalCrearMarca from "./marcas/ModalCrearMarca";
@@ -57,10 +58,90 @@ const Marcas = () => {
         }
     };
 
+    const seleccionarDestinoMigracion = async (marca) => {
+        const opcionesDestino = marcas
+            .filter((item) => item.id !== marca.id && item.estado === 1)
+            .reduce((opciones, item) => ({ ...opciones, [item.id]: item.nombre }), {});
+
+        if (Object.keys(opcionesDestino).length === 0) {
+            mostrarAlerta(
+                "Sin destino disponible",
+                "No hay otra marca activa para migrar los productos. Puedes marcarla En Desuso.",
+                "warning",
+            );
+            return null;
+        }
+
+        const seleccion = await Swal.fire({
+            title: "Migrar productos",
+            text: `Selecciona la marca destino para los productos de "${marca.nombre}".`,
+            input: "select",
+            inputOptions: opcionesDestino,
+            inputPlaceholder: "Selecciona destino",
+            showCancelButton: true,
+            confirmButtonText: "Migrar y marcar En Desuso",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#ef4444",
+            inputValidator: (value) => (!value ? "Debes seleccionar un destino" : undefined),
+        });
+
+        return seleccion.isConfirmed ? seleccion.value : null;
+    };
+
+    const retirarConProductos = async (marca) => {
+        const opcion = await Swal.fire({
+            title: `Retirar Marca: ${marca.nombre}`,
+            text: "Esta marca tiene productos asociados. Elige cómo continuar.",
+            icon: "warning",
+            input: "radio",
+            inputOptions: {
+                migrar: "Migrar productos a otra marca activa",
+                desuso: "Solo marcar En Desuso",
+            },
+            inputValidator: (value) => (!value ? "Debes elegir una opción" : undefined),
+            showCancelButton: true,
+            confirmButtonText: "Continuar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#ef4444",
+        });
+
+        if (!opcion.isConfirmed) return;
+
+        try {
+            if (opcion.value === "desuso") {
+                await axios.patch(`/api/v1/marcas/${marca.id}/en-desuso`, {}, { headers });
+                Toast.fire({ icon: "success", title: "Marcado En Desuso" });
+                cargarMarcas();
+                return;
+            }
+
+            const destinoId = await seleccionarDestinoMigracion(marca);
+            if (!destinoId) return;
+
+            await axios.patch(
+                `/api/v1/marcas/${marca.id}/migrar-productos`,
+                { destinoId: Number(destinoId) },
+                { headers },
+            );
+            Toast.fire({ icon: "success", title: "Productos migrados y origen En Desuso" });
+            cargarMarcas();
+        } catch (e) {
+            mostrarAlerta("Error", e.response?.data?.message || "No se pudo retirar.", "error");
+        }
+    };
+
     const eliminar = async (marca) => {
+        const cantidadProductos = marca.cantidadProductosRelacionados ?? 0;
+        if (cantidadProductos > 0) {
+            await retirarConProductos(marca);
+            return;
+        }
+
         const confirmacion = await confirmarAccion(
             "¿Eliminar marca?",
-            `¿Está seguro de eliminar "${marca.nombre}"? No se puede eliminar si tiene productos asociados.`,
+            `¿Está seguro de eliminar "${marca.nombre}"?`,
             "Sí, eliminar",
             "warning",
         );
