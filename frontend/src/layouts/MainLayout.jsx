@@ -5,6 +5,7 @@ import api from "../api/axiosConfig";
 import { Toast, confirmarAccion } from "../utils/alerts";
 import { IconDashboard } from "../components/ui/IconCatalog";
 import { iconMap } from "../utils/iconUtils";
+import { filtrarOpcionesSidebar } from "../utils/sidebarOptions";
 import CajaHeaderModal from "../pages/caja/CajaHeaderModal";
 
 // ── Iconos SVG inline (Específicos de Layout) ───────────────────────
@@ -60,11 +61,13 @@ const MainLayout = ({ opciones = [], setToken }) => {
     }));
   };
 
-  const opcionesPadre = opciones
+  const opcionesSidebar = filtrarOpcionesSidebar(opciones);
+
+  const opcionesPadre = opcionesSidebar
     .filter((op) => op.idPadre === null)
     .sort((a, b) => (a.orden || 0) - (b.orden || 0));
 
-  const opcionesHijas = opciones.filter((op) => op.idPadre !== null);
+  const opcionesHijas = opcionesSidebar.filter((op) => op.idPadre !== null);
 
   const getHijos = (idPadre) => {
     return opcionesHijas
