@@ -97,6 +97,13 @@ const TablaProductos = ({ productos, cargando, recargarTabla, onEditarProducto, 
     }
   };
 
+  const requiereRevisionCatalogo = (p) =>
+    p.requiereRevisionCatalogo ||
+    p.categoriaEstado === 2 ||
+    p.marcaEstado === 2 ||
+    p.categoriaNombre?.trim().toUpperCase() === "INDEFINIDO" ||
+    p.marcaNombre?.trim().toUpperCase() === "INDEFINIDO";
+
   const productosFiltrados = productos.filter((p) => {
     const matchesSearch =
       !busqueda ||
@@ -253,18 +260,34 @@ const TablaProductos = ({ productos, cargando, recargarTabla, onEditarProducto, 
                 </td>
               </tr>
             ) : (
-              productosFiltrados.map((p) => (
-                <tr key={p.id} style={{ borderBottom: "1px solid #f1f5f9", color: "#334155" }}>
+              productosFiltrados.map((p) => {
+                const revisarCatalogo = requiereRevisionCatalogo(p);
+                return (
+                <tr
+                  key={p.id}
+                  className={revisarCatalogo ? "catalog-review-row" : ""}
+                  style={{ borderBottom: "1px solid #f1f5f9", color: "#334155" }}
+                >
                   <td style={{ padding: "12px 8px", fontWeight: 600, color: "#64748b" }}>
                     {p.codigo || "S/N"}
                   </td>
                   <td style={{ padding: "12px 8px" }}>
                     <div style={{ fontWeight: 600, color: "#1e293b" }}>{p.nombre}</div>
                     <div style={{ fontSize: "11px", color: "#94a3b8" }}>{p.modelo || "Sin modelo"}</div>
+                    {revisarCatalogo && (
+                      <span className="catalog-review-badge">⚠ Revisar catálogo</span>
+                    )}
                   </td>
                   <td style={{ padding: "12px 8px" }}>
                     <div>{p.marcaNombre || "Sin marca"}</div>
-                    <div style={{ fontSize: "11px", color: "#64748b" }}>{p.tipoProducto}</div>
+                    <div style={{ fontSize: "11px", color: "#64748b" }}>
+                      {p.categoriaNombre || "Sin categoría"} · {p.tipoProducto}
+                    </div>
+                    {(p.marcaEstado === 2 || p.categoriaEstado === 2) && (
+                      <div style={{ fontSize: "11px", color: "#92400e", marginTop: "2px", fontWeight: 700 }}>
+                        Marca/Categoría En Desuso
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: "12px 8px" }}>
                     <span style={{ fontSize: "12px", background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px" }}>
@@ -320,7 +343,8 @@ const TablaProductos = ({ productos, cargando, recargarTabla, onEditarProducto, 
                     </div>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>

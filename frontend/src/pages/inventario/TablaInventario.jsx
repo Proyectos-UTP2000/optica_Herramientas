@@ -2,6 +2,13 @@ import { PlusCircle, DashCircle, Eye } from "react-bootstrap-icons";
 
 const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
 
+  const requiereRevisionCatalogo = (item) =>
+    item.requiereRevisionCatalogo ||
+    item.categoriaEstado === 2 ||
+    item.marcaEstado === 2 ||
+    item.categoriaNombre?.trim().toUpperCase() === "INDEFINIDO" ||
+    item.marcaNombre?.trim().toUpperCase() === "INDEFINIDO";
+
   if (cargando) {
     return (
       <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b", fontSize: "14px" }}>
@@ -30,12 +37,15 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
               </td>
             </tr>
           ) : (
-            saldos.map((item) => (
-              <tr 
-                key={item.productoId} 
-                style={{ 
+            saldos.map((item) => {
+              const revisarCatalogo = requiereRevisionCatalogo(item);
+              return (
+              <tr
+                key={item.productoId}
+                className={revisarCatalogo ? "catalog-review-row" : ""}
+                style={{
                   borderBottom: "1px solid #f1f5f9",
-                  backgroundColor: item.bajoStock ? "#ffff1a10" : "transparent" // Un ligero fondo si está en alerta
+                  backgroundColor: revisarCatalogo ? undefined : item.bajoStock ? "#ffff1a10" : "transparent"
                 }}
               >
                 <td style={{ padding: "12px 8px", color: "#64748b" }}>#{item.productoId}</td>
@@ -48,6 +58,12 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
                     <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px" }}>
                       SKU: {item.productoCodigo}
                     </div>
+                  )}
+                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
+                    {item.marcaNombre || "Sin marca"} · {item.categoriaNombre || "Sin categoría"}
+                  </div>
+                  {revisarCatalogo && (
+                    <span className="catalog-review-badge">⚠ Revisar catálogo</span>
                   )}
                 </td>
 
@@ -103,7 +119,8 @@ const TablaInventario = ({ saldos, cargando, onAjuste, onVerHistorial }) => {
                   </div>
                 </td>
               </tr>
-            ))
+              );
+            })
           )}
         </tbody>
       </table>
