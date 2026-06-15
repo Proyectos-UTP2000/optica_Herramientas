@@ -91,7 +91,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 // Rutas a los que cualquiera tenga accesso Cualquiera puede intentar iniciar
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**").permitAll()
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**", "/api/v1/public/**").permitAll()
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated())
 
