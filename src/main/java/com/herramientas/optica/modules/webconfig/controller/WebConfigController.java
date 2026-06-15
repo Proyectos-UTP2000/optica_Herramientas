@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/v1/web-config")
+@RequestMapping("/api/v1/contenido-web")
 public class WebConfigController {
 
     private final WebConfigService webConfigService;

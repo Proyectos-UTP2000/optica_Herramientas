@@ -43,7 +43,7 @@ const ContenidoWeb = () => {
   const cargarConfiguracion = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await api.get("/api/v1/web-config", {
+      const response = await api.get("/api/v1/contenido-web", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = response.data;
@@ -193,7 +193,7 @@ const ContenidoWeb = () => {
         formData.append("carrusel", file);
       });
 
-      await api.put("/api/v1/web-config", formData, {
+      await api.put("/api/v1/contenido-web", formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
