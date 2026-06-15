@@ -20,6 +20,9 @@ public class DashboardController {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    @Autowired
+    private com.herramientas.optica.security.service.DashboardService dashboardService;
+
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Long>> getStats() {
         Map<String, Long> stats = new HashMap<>();
@@ -32,5 +35,10 @@ public class DashboardController {
         stats.put("totalProductos", 0L); 
         
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/analytics")
+    public ResponseEntity<com.herramientas.optica.security.dto.DashboardAnalyticsDTO> getAnalytics() {
+        return ResponseEntity.ok(dashboardService.obtenerAnaliticas());
     }
 }
