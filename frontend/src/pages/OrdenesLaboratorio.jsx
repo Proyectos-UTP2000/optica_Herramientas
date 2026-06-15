@@ -350,4 +350,4 @@ const OrdenesLaboratorio = () => {
   );
 };
 
-export default OrdenLaboratorio;
+export default OrdenesLaboratorio;
