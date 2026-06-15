@@ -25,6 +25,7 @@ import ReporteVentas from "./pages/reportes/ReporteVentas";
 import ReporteCompras from "./pages/reportes/ReporteCompras";
 import ReporteCajas from "./pages/reportes/ReporteCajas";
 import EnProceso from "./pages/EnProceso";
+import CatalogoWeb from "./pages/CatalogoWeb";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -107,24 +108,8 @@ function App() {
               />
             }
           />
-          <Route
-            path="catalogo-web"
-            element={
-              <EnProceso
-                titulo="Catálogo Web"
-                descripcion="La gestión del catálogo público se habilitará cuando el módulo web esté listo."
-              />
-            }
-          />
-          <Route
-            path="gestion-web/catalogo-web"
-            element={
-              <EnProceso
-                titulo="Catálogo Web"
-                descripcion="La gestión del catálogo público se habilitará cuando el módulo web esté listo."
-              />
-            }
-          />
+          <Route path="catalogo-web" element={<CatalogoWeb />} />
+          <Route path="gestion-web/catalogo-web" element={<CatalogoWeb />} />
           <Route
             path="cotizaciones"
             element={
