@@ -1,5 +1,9 @@
-import { useState, useEffect, createContext, useContext, useMemo } from "react";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { useState, useEffect, createContext, useContext } from "react";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 import Login from "./pages/Login";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -31,14 +35,12 @@ import ContenidoWeb from "./pages/ContenidoWeb";
 import CotizacionesAdmin from "./pages/CotizacionesAdmin";
 
 const AppContext = createContext(null);
-export const useApp = () => useContext(AppContext);
+const useApp = () => useContext(AppContext);
 
 const LoginRoute = () => {
   const { setToken } = useApp();
   return (
-    <Login
-      onLoginSuccess={() => setToken(localStorage.getItem("token"))}
-    />
+    <Login onLoginSuccess={() => setToken(localStorage.getItem("token"))} />
   );
 };
 
