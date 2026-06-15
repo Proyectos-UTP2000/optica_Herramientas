@@ -23,15 +23,21 @@ public class CotizacionService {
     private final CotizacionDetalleRepository cotizacionDetalleRepository;
     private final ProductoRepository productoRepository;
     private final com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository;
+    private final com.herramientas.optica.modules.clientes.service.ClienteService clienteService;
+    private final com.herramientas.optica.modules.clientes.repository.TipoDocumentoRepository tipoDocumentoRepository;
 
     public CotizacionService(CotizacionRepository cotizacionRepository,
                              CotizacionDetalleRepository cotizacionDetalleRepository,
                              ProductoRepository productoRepository,
-                             com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository) {
+                             com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository,
+                             com.herramientas.optica.modules.clientes.service.ClienteService clienteService,
+                             com.herramientas.optica.modules.clientes.repository.TipoDocumentoRepository tipoDocumentoRepository) {
         this.cotizacionRepository = cotizacionRepository;
         this.cotizacionDetalleRepository = cotizacionDetalleRepository;
         this.productoRepository = productoRepository;
         this.clienteRepository = clienteRepository;
+        this.clienteService = clienteService;
+        this.tipoDocumentoRepository = tipoDocumentoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -51,11 +57,80 @@ public class CotizacionService {
     @Transactional
     public CotizacionDTO crearCotizacion(CotizacionDTO dto) {
         com.herramientas.optica.modules.clientes.model.Cliente clienteUsuario = null;
-        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            String username = auth.getName();
-            if (username != null && username.contains("@")) {
-                clienteUsuario = clienteRepository.findByCorreo(username).orElse(null);
+
+        if (dto.getClienteDocumento() != null && !dto.getClienteDocumento().trim().isEmpty()) {
+            String doc = dto.getClienteDocumento().trim();
+            var optCliente = clienteRepository.findByNumeroDocumento(doc);
+            if (optCliente.isPresent()) {
+                clienteUsuario = optCliente.get();
+            } else {
+                try {
+                    com.herramientas.optica.modules.clientes.dto.ClienteRequestDTO req = new com.herramientas.optica.modules.clientes.dto.ClienteRequestDTO();
+                    req.setNumeroDocumento(doc);
+                    req.setIdTipoDocumento(doc.length() == 11 ? 2L : 1L);
+                    req.setCorreo(dto.getClienteCorreo());
+                    req.setTelefono(dto.getClienteTelefono());
+                    req.setDireccion(dto.getDireccion() != null && !dto.getDireccion().trim().isEmpty() ? dto.getDireccion() : "NO ESPECIFICADA");
+
+                    var resp = clienteService.crearCliente(req);
+                    clienteUsuario = clienteRepository.findById(resp.getId()).orElse(null);
+                } catch (Exception e) {
+                    try {
+                        com.herramientas.optica.modules.clientes.model.TipoDocumento tipoDoc = tipoDocumentoRepository.findById(doc.length() == 11 ? 2L : 1L)
+                                .orElseThrow(() -> new IllegalArgumentException("Tipo de documento no encontrado"));
+
+                        com.herramientas.optica.modules.clientes.model.Cliente.ClienteBuilder builder = com.herramientas.optica.modules.clientes.model.Cliente.builder()
+                                .numeroDocumento(doc)
+                                .correo(dto.getClienteCorreo())
+                                .telefono(dto.getClienteTelefono())
+                                .direccion(dto.getDireccion() != null && !dto.getDireccion().trim().isEmpty() ? dto.getDireccion().toUpperCase() : "NO ESPECIFICADA")
+                                .tipoDocumento(tipoDoc)
+                                .estado(1);
+
+                        if (tipoDoc.getId() == 2L) {
+                            builder.nombreEmpresa(dto.getClienteNombre() != null ? dto.getClienteNombre().toUpperCase() : "EMPRESA NUEVA");
+                            builder.direccionEmpresa(dto.getDireccion() != null && !dto.getDireccion().trim().isEmpty() ? dto.getDireccion().toUpperCase() : "NO ESPECIFICADA");
+                        } else {
+                            String fullName = dto.getClienteNombre();
+                            if (fullName != null && !fullName.trim().isEmpty()) {
+                                String[] parts = fullName.trim().split("\\s+");
+                                if (parts.length >= 3) {
+                                    builder.nombre(parts[0].toUpperCase());
+                                    builder.apellidoPaterno(parts[1].toUpperCase());
+                                    StringBuilder mat = new StringBuilder();
+                                    for (int i = 2; i < parts.length; i++) {
+                                        if (i > 2) mat.append(" ");
+                                        mat.append(parts[i]);
+                                    }
+                                    builder.apellidoMaterno(mat.toString().toUpperCase());
+                                } else if (parts.length == 2) {
+                                    builder.nombre(parts[0].toUpperCase());
+                                    builder.apellidoPaterno(parts[1].toUpperCase());
+                                    builder.apellidoMaterno("");
+                                } else {
+                                    builder.nombre(fullName.toUpperCase());
+                                    builder.apellidoPaterno("");
+                                    builder.apellidoMaterno("");
+                                }
+                            } else {
+                                builder.nombre("CLIENTE");
+                                builder.apellidoPaterno("NUEVO");
+                                builder.apellidoMaterno("");
+                            }
+                        }
+                        clienteUsuario = clienteRepository.save(builder.build());
+                    } catch (Exception ex) {
+                        System.err.println("Error en fallback manual de cliente: " + ex.getMessage());
+                    }
+                }
+            }
+        } else {
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                String username = auth.getName();
+                if (username != null && username.contains("@")) {
+                    clienteUsuario = clienteRepository.findByCorreo(username).orElse(null);
+                }
             }
         }
 

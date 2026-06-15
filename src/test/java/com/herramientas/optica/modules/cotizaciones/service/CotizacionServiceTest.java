@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,15 @@ class CotizacionServiceTest {
 
     @Autowired
     private UnidadRepository unidadRepository;
+
+    @Autowired
+    private com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository;
+
+    @Autowired
+    private com.herramientas.optica.modules.clientes.repository.TipoDocumentoRepository tipoDocumentoRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Producto crearMockProducto(String codigo, String precioStr) {
         Categoria categoria = categoriaRepository.save(Categoria.builder()
@@ -209,5 +219,47 @@ class CotizacionServiceTest {
         List<CotizacionDTO> todas = cotizacionService.listarTodas();
         assertThat(todas).isNotEmpty();
         assertThat(todas.get(0).getId()).isEqualTo(response.getId());
+    }
+
+    @Test
+    void crearCotizacionConNuevoDocumentoCreaClienteAutomatico() {
+        if (!tipoDocumentoRepository.existsById(1L)) {
+            jdbcTemplate.update(
+                    "INSERT INTO tipo_documento (id_tipodocumento, tipodoc_nombre, tipodoc_estado) VALUES (?, ?, ?)",
+                    1L, "DNI", 1);
+        }
+
+        Producto prod = crearMockProducto("PROD_AUTO_CLI", "50.00");
+        String nuevoDni = "99887766";
+
+        // El cliente no debe existir
+        assertThat(clienteRepository.findByNumeroDocumento(nuevoDni)).isEmpty();
+
+        CotizacionDTO request = CotizacionDTO.builder()
+                .clienteNombre("GOMEZ PEREZ CARLOS")
+                .clienteDocumento(nuevoDni)
+                .clienteTelefono("987654321")
+                .clienteCorreo("carlos@gomez.com")
+                .direccion("Av. Progreso 123")
+                .detalles(List.of(
+                        CotizacionDetalleDTO.builder()
+                                .productoId(prod.getId())
+                                .cantidad(1)
+                                .build()
+                ))
+                .build();
+
+        CotizacionDTO response = cotizacionService.crearCotizacion(request);
+
+        // Debe haberse creado el cliente
+        var optCliente = clienteRepository.findByNumeroDocumento(nuevoDni);
+        assertThat(optCliente).isPresent();
+
+        com.herramientas.optica.modules.clientes.model.Cliente cliente = optCliente.get();
+        assertThat(cliente.getNumeroDocumento()).isEqualTo(nuevoDni);
+        assertThat(cliente.getCorreo()).isEqualTo("carlos@gomez.com");
+
+        // Y el link debe estar configurado
+        assertThat(response.getClienteUsuarioId()).isEqualTo(cliente.getId());
     }
 }
