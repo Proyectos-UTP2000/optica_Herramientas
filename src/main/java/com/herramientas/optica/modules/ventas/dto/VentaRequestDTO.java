@@ -51,4 +51,6 @@ public class VentaRequestDTO {
     @NotEmpty(message = "La venta debe incluir al menos un detalle")
     @Valid
     private List<VentaDetalleRequestDTO> detalles;
+
+    private Long cotizacionId;
 }

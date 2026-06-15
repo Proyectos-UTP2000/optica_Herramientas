@@ -60,6 +60,7 @@ public class VentaService {
     private final CajaService cajaService;
     private final OrdenLaboratorioService ordenLaboratorioService;
     private final RecetaClinicaRepository recetaClinicaRepository;
+    private final com.herramientas.optica.modules.cotizaciones.repository.CotizacionRepository cotizacionRepository;
 
     /**
      * Crea el servicio que coordina ventas emitidas con inventario y caja.
@@ -68,7 +69,8 @@ public class VentaService {
             EmpleadoRepository empleadoRepository, ProductoRepository productoRepository, CajaRepository cajaRepository,
             TipoComprobanteRepository tipoComprobanteRepository, InventarioService inventarioService,
             CajaService cajaService, OrdenLaboratorioService ordenLaboratorioService,
-            RecetaClinicaRepository recetaClinicaRepository) {
+            RecetaClinicaRepository recetaClinicaRepository,
+            com.herramientas.optica.modules.cotizaciones.repository.CotizacionRepository cotizacionRepository) {
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.empleadoRepository = empleadoRepository;
@@ -79,6 +81,7 @@ public class VentaService {
         this.cajaService = cajaService;
         this.ordenLaboratorioService = ordenLaboratorioService;
         this.recetaClinicaRepository = recetaClinicaRepository;
+        this.cotizacionRepository = cotizacionRepository;
     }
 
     /**
@@ -106,7 +109,7 @@ public class VentaService {
             throw new IllegalArgumentException("El total de la venta debe ser mayor que cero.");
         }
 
-        Venta venta = Venta.builder()
+        var ventaBuilder = Venta.builder()
                 .cliente(cliente)
                 .empleado(empleado)
                 .caja(caja)
@@ -120,8 +123,22 @@ public class VentaService {
                 .estado(EstadoVenta.EMITIDA.getCodigo())
                 .observaciones(normalizarTextoOpcional(dto.getObservaciones()))
                 .pagoInicial(normalizarMonto(total))
-                .deuda(BigDecimal.ZERO.setScale(2, RoundingMode.UNNECESSARY))
-                .build();
+                .deuda(BigDecimal.ZERO.setScale(2, RoundingMode.UNNECESSARY));
+
+        if (dto.getCotizacionId() != null) {
+            com.herramientas.optica.modules.cotizaciones.model.Cotizacion cotizacion = cotizacionRepository.findById(dto.getCotizacionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Cotización no encontrada con el ID: " + dto.getCotizacionId()));
+
+            if ("PROCESADO".equalsIgnoreCase(cotizacion.getEstado())) {
+                throw new IllegalStateException("La cotización ya ha sido procesada.");
+            }
+
+            ventaBuilder.cotizacion(cotizacion);
+            cotizacion.setEstado("PROCESADO");
+            cotizacionRepository.save(cotizacion);
+        }
+
+        Venta venta = ventaBuilder.build();
 
         Venta ventaGuardada = ventaRepository.save(venta);
         if (generarNumeroComprobante && tipoComprobante == null) {
