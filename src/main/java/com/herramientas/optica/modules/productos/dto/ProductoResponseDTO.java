@@ -44,6 +44,13 @@ public class ProductoResponseDTO {
 
     private java.util.List<String> rutasImagenes;
 
+    private Boolean visibleWeb;
+    private Boolean destacado;
+    private String slug;
+    private String descripcionWeb;
+    private String etiquetas;
+    private Integer orden;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

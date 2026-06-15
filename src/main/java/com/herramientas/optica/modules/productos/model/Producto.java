@@ -99,6 +99,27 @@ public class Producto {
     @jakarta.persistence.OneToMany(mappedBy = "producto", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private java.util.List<ProductoImagen> imagenes = new java.util.ArrayList<>();
 
+    @Builder.Default
+    @Column(name = "produc_visible_web", nullable = false)
+    private Boolean visibleWeb = false;
+
+    @Builder.Default
+    @Column(name = "produc_destacado", nullable = false)
+    private Boolean destacado = false;
+
+    @Column(name = "produc_slug", unique = true, length = 255)
+    private String slug;
+
+    @Column(name = "produc_descripcion_web", columnDefinition = "TEXT")
+    private String descripcionWeb;
+
+    @Column(name = "produc_etiquetas", length = 500)
+    private String etiquetas;
+
+    @Builder.Default
+    @Column(name = "produc_orden", nullable = false)
+    private Integer orden = 0;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
