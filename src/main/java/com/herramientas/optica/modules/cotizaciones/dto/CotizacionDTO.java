@@ -24,4 +24,6 @@ public class CotizacionDTO {
     private LocalDateTime fechaCreacion;
     private String observaciones;
     private List<CotizacionDetalleDTO> detalles;
+    private Long clienteUsuarioId;
+    private String direccion;
 }

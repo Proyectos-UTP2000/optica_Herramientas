@@ -22,13 +22,16 @@ public class CotizacionService {
     private final CotizacionRepository cotizacionRepository;
     private final CotizacionDetalleRepository cotizacionDetalleRepository;
     private final ProductoRepository productoRepository;
+    private final com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository;
 
     public CotizacionService(CotizacionRepository cotizacionRepository,
                              CotizacionDetalleRepository cotizacionDetalleRepository,
-                             ProductoRepository productoRepository) {
+                             ProductoRepository productoRepository,
+                             com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository) {
         this.cotizacionRepository = cotizacionRepository;
         this.cotizacionDetalleRepository = cotizacionDetalleRepository;
         this.productoRepository = productoRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     @Transactional(readOnly = true)
@@ -47,6 +50,15 @@ public class CotizacionService {
 
     @Transactional
     public CotizacionDTO crearCotizacion(CotizacionDTO dto) {
+        com.herramientas.optica.modules.clientes.model.Cliente clienteUsuario = null;
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            String username = auth.getName();
+            if (username != null && username.contains("@")) {
+                clienteUsuario = clienteRepository.findByCorreo(username).orElse(null);
+            }
+        }
+
         Cotizacion cotizacion = Cotizacion.builder()
                 .clienteNombre(dto.getClienteNombre())
                 .clienteDocumento(dto.getClienteDocumento())
@@ -55,6 +67,8 @@ public class CotizacionService {
                 .observaciones(dto.getObservaciones())
                 .totalEstimado(BigDecimal.ZERO)
                 .estado("PENDIENTE")
+                .clienteUsuario(clienteUsuario)
+                .direccion(dto.getDireccion())
                 .build();
 
         // Guardamos primero la cotización para generar el ID
@@ -127,6 +141,8 @@ public class CotizacionService {
                 .fechaCreacion(c.getFechaCreacion())
                 .observaciones(c.getObservaciones())
                 .detalles(dets)
+                .clienteUsuarioId(c.getClienteUsuario() != null ? c.getClienteUsuario().getId() : null)
+                .direccion(c.getDireccion())
                 .build();
     }
 }
