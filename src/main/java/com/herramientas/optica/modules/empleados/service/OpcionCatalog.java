@@ -48,7 +48,8 @@ public final class OpcionCatalog {
                 //new OpcionDefinition("Productos Bajo Stock", "/reportes/bajo-stock", "IconInventario", 5, "Reportes", false),
 
             new OpcionDefinition("Catálogo Web", "/catalogo-web", "IconInventario", 1, "Gestión Web", true, true),
-            new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 2, "Gestión Web", true, true));
+            new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 2, "Gestión Web", true, true),
+            new OpcionDefinition("Contenido Web", "/contenido-web", "IconGestionWeb", 3, "Gestión Web", true, true));
     }
 
     public record OpcionDefinition(String nombre, String ruta, String icono, Integer orden, String padreNombre,
