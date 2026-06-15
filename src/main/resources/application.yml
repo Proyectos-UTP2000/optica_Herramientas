@@ -5,6 +5,12 @@ spring:
   application:
     name: optica
 
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
