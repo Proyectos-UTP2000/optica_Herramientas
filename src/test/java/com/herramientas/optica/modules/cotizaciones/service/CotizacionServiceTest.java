@@ -77,6 +77,7 @@ class CotizacionServiceTest {
                 .unidadCompra(unidadCompra)
                 .factorConversion(1)
                 .estado(1)
+                .visibleWeb(true)
                 .build());
     }
 
@@ -135,6 +136,50 @@ class CotizacionServiceTest {
         assertThatThrownBy(() -> cotizacionService.crearCotizacion(request))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Producto no encontrado");
+    }
+
+    @Test
+    void crearCotizacionConProductoSinStockFalla() {
+        Producto prod = crearMockProducto("PROD_SIN_STOCK", "10.00");
+        prod.setStock(0);
+        productoRepository.save(prod);
+
+        CotizacionDTO request = CotizacionDTO.builder()
+                .clienteNombre("Pedro")
+                .clienteTelefono("999999999")
+                .detalles(List.of(
+                        CotizacionDetalleDTO.builder()
+                                .productoId(prod.getId())
+                                .cantidad(1)
+                                .build()
+                ))
+                .build();
+
+        assertThatThrownBy(() -> cotizacionService.crearCotizacion(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no está disponible o no tiene stock");
+    }
+
+    @Test
+    void crearCotizacionConProductoNoVisibleFalla() {
+        Producto prod = crearMockProducto("PROD_OCULTO", "10.00");
+        prod.setVisibleWeb(false);
+        productoRepository.save(prod);
+
+        CotizacionDTO request = CotizacionDTO.builder()
+                .clienteNombre("Pedro")
+                .clienteTelefono("999999999")
+                .detalles(List.of(
+                        CotizacionDetalleDTO.builder()
+                                .productoId(prod.getId())
+                                .cantidad(1)
+                                .build()
+                ))
+                .build();
+
+        assertThatThrownBy(() -> cotizacionService.crearCotizacion(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no está disponible o no tiene stock");
     }
 
     @Test

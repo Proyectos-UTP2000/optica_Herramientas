@@ -79,7 +79,14 @@ public class CotizacionService {
 
         for (CotizacionDetalleDTO detDto : dto.getDetalles()) {
             Producto producto = productoRepository.findById(detDto.getProductoId())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + detDto.getProductoId()));
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + detDto.getProductoId()));
+
+            if (producto.getEstado() != 1 ||
+                !Boolean.TRUE.equals(producto.getVisibleWeb()) ||
+                producto.getStock() == null ||
+                producto.getStock() <= 0) {
+                throw new IllegalArgumentException("El producto '" + producto.getNombre() + "' no está disponible o no tiene stock.");
+            }
 
             BigDecimal precio = producto.getPrecio() != null ? producto.getPrecio() : BigDecimal.ZERO;
             BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(detDto.getCantidad()));

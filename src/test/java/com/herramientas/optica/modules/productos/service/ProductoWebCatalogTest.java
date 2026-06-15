@@ -103,23 +103,46 @@ class ProductoWebCatalogTest {
         Marca mar = crearMarcaMock();
         Unidad uni = crearUnidadMock();
 
-        // Producto visible
+        // Producto visible con stock
         ProductoRequestDTO req1 = productoRequest("Visible Web 1", "VIS-1", cat.getId(), mar.getId(), uni.getId(), uni.getId());
         req1.setVisibleWeb(true);
+        req1.setStockInicial(5);
         req1.setOrden(10);
         productoService.crear(req1, null);
 
-        // Producto no visible
-        ProductoRequestDTO req2 = productoRequest("Oculto Web 2", "OCU-2", cat.getId(), mar.getId(), uni.getId(), uni.getId());
-        req2.setVisibleWeb(false);
+        // Producto visible sin stock (stock inicial 0)
+        ProductoRequestDTO req2 = productoRequest("Visible Sin Stock", "SIN-STOCK", cat.getId(), mar.getId(), uni.getId(), uni.getId());
+        req2.setVisibleWeb(true);
+        req2.setStockInicial(0);
         productoService.crear(req2, null);
+
+        // Producto no visible
+        ProductoRequestDTO req3 = productoRequest("Oculto Web 2", "OCU-2", cat.getId(), mar.getId(), uni.getId(), uni.getId());
+        req3.setVisibleWeb(false);
+        productoService.crear(req3, null);
 
         List<ProductoPublicResponseDTO> publicos = productoService.listarPublicos();
 
         assertThat(publicos).hasSize(1);
         assertThat(publicos.get(0).getNombre()).isEqualTo("VISIBLE WEB 1");
         assertThat(publicos.get(0).getOrden()).isEqualTo(10);
-        assertThat(publicos.get(0).getConStock()).isFalse(); // stock inicial 0
+        assertThat(publicos.get(0).getConStock()).isTrue();
+    }
+
+    @Test
+    void buscarPorSlugConStockCeroFalla() throws Exception {
+        Categoria cat = crearCategoriaMock();
+        Marca mar = crearMarcaMock();
+        Unidad uni = crearUnidadMock();
+
+        ProductoRequestDTO req = productoRequest("Agotado Por Slug", "AGOT-1", cat.getId(), mar.getId(), uni.getId(), uni.getId());
+        req.setVisibleWeb(true);
+        req.setStockInicial(0);
+        productoService.crear(req, null);
+
+        assertThatThrownBy(() -> productoService.buscarPorSlug("agotado-por-slug"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("El producto solicitado no cuenta con stock disponible.");
     }
 
     @Test
@@ -130,6 +153,7 @@ class ProductoWebCatalogTest {
 
         ProductoRequestDTO req = productoRequest("Buscado Por Slug", "BUSC-1", cat.getId(), mar.getId(), uni.getId(), uni.getId());
         req.setVisibleWeb(true);
+        req.setStockInicial(5);
         productoService.crear(req, null);
 
         ProductoPublicResponseDTO dto = productoService.buscarPorSlug("buscado-por-slug");

@@ -299,6 +299,7 @@ public class ProductoService {
     @Transactional(readOnly = true)
     public List<ProductoPublicResponseDTO> listarPublicos() {
         return productoRepository.findByVisibleWebTrueAndEstadoOrderByOrdenAscNombreAsc(ESTADO_ACTIVO).stream()
+                .filter(p -> p.getStock() != null && p.getStock() > 0)
                 .map(this::mapearAPublicResponse)
                 .collect(Collectors.toList());
     }
@@ -307,6 +308,9 @@ public class ProductoService {
     public ProductoPublicResponseDTO buscarPorSlug(String slug) {
         Producto p = productoRepository.findBySlugAndVisibleWebTrueAndEstado(slug, ESTADO_ACTIVO)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con el slug: " + slug));
+        if (p.getStock() == null || p.getStock() <= 0) {
+            throw new IllegalArgumentException("El producto solicitado no cuenta con stock disponible.");
+        }
         return mapearAPublicResponse(p);
     }
 
