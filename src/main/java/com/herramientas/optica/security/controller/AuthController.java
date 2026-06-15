@@ -55,11 +55,39 @@ public class AuthController {
 
     @PostMapping("/cliente/register")
     public ResponseEntity<String> registrarCliente(@Valid @RequestBody com.herramientas.optica.modules.clientes.dto.ClienteRegisterDTO dto) {
+        var optClienteByDoc = clienteRepository.findByNumeroDocumento(dto.getNumeroDocumento());
+        if (optClienteByDoc.isPresent()) {
+            var existingCliente = optClienteByDoc.get();
+            if (existingCliente.getContrasena() != null && !existingCliente.getContrasena().isBlank()) {
+                return ResponseEntity.badRequest().body("El número de documento ya está registrado.");
+            }
+            
+            // Validar que el correo no esté registrado por OTRO cliente
+            var optClienteByCorreo = clienteRepository.findByCorreo(dto.getCorreo());
+            if (optClienteByCorreo.isPresent() && !optClienteByCorreo.get().getId().equals(existingCliente.getId())) {
+                return ResponseEntity.badRequest().body("El correo ya está registrado.");
+            }
+            
+            var tipoDoc = tipoDocumentoRepository.findById(dto.getIdTipoDocumento())
+                    .orElseThrow(() -> new RuntimeException("Tipo de documento no válido"));
+            
+            // Vincular cuenta presencial existente
+            existingCliente.setNombre(dto.getNombre());
+            existingCliente.setApellidoPaterno(dto.getApellidoPaterno());
+            existingCliente.setApellidoMaterno(dto.getApellidoMaterno());
+            existingCliente.setCorreo(dto.getCorreo());
+            existingCliente.setTelefono(dto.getTelefono());
+            existingCliente.setDireccion(dto.getDireccion());
+            existingCliente.setContrasena(passwordEncoder.encode(dto.getContrasena()));
+            existingCliente.setTipoDocumento(tipoDoc);
+            existingCliente.setEstado(1);
+            
+            clienteRepository.save(existingCliente);
+            return ResponseEntity.ok("Cliente registrado y vinculado exitosamente.");
+        }
+
         if (clienteRepository.existsByCorreo(dto.getCorreo())) {
             return ResponseEntity.badRequest().body("El correo ya está registrado.");
-        }
-        if (clienteRepository.findByNumeroDocumento(dto.getNumeroDocumento()).isPresent()) {
-            return ResponseEntity.badRequest().body("El número de documento ya está registrado.");
         }
         var tipoDoc = tipoDocumentoRepository.findById(dto.getIdTipoDocumento())
                 .orElseThrow(() -> new RuntimeException("Tipo de documento no válido"));

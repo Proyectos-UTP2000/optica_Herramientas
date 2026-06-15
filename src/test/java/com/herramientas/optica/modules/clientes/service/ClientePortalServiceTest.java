@@ -152,4 +152,60 @@ class ClientePortalServiceTest {
         assertThatThrownBy(() -> userDetailsService.loadUserByUsername("inexistente@test.com"))
                 .isInstanceOf(UsernameNotFoundException.class);
     }
+
+    @Test
+    void vincularClienteExistentePresencial() {
+        // 1. Crear un cliente presencial sin contraseña
+        Cliente presencial = clienteRepository.save(Cliente.builder()
+                .nombre("Jose Presencial")
+                .numeroDocumento("88888888")
+                .tipoDocumento(tipoDocumento)
+                .direccion("Direccion Presencial")
+                .telefono("999888777")
+                .estado(1)
+                .build());
+
+        // 2. Intentar registrarse vía web con el mismo DNI
+        ClienteRegisterDTO regDto = ClienteRegisterDTO.builder()
+                .nombre("Jose Modificado")
+                .apellidoPaterno("Castro")
+                .apellidoMaterno("Luna")
+                .numeroDocumento("88888888")
+                .idTipoDocumento(tipoDocumento.getId())
+                .direccion("Av. Web 123")
+                .telefono("999111222")
+                .correo("jose@web.com")
+                .contrasena("newsecure123")
+                .build();
+
+        var regResponse = authController.registrarCliente(regDto);
+        assertThat(regResponse.getStatusCode().value()).isEqualTo(200);
+        assertThat(regResponse.getBody()).contains("vinculado");
+
+        // 3. Verificar que se actualizó el cliente existente en vez de crear uno nuevo
+        Cliente actualizado = clienteRepository.findByNumeroDocumento("88888888").orElseThrow();
+        assertThat(actualizado.getId()).isEqualTo(presencial.getId());
+        assertThat(actualizado.getNombre()).isEqualTo("Jose Modificado");
+        assertThat(actualizado.getCorreo()).isEqualTo("jose@web.com");
+        assertThat(actualizado.getContrasena()).isNotEmpty();
+        assertThat(actualizado.getTelefono()).isEqualTo("999111222");
+
+        // 4. Intentar registrarse de nuevo con el mismo DNI ya activado debe fallar
+        var dupResponse = authController.registrarCliente(regDto);
+        assertThat(dupResponse.getStatusCode().value()).isEqualTo(400);
+
+        // 5. Intentar registrar a otro usuario con el mismo correo debe fallar
+        ClienteRegisterDTO otroDto = ClienteRegisterDTO.builder()
+                .nombre("Otro Cliente")
+                .numeroDocumento("11223344")
+                .idTipoDocumento(tipoDocumento.getId())
+                .direccion("Calle Otra 12")
+                .telefono("999444333")
+                .correo("jose@web.com") // Mismo correo
+                .contrasena("otherpass123")
+                .build();
+        var mailDupResponse = authController.registrarCliente(otroDto);
+        assertThat(mailDupResponse.getStatusCode().value()).isEqualTo(400);
+    }
 }
+
