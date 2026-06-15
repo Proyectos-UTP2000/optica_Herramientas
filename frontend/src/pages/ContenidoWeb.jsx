@@ -707,7 +707,12 @@ const ContenidoWeb = () => {
 
         <button
           type="submit"
-          style={styles.btnGuardar}
+          style={{
+            ...styles.btnGuardar,
+            opacity: (guardando || !tieneCambios) ? 0.55 : 1,
+            cursor: (guardando || !tieneCambios) ? "not-allowed" : "pointer",
+            boxShadow: (guardando || !tieneCambios) ? "none" : styles.btnGuardar.boxShadow,
+          }}
           disabled={guardando || !tieneCambios}
         >
           <SaveFill /> {guardando ? "Guardando..." : "Guardar Cambios"}
