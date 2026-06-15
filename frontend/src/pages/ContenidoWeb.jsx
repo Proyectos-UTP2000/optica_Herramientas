@@ -40,7 +40,7 @@ const ContenidoWeb = () => {
 
   const logoInputRef = useRef();
   const carruselInputRef = useRef();
-  const originalConfigRef = useRef(null);
+  const [originalConfig, setOriginalConfig] = useState(null);
 
   const cargarConfiguracion = async () => {
     try {
@@ -69,7 +69,7 @@ const ContenidoWeb = () => {
       // Sort by order
       listImgs.sort((a, b) => a.orden - b.orden);
       setImagenes(listImgs);
-      originalConfigRef.current = {
+      setOriginalConfig({
         telefonoContacto: data.telefonoContacto || "",
         correoContacto: data.correoContacto || "",
         direccion: data.direccion || "",
@@ -78,7 +78,7 @@ const ContenidoWeb = () => {
         enlaceInstagram: data.enlaceInstagram || "",
         enlaceTiktok: data.enlaceTiktok || "",
         imagenes: listImgs.map((img) => ({ ...img })),
-      };
+      });
     } catch (error) {
       console.error("Error al cargar configuración web:", error);
       Toast.fire({
@@ -108,8 +108,8 @@ const ContenidoWeb = () => {
   };
 
   const comprobarCambios = () => {
-    if (!originalConfigRef.current) return false;
-    const orig = originalConfigRef.current;
+    if (!originalConfig) return false;
+    const orig = originalConfig;
 
     if (telefonoContacto !== orig.telefonoContacto) return true;
     if (correoContacto !== orig.correoContacto) return true;
@@ -129,7 +129,7 @@ const ContenidoWeb = () => {
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      tieneCambios && currentLocation.pathname !== nextLocation.pathname
+      tieneCambios && currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const ContenidoWeb = () => {
         "¿Salir sin guardar cambios?",
         "Tienes cambios sin guardar en la configuración. Si sales, se perderán.",
         "Sí, salir",
-        "warning"
+        "warning",
       ).then((result) => {
         if (result.isConfirmed) {
           blocker.proceed();
@@ -705,7 +705,11 @@ const ContenidoWeb = () => {
           )}
         </div>
 
-        <button type="submit" style={styles.btnGuardar} disabled={guardando || !tieneCambios}>
+        <button
+          type="submit"
+          style={styles.btnGuardar}
+          disabled={guardando || !tieneCambios}
+        >
           <SaveFill /> {guardando ? "Guardando..." : "Guardar Cambios"}
         </button>
       </form>
