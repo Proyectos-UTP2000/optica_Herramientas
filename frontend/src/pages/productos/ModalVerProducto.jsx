@@ -2,7 +2,7 @@ import { ModalShell, SeccionLabel, Divider } from "../../components/ui/ModalShel
 import { Image, InfoCircle } from "react-bootstrap-icons";
 
 const ModalVerProducto = ({ producto, cerrarModal }) => {
-  const imagenUrl = producto?.rutasImagenes?.length > 0 ? producto.rutasImagenes[0] : null;
+  const imagenUrl = producto?.imagenes?.length > 0 ? producto.imagenes[0].rutaImagen : null;
 
   return (
     <ModalShell

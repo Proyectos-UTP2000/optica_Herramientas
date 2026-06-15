@@ -31,36 +31,22 @@ const ModalCrearProducto = ({ cerrarModal, recargarTabla }) => {
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState({});
 
-  const [visibleWeb, setVisibleWeb] = useState(false);
-  const [destacado, setDestacado] = useState(false);
-  const [slug, setSlug] = useState("");
-  const [descripcionWeb, setDescripcionWeb] = useState("");
-  const [etiquetasDisponibles, setEtiquetasDisponibles] = useState([]);
-  const [selectedEtiquetas, setSelectedEtiquetas] = useState([]);
-  const [orden, setOrden] = useState("0");
+  const [visibleWeb, setVisibleWeb] = useState(true);
 
   const hoyStr = new Date().toISOString().split("T")[0];
-
-  const handleToggleTag = (tagId) => {
-    setSelectedEtiquetas(prev =>
-      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
-    );
-  };
 
   useEffect(() => {
     const cargarDatosSoporte = async () => {
       const tokenInicial = localStorage.getItem("token");
       try {
-        const [resMarcas, resCategorias, resUnidades, resEtiquetas] = await Promise.all([
+        const [resMarcas, resCategorias, resUnidades] = await Promise.all([
           axios.get("/api/v1/marcas", { headers: { Authorization: `Bearer ${tokenInicial}` } }),
           axios.get("/api/v1/categorias", { headers: { Authorization: `Bearer ${tokenInicial}` } }),
           axios.get("/api/v1/unidades", { headers: { Authorization: `Bearer ${tokenInicial}` } }),
-          axios.get("/api/v1/etiquetas/activos", { headers: { Authorization: `Bearer ${tokenInicial}` } }),
         ]);
         setMarcas(resMarcas.data || []);
         setCategorias(resCategorias.data || []);
         setUnidades(resUnidades.data || []);
-        setEtiquetasDisponibles(resEtiquetas.data || []);
       } catch {
         Toast.fire({ icon: "error", title: "Error al cargar las listas de soporte" });
       }
@@ -145,11 +131,11 @@ const ModalCrearProducto = ({ cerrarModal, recargarTabla }) => {
       idUnidadCompra: parseInt(idUnidadCompra),
       factorConversion: parseInt(factorConversion) || 1,
       visibleWeb,
-      destacado,
-      slug: slug.trim() || null,
-      descripcionWeb: descripcionWeb.trim() || null,
-      idEtiquetas: selectedEtiquetas,
-      orden: parseInt(orden) || 0,
+      destacado: false,
+      slug: null,
+      descripcionWeb: null,
+      idEtiquetas: [],
+      orden: 0,
     };
 
     formData.append("producto", new Blob([JSON.stringify(productoData)], { type: "application/json" }));
@@ -369,75 +355,11 @@ const ModalCrearProducto = ({ cerrarModal, recargarTabla }) => {
       )}
 
       <Divider />
-      <SeccionLabel text="Información para Catálogo Web (B2C)" />
-      <div className="form-grid">
-        <div style={{ display: "flex", gap: "20px", alignItems: "center", height: "100%" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#1e293b" }}>
-            <input type="checkbox" checked={visibleWeb} onChange={(e) => setVisibleWeb(e.target.checked)} style={{ width: "17px", height: "17px" }} />
-            Visible en Web
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#1e293b" }}>
-            <input type="checkbox" checked={destacado} onChange={(e) => setDestacado(e.target.checked)} style={{ width: "17px", height: "17px" }} />
-            Producto Destacado
-          </label>
-        </div>
-        <div>
-          <label className="label-control">Enlace URL (Slug)</label>
-          <input className="input-control" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Autogenerado si está vacío" />
-        </div>
-        <div>
-          <label className="label-control">Orden de Visualización</label>
-          <input type="number" min="0" className="input-control" value={orden} onChange={(e) => setOrden(e.target.value)} />
-        </div>
-      </div>
-      <div style={{ marginTop: "10px" }}>
-        <label className="label-control">Seleccionar Etiquetas B2C</label>
-        <div style={{ 
-          display: "flex", 
-          gap: "8px", 
-          flexWrap: "wrap", 
-          border: "1px solid #cbd5e1", 
-          padding: "10px", 
-          borderRadius: "6px", 
-          maxHeight: "120px", 
-          overflowY: "auto", 
-          background: "#f8fafc" 
-        }}>
-          {etiquetasDisponibles.length === 0 ? (
-            <span style={{ fontSize: "12.5px", color: "#94a3b8", fontStyle: "italic" }}>No hay etiquetas disponibles</span>
-          ) : (
-            etiquetasDisponibles.map((tag) => {
-              const isChecked = selectedEtiquetas.includes(tag.id);
-              return (
-                <button
-                  key={tag.id}
-                  type="button"
-                  onClick={() => handleToggleTag(tag.id)}
-                  style={{
-                    padding: "4px 10px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    borderRadius: "20px",
-                    border: "1px solid",
-                    borderColor: isChecked ? "#3b82f6" : "#cbd5e1",
-                    background: isChecked ? "#eff6ff" : "#ffffff",
-                    color: isChecked ? "#2563eb" : "#475569",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    display: "inline-flex",
-                    alignItems: "center"
-                  }}
-                >
-                  {tag.nombre}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </div>
-      <div style={{ marginTop: "10px", marginBottom: "15px" }}>
-        <label className="label-control">Descripción Comercial para Web</label>
-        <textarea className="input-control" value={descripcionWeb} onChange={(e) => setDescripcionWeb(e.target.value)} placeholder="Descripción llamativa para el cliente final..." rows="2" style={{ resize: "vertical", width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+      <div style={{ marginTop: "15px", marginBottom: "15px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#1e293b" }}>
+          <input type="checkbox" checked={visibleWeb} onChange={(e) => setVisibleWeb(e.target.checked)} style={{ width: "17px", height: "17px" }} />
+          Visible en Web
+        </label>
       </div>
 
       <Divider />

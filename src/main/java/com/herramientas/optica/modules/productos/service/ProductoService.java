@@ -415,12 +415,19 @@ public class ProductoService {
     }
 
     private void procesarImagenes(Producto producto, List<MultipartFile> archivos, List<ProductoImagenRequestDTO> config) throws IOException {
-        if (config == null || config.isEmpty()) {
+        if (config == null) {
             if (archivos != null && !archivos.isEmpty()) {
                 List<ProductoImagen> existingImages = productoImagenRepository.findByProductoId(producto.getId());
-                if (!existingImages.isEmpty()) {
-                    for (ProductoImagen img : existingImages) {
-                        String publicId = extraerPublicId(img.getRutaImagen());
+                ProductoImagen principal = existingImages.stream()
+                        .filter(img -> img.getEsPrincipal() != null && img.getEsPrincipal())
+                        .findFirst()
+                        .orElse(existingImages.isEmpty() ? null : existingImages.get(0));
+
+                MultipartFile file = archivos.get(0);
+                if (file != null && !file.isEmpty()) {
+                    String url = cloudinaryService.subirImagen(file, producto.getCodigo());
+                    if (principal != null) {
+                        String publicId = extraerPublicId(principal.getRutaImagen());
                         if (publicId != null) {
                             try {
                                 cloudinaryService.eliminarImagen(publicId);
@@ -428,19 +435,15 @@ public class ProductoService {
                                 System.out.println("No se pudo eliminar de Cloudinary: " + e.getMessage());
                             }
                         }
-                    }
-                    productoImagenRepository.deleteByProductoId(producto.getId());
-                }
-
-                for (int i = 0; i < archivos.size(); i++) {
-                    MultipartFile file = archivos.get(i);
-                    if (file != null && !file.isEmpty()) {
-                        String url = cloudinaryService.subirImagen(file, producto.getCodigo());
+                        principal.setRutaImagen(url);
+                        principal.setEsPrincipal(true);
+                        productoImagenRepository.save(principal);
+                    } else {
                         ProductoImagen img = ProductoImagen.builder()
                                 .producto(producto)
                                 .rutaImagen(url)
-                                .esPrincipal(i == 0)
-                                .orden(i)
+                                .esPrincipal(true)
+                                .orden(0)
                                 .build();
                         productoImagenRepository.save(img);
                     }
