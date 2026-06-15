@@ -16,6 +16,8 @@ import Unidades from "./pages/Unidades";
 import Inventario from "./pages/Inventario";
 import Proveedores from "./pages/Proveedores";
 import Ventas from "./pages/Ventas";
+import Recetas from "./pages/Recetas";
+import OrdenesLaboratorio from "./pages/OrdenesLaboratorio";
 import ReporteDiarioCaja from "./pages/caja/ReporteDiarioCaja";
 import Compras from "./pages/Compras";
 import ReporteKardex from "./pages/reportes/ReporteKardex";
@@ -89,6 +91,8 @@ function App() {
           <Route path="inventario" element={<Inventario />} />
           <Route path="proveedores" element={<Proveedores />} />
           <Route path="ventas" element={<Ventas />} />
+          <Route path="recetas" element={<Recetas />} />
+          <Route path="ordenes-laboratorio" element={<OrdenesLaboratorio />} />
           <Route path="reportes/caja" element={<ReporteCajas />} />
           <Route path="reportes/caja-diaria" element={<Navigate to="/reportes/caja" replace />} />
           <Route path="reportes/kardex" element={<ReporteKardex />} />

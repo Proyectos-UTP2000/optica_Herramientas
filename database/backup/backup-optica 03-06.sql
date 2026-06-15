@@ -468,7 +468,7 @@ CREATE TABLE `flyway_schema_history` (
   `success` tinyint(1) NOT NULL,
   PRIMARY KEY (`installed_rank`),
   KEY `flyway_schema_history_s_idx` (`success`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,7 +585,7 @@ CREATE TABLE `inventario_saldo` (
   UNIQUE KEY `uk_inventario_saldo_producto` (`id_producto`),
   KEY `idx_inventario_saldo_stock_minimo` (`inv_stock_actual`,`inv_stock_minimo`),
   CONSTRAINT `fk_inventario_saldo_producto` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -651,7 +651,7 @@ CREATE TABLE `movimiento_caja` (
   KEY `idx_movimiento_caja_caja_fecha` (`id_caja`,`mov_fecha`),
   CONSTRAINT `FKci27ljtoe58xxjwwi67y2jml9` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id_empleado`),
   CONSTRAINT `FKhw08ftkmr79jqg9wsv7rrptqd` FOREIGN KEY (`id_caja`) REFERENCES `caja` (`id_caja`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -692,7 +692,7 @@ CREATE TABLE `movimiento_inventario` (
   KEY `idx_movimiento_inventario_referencia` (`mov_referencia_tipo`,`mov_referencia_id`),
   CONSTRAINT `fk_movimiento_inventario_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id_empleado`),
   CONSTRAINT `fk_movimiento_inventario_producto` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
