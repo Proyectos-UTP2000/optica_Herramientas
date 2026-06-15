@@ -59,6 +59,9 @@ const Ventas = () => {
     observaciones: "",
   });
 
+  const [cotizacionIdBusqueda, setCotizacionIdBusqueda] = useState("");
+  const [cotizacionImportada, setCotizacionImportada] = useState(null);
+
   const [recetasCliente, setRecetasCliente] = useState([]);
   const [recetaSeleccionadaId, setRecetaSeleccionadaId] = useState("");
   const [modalRecetaRapida, setModalRecetaRapida] = useState(false);
@@ -386,6 +389,113 @@ const Ventas = () => {
     }
   };
 
+  const handleImportarCotizacion = async () => {
+    const quoteId = cotizacionIdBusqueda.trim();
+    if (!quoteId) {
+      Toast.fire({ icon: "warning", title: "Ingrese un ID de cotización" });
+      return;
+    }
+
+    try {
+      const res = await api.get(`/api/v1/cotizaciones/${quoteId}`);
+      const coti = res.data;
+      if (!coti) {
+        Toast.fire({ icon: "error", title: "Cotización no encontrada" });
+        return;
+      }
+
+      if (coti.estado && coti.estado.toUpperCase() === "PROCESADO") {
+        Toast.fire({ icon: "warning", title: "Esta cotización ya fue procesada" });
+        return;
+      }
+
+      if (coti.estado && coti.estado.toUpperCase() === "ANULADO") {
+        Toast.fire({ icon: "warning", title: "Esta cotización está anulada" });
+        return;
+      }
+
+      // 1. Buscar al cliente en la lista local. Si no está, intentamos recargar clientes
+      let clienteEncontrado = clientes.find(c => c.numeroDocumento === coti.clienteDocumento);
+      if (!clienteEncontrado && coti.clienteDocumento) {
+        const clientesRes = await api.get("/api/v1/clientes");
+        const listClientes = (clientesRes.data || []).filter(c => c.estado === 1);
+        setClientes(listClientes);
+        clienteEncontrado = listClientes.find(c => c.numeroDocumento === coti.clienteDocumento);
+      }
+
+      if (clienteEncontrado) {
+        seleccionarCliente(clienteEncontrado);
+      } else {
+        Toast.fire({
+          icon: "info",
+          title: `Cotización cargada, pero el cliente (Doc: ${coti.clienteDocumento || "Sin Doc"}) no está registrado en la base de datos principal.`,
+        });
+      }
+
+      // 2. Cargar los detalles de la cotización al carrito (carrito de ventas)
+      const nuevosDetalles = [];
+      const advertenciasStock = [];
+
+      for (const det of coti.detalles) {
+        const prod = productos.find(p => p.id === det.productoId);
+        if (!prod) {
+          advertenciasStock.push(`Producto #${det.productoId} (${det.productoNombre}) no existe en el catálogo.`);
+          continue;
+        }
+
+        const stockDisponible = Number(prod.stock || 0);
+        if (stockDisponible <= 0) {
+          advertenciasStock.push(`Producto "${prod.nombre}" no cuenta con stock disponible.`);
+          continue;
+        }
+
+        const cantidadAAgregar = Math.min(det.cantidad, stockDisponible);
+        if (cantidadAAgregar < det.cantidad) {
+          advertenciasStock.push(`Producto "${prod.nombre}" solo tiene ${stockDisponible} unidades disponibles.`);
+        }
+
+        nuevosDetalles.push({
+          productoId: prod.id,
+          productoNombre: prod.nombre,
+          productoCodigo: prod.codigo,
+          cantidad: cantidadAAgregar,
+          precioUnitario: Number(prod.precio || 0),
+          descuento: 0,
+          stockDisponible: stockDisponible,
+        });
+      }
+
+      if (nuevosDetalles.length > 0) {
+        setDetalles(nuevosDetalles);
+        setCotizacionImportada(coti);
+
+        if (advertenciasStock.length > 0) {
+          Toast.fire({
+            icon: "warning",
+            title: `Cotización importada parcialmente. Advertencias:\n${advertenciasStock.join("\n")}`,
+          });
+        } else {
+          Toast.fire({
+            icon: "success",
+            title: `Cotización #${coti.id} importada correctamente.`,
+          });
+        }
+      } else {
+        Toast.fire({
+          icon: "error",
+          title: "No se pudo agregar ningún producto al carrito (sin stock o descontinuados).",
+        });
+      }
+
+    } catch (err) {
+      console.error("Error al importar cotización:", err);
+      Toast.fire({
+        icon: "error",
+        title: "Error al consultar la cotización por ID",
+      });
+    }
+  };
+
   const subtotal = useMemo(
     () =>
       detalles.reduce(
@@ -435,6 +545,7 @@ const Ventas = () => {
         descuento: descuentoGlobal,
         observaciones: formulario.observaciones || null,
         recetaId: recetaSeleccionadaId ? Number(recetaSeleccionadaId) : null,
+        cotizacionId: cotizacionImportada ? Number(cotizacionImportada.id) : null,
         detalles: detalles.map((detalle) => ({
           productoId: detalle.productoId,
           cantidad: detalle.cantidad,
@@ -453,6 +564,8 @@ const Ventas = () => {
       }));
       setBusquedaCliente("");
       setRecetaSeleccionadaId("");
+      setCotizacionIdBusqueda("");
+      setCotizacionImportada(null);
       cargarDatos();
     } catch (error) {
       console.error("Error al emitir venta:", error);
@@ -647,6 +760,46 @@ const Ventas = () => {
             <h3 style={{ margin: "0 0 14px", fontSize: 16, color: "#0f172a" }}>
               Nueva venta
             </h3>
+
+            {/* Importar Cotización Web */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              background: "#eff6ff",
+              border: "1px dashed #3b82f6",
+              borderRadius: 8,
+              padding: "12px 16px",
+              marginBottom: 18,
+              flexWrap: "wrap"
+            }}>
+              <span style={{ fontSize: 13, fontWeight: "600", color: "#1d4ed8" }}>
+                ¿Cerrar cotización web?
+              </span>
+              <div style={{ display: "flex", gap: 8, flex: 1, minWidth: 250, maxWidth: 350 }}>
+                <input
+                  type="text"
+                  className="input-control"
+                  style={{ height: 34, padding: "4px 10px", fontSize: 13, margin: 0 }}
+                  placeholder="Ingrese ID de cotización..."
+                  value={cotizacionIdBusqueda}
+                  onChange={(e) => setCotizacionIdBusqueda(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn-primary"
+                  style={{ height: 34, padding: "0 14px", fontSize: 12, display: "flex", alignItems: "center", gap: 6, margin: 0 }}
+                  onClick={handleImportarCotizacion}
+                >
+                  <ArrowRepeat size={14} /> Importar
+                </button>
+              </div>
+              {cotizacionImportada && (
+                <span style={{ fontSize: 12, fontWeight: "600", color: "#166534", marginLeft: "auto" }}>
+                  Importada: #{cotizacionImportada.id} ({formatoMoneda(cotizacionImportada.totalEstimado)})
+                </span>
+              )}
+            </div>
 
             <div className="form-grid">
               <div>
