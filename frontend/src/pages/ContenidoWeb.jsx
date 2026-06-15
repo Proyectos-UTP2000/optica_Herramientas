@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { useBlocker } from "react-router-dom";
 import api from "../api/axiosConfig";
-import { Toast } from "../utils/alerts";
+import { Toast, confirmarAccion } from "../utils/alerts";
 import {
   Globe,
   TelephoneFill,
@@ -125,6 +126,42 @@ const ContenidoWeb = () => {
   };
 
   const tieneCambios = comprobarCambios();
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      tieneCambios && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      confirmarAccion(
+        "¿Salir sin guardar cambios?",
+        "Tienes cambios sin guardar en la configuración. Si sales, se perderán.",
+        "Sí, salir",
+        "warning"
+      ).then((result) => {
+        if (result.isConfirmed) {
+          blocker.proceed();
+        } else {
+          blocker.reset();
+        }
+      });
+    }
+  }, [blocker.state]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (tieneCambios) {
+        e.preventDefault();
+        e.returnValue = "Tienes cambios sin guardar. ¿Deseas salir?";
+        return e.returnValue;
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [tieneCambios]);
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
