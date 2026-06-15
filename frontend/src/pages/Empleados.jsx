@@ -5,7 +5,6 @@ import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 import ModalCrearEmpleado from "./empleados/ModalCrearEmpleado";
 import ModalEditarEmpleado from "./empleados/ModalEditarEmpleado";
 import ModalVerEmpleado from "./empleados/ModalVerEmpleado";
-import ToggleEstado from "../components/ui/ToggleEstado";
 
 const Empleados = () => {
   const [empleados, setEmpleados] = useState([]);

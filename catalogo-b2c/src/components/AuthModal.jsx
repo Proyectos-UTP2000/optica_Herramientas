@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 import { Toast } from "../utils/alerts";
 import { X, Eye, EyeSlash } from "react-bootstrap-icons";
@@ -12,7 +12,7 @@ const AuthModal = () => {
   // Form states
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
-  
+
   // Register additional states
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
@@ -55,13 +55,13 @@ const AuthModal = () => {
         // Login flow
         const response = await api.post("/api/v1/auth/cliente/login", {
           username: correo,
-          password: contrasena
+          password: contrasena,
         });
         const { token, username, empleadoId } = response.data;
         localStorage.setItem("token_cliente", token);
         localStorage.setItem("username_cliente", username);
         localStorage.setItem("id_cliente", empleadoId);
-        
+
         Toast.fire({ icon: "success", title: "Sesión iniciada con éxito" });
         window.dispatchEvent(new Event("cliente-session-changed"));
         handleClose();
@@ -76,17 +76,25 @@ const AuthModal = () => {
           direccion,
           telefono,
           correo,
-          contrasena
+          contrasena,
         };
         await api.post("/api/v1/auth/cliente/register", payload);
-        Toast.fire({ icon: "success", title: "Registro exitoso. Ahora puedes iniciar sesión." });
+        Toast.fire({
+          icon: "success",
+          title: "Registro exitoso. Ahora puedes iniciar sesión.",
+        });
         setIsLogin(true);
         setContrasena("");
       }
     } catch (error) {
       console.error("Auth error:", error);
-      const errMsg = error.response?.data || "Ocurrió un error inesperado. Inténtelo de nuevo.";
-      Toast.fire({ icon: "error", title: typeof errMsg === "string" ? errMsg : "Error en la operación" });
+      const errMsg =
+        error.response?.data ||
+        "Ocurrió un error inesperado. Inténtelo de nuevo.";
+      Toast.fire({
+        icon: "error",
+        title: typeof errMsg === "string" ? errMsg : "Error en la operación",
+      });
     } finally {
       setLoading(false);
     }
@@ -104,7 +112,7 @@ const AuthModal = () => {
       alignItems: "center",
       zIndex: 1000,
       backdropFilter: "blur(4px)",
-      padding: "20px"
+      padding: "20px",
     },
     modal: {
       backgroundColor: "#ffffff",
@@ -113,21 +121,22 @@ const AuthModal = () => {
       maxHeight: "90vh",
       display: "flex",
       flexDirection: "column",
-      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-      overflow: "hidden"
+      boxShadow:
+        "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+      overflow: "hidden",
     },
     header: {
       padding: "20px 24px",
       borderBottom: "1px solid #f1f5f9",
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "center"
+      alignItems: "center",
     },
     title: {
       fontSize: "20px",
       fontWeight: "700",
       color: "#0f172a",
-      margin: 0
+      margin: 0,
     },
     closeBtn: {
       background: "none",
@@ -136,24 +145,24 @@ const AuthModal = () => {
       cursor: "pointer",
       padding: "4px",
       display: "flex",
-      alignItems: "center"
+      alignItems: "center",
     },
     body: {
       padding: "24px",
       overflowY: "auto",
       display: "flex",
       flexDirection: "column",
-      gap: "16px"
+      gap: "16px",
     },
     inputGroup: {
       display: "flex",
       flexDirection: "column",
-      gap: "6px"
+      gap: "6px",
     },
     label: {
       fontSize: "13px",
       fontWeight: "600",
-      color: "#475569"
+      color: "#475569",
     },
     input: {
       padding: "10px 12px",
@@ -162,15 +171,15 @@ const AuthModal = () => {
       fontSize: "14px",
       outline: "none",
       transition: "border-color 150ms",
-      width: "100%"
+      width: "100%",
     },
     row: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
-      gap: "12px"
+      gap: "12px",
     },
     passwordWrapper: {
-      position: "relative"
+      position: "relative",
     },
     eyeIcon: {
       position: "absolute",
@@ -178,7 +187,7 @@ const AuthModal = () => {
       top: "50%",
       transform: "translateY(-50%)",
       color: "#64748b",
-      cursor: "pointer"
+      cursor: "pointer",
     },
     submitBtn: {
       backgroundColor: "#2563eb",
@@ -193,27 +202,29 @@ const AuthModal = () => {
       justifyContent: "center",
       alignItems: "center",
       transition: "background-color 150ms",
-      marginTop: "10px"
+      marginTop: "10px",
     },
     toggleText: {
       textAlign: "center",
       fontSize: "13px",
       color: "#64748b",
-      marginTop: "10px"
+      marginTop: "10px",
     },
     toggleLink: {
       color: "#2563eb",
       fontWeight: "600",
       textDecoration: "underline",
-      cursor: "pointer"
-    }
+      cursor: "pointer",
+    },
   };
 
   return (
     <div style={styles.overlay} onMouseDown={handleClose}>
       <div style={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h3 style={styles.title}>{isLogin ? "Iniciar Sesión" : "Crear una Cuenta"}</h3>
+          <h3 style={styles.title}>
+            {isLogin ? "Iniciar Sesión" : "Crear una Cuenta"}
+          </h3>
           <button style={styles.closeBtn} onClick={handleClose}>
             <X size={24} />
           </button>
@@ -278,7 +289,9 @@ const AuthModal = () => {
                     placeholder="Número de Documento"
                     style={styles.input}
                     value={numeroDocumento}
-                    onChange={(e) => setNumeroDocumento(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) =>
+                      setNumeroDocumento(e.target.value.replace(/\D/g, ""))
+                    }
                     required
                     maxLength={idTipoDocumento === "1" ? 8 : 11}
                   />
@@ -304,7 +317,9 @@ const AuthModal = () => {
                   placeholder="Ej: 999999999"
                   style={styles.input}
                   value={telefono}
-                  onChange={(e) => setTelefono(e.target.value.replace(/[^\d+]/g, ""))}
+                  onChange={(e) =>
+                    setTelefono(e.target.value.replace(/[^\d+]/g, ""))
+                  }
                   required
                 />
               </div>
@@ -330,14 +345,19 @@ const AuthModal = () => {
             <div style={styles.passwordWrapper}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder={isLogin ? "Ingresa tu contraseña" : "Mínimo 6 caracteres"}
+                placeholder={
+                  isLogin ? "Ingresa tu contraseña" : "Mínimo 6 caracteres"
+                }
                 style={{ ...styles.input, paddingRight: "40px" }}
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
                 required
                 minLength={isLogin ? undefined : 6}
               />
-              <div style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>
+              <div
+                style={styles.eyeIcon}
+                onClick={() => setShowPassword(!showPassword)}
+              >
                 {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
               </div>
             </div>

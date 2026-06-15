@@ -12,7 +12,6 @@ import {
   Images,
   InfoCircle,
   PlusCircle,
-  Trash,
   ArrowUp,
   ArrowDown,
   StarFill,
@@ -397,8 +396,8 @@ const ModalEditarWeb = ({ producto, cerrarModal, recargarTabla }) => {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\-\-+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
       .replace(/^-+/, "")
       .replace(/-+$/, "");
   };

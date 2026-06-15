@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import api from "../../api/axiosConfig";
 import { Search, XCircleFill, Save2Fill } from "react-bootstrap-icons";
 import { Toast } from "../../utils/alerts";

@@ -80,8 +80,8 @@ const Perfiles = () => {
   const [opciones, setOpciones] = useState([]); // Flat list from API
   const [arbolOpciones, setArbolOpciones] = useState([]); // Hierarchical list
   const [busqueda, setBusqueda] = useState("");
-  const [registrosPorPagina, setRegistrosPorPagina] = useState(10);
-  const [paginaActual, setPaginaActual] = useState(1);
+  const [registrosPorPagina] = useState(10);
+  const [paginaActual] = useState(1);
   const [loading, setLoading] = useState(true);
 
   // Modales y Formularios
@@ -105,7 +105,7 @@ const Perfiles = () => {
       setPerfiles(resPerfiles.data);
       setOpciones(resOpciones.data);
       setArbolOpciones(construirArbol(resOpciones.data));
-    } catch (err) {
+    } catch {
       mostrarAlerta("Error", "No se pudieron cargar los datos", "error");
     } finally {
       setLoading(false);

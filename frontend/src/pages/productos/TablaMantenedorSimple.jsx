@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
   PlusLg,
@@ -19,26 +19,39 @@ const TablaMantenedorSimple = ({ titulo, endpoint }) => {
   const [itemSeleccionado, setItemSeleccionado] = useState(null);
 
   const token = localStorage.getItem("token");
-  const headers = { Authorization: `Bearer ${token}` };
-
-  const listarDatos = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`/api/v1/${endpoint}`, { headers });
-      setItems(res.data || []);
-    } catch (err) {
-      Toast.fire({
-        icon: "error",
-        title: `Error al cargar ${titulo.toLowerCase()}`,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const headers = useMemo(
+    () => ({ Authorization: `Bearer ${token}` }),
+    [token],
+  );
 
   useEffect(() => {
+    let activo = true;
+
+    const listarDatos = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`/api/v1/${endpoint}`, { headers });
+        if (activo) {
+          setItems(res.data || []);
+        }
+      } catch {
+        Toast.fire({
+          icon: "error",
+          title: `Error al cargar ${titulo.toLowerCase()}`,
+        });
+      } finally {
+        if (activo) {
+          setLoading(false);
+        }
+      }
+    };
+
     listarDatos();
-  }, [endpoint]);
+
+    return () => {
+      activo = false;
+    };
+  }, [endpoint, headers, titulo]);
 
   const handleCambiarEstado = async (id, estadoActual) => {
     const accion = estadoActual === 1 ? "desactivar" : "activar";
@@ -57,8 +70,9 @@ const TablaMantenedorSimple = ({ titulo, endpoint }) => {
           { headers },
         );
         Toast.fire({ icon: "success", title: "Estado actualizado" });
-        listarDatos();
-      } catch (err) {
+        const res = await axios.get(`/api/v1/${endpoint}`, { headers });
+        setItems(res.data || []);
+      } catch {
         mostrarAlerta("Error", "No se pudo cambiar el estado", "error");
       }
     }
@@ -76,8 +90,9 @@ const TablaMantenedorSimple = ({ titulo, endpoint }) => {
       try {
         await axios.delete(`/api/v1/${endpoint}/${id}`, { headers });
         Toast.fire({ icon: "success", title: "Eliminado correctamente" });
-        listarDatos();
-      } catch (err) {
+        const res = await axios.get(`/api/v1/${endpoint}`, { headers });
+        setItems(res.data || []);
+      } catch {
         mostrarAlerta("Error", "No se pudo eliminar", "error");
       }
     }
@@ -207,7 +222,13 @@ const TablaMantenedorSimple = ({ titulo, endpoint }) => {
           endpoint={endpoint}
           item={itemSeleccionado}
           cerrarModal={() => setShowModal(false)}
-          recargar={listarDatos}
+          recargar={() => {
+            const refrescar = async () => {
+              const res = await axios.get(`/api/v1/${endpoint}`, { headers });
+              setItems(res.data || []);
+            };
+            refrescar();
+          }}
         />
       )}
     </div>

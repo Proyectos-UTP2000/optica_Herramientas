@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Toast, mostrarAlerta } from "../../utils/alerts";
 import {
@@ -13,30 +13,21 @@ const ModalEditarEmpleado = ({
   recargarTabla,
   perfiles,
 }) => {
-  const [correo, setCorreo] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [direccion, setDireccion] = useState("");
-  const [idPerfil, setIdPerfil] = useState("");
+  const [correo, setCorreo] = useState(() => empleado?.correo || "");
+  const [telefono, setTelefono] = useState(() => empleado?.telefono || "");
+  const [direccion, setDireccion] = useState(() => empleado?.direccion || "");
+  const [idPerfil, setIdPerfil] = useState(() => {
+    const perfilEncontrado = perfiles.find(
+      (p) => p.nombre === empleado?.perfilNombre,
+    );
+    return perfilEncontrado?.id || "";
+  });
 
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState({});
 
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
-
-  // Cargar los datos del empleado seleccionado al abrir el modal
-  useEffect(() => {
-    if (empleado) {
-      setCorreo(empleado.correo || "");
-      setTelefono(empleado.telefono || "");
-      setDireccion(empleado.direccion || "");
-
-      const perfilEncontrado = perfiles.find(
-        (p) => p.nombre === empleado.perfilNombre,
-      );
-      if (perfilEncontrado) setIdPerfil(perfilEncontrado.id);
-    }
-  }, [empleado, perfiles]);
 
   const validarFormulario = () => {
     const nuevosErrores = {};

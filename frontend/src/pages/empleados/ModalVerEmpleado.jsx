@@ -4,40 +4,39 @@ import {
   Divider,
 } from "../../components/ui/ModalShell";
 
-const ModalVerEmpleado = ({ empleado, cerrarModal }) => {
-  // Helper para mostrar un dato o un guion si está vacío
-  const MostrarDato = ({ label, valor }) => (
-    <div
+const MostrarDato = ({ label, valor }) => (
+  <div
+    style={{
+      padding: "8px 0",
+      borderBottom: "1px solid #f8fafc",
+      display: "flex",
+      justifyContent: "space-between",
+    }}
+  >
+    <span
       style={{
-        padding: "8px 0",
-        borderBottom: "1px solid #f8fafc",
-        display: "flex",
-        justifyContent: "space-between",
+        fontSize: "12px",
+        color: "var(--text-muted)",
+        fontWeight: "600",
       }}
     >
-      <span
-        style={{
-          fontSize: "12px",
-          color: "var(--text-muted)",
-          fontWeight: "600",
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontSize: "13px",
-          color: "var(--text-main)",
-          fontWeight: "500",
-          textAlign: "right",
-          maxWidth: "60%",
-        }}
-      >
-        {valor || "—"}
-      </span>
-    </div>
-  );
+      {label}
+    </span>
+    <span
+      style={{
+        fontSize: "13px",
+        color: "var(--text-main)",
+        fontWeight: "500",
+        textAlign: "right",
+        maxWidth: "60%",
+      }}
+    >
+      {valor || "—"}
+    </span>
+  </div>
+);
 
+const ModalVerEmpleado = ({ empleado, cerrarModal }) => {
   return (
     <ModalShell
       titulo="Ficha Técnica del Empleado"

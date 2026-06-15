@@ -51,8 +51,6 @@ const ModalHistorialInventario = ({ producto, cerrarModal }) => {
 
     if (idProducto) {
       cargarHistorial();
-    } else {
-      setCargando(false);
     }
   }, [idProducto]);
 

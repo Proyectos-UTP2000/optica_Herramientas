@@ -1,163 +1,169 @@
 /* Reset default boilerplate constraints to allow full-width layout */
-html, body {
-  margin: 0;
-  padding: 0;
-  background-color: #f8fafc;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: #334155;
-  min-height: 100vh;
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f8fafc;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+        Arial, sans-serif;
+    color: #334155;
+    min-height: 100vh;
 }
 
 #root {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  text-align: left !important;
-  border-inline: none !important;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    text-align: left !important;
+    border-inline: none !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+    background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+    background: #94a3b8;
 }
 
 /* SweetAlert2: presentación profesional para confirmaciones críticas */
 .swal-pro-card {
-  border-radius: 20px !important;
-  padding: 0 !important;
-  width: min(440px, calc(100vw - 32px)) !important;
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22) !important;
-  overflow: hidden !important;
-  font-family: inherit;
+    border-radius: 20px !important;
+    padding: 0 !important;
+    width: min(440px, calc(100vw - 32px)) !important;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22) !important;
+    overflow: hidden !important;
+    font-family: inherit;
 }
 
 .swal-pro-content {
-  padding: 28px 30px 8px;
-  text-align: center;
+    padding: 28px 30px 8px;
+    text-align: center;
 }
 
 .swal-pro-icon {
-  width: 58px;
-  height: 58px;
-  border: 1px solid;
-  border-radius: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  margin-bottom: 14px;
+    width: 58px;
+    height: 58px;
+    border: 1px solid;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 14px;
 }
 
 .swal-pro-kicker {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
 }
 
 .swal-pro-title {
-  color: #0f172a;
-  font-size: 21px;
-  line-height: 1.25;
-  font-weight: 800;
-  margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 21px;
+    line-height: 1.25;
+    font-weight: 800;
+    margin: 0 0 10px;
 }
 
 .swal-pro-text {
-  color: #475569;
-  font-size: 14px;
-  line-height: 1.55;
-  margin: 0;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
 }
 
 .swal-pro-actions {
-  width: 100%;
-  padding: 18px 24px 24px !important;
-  gap: 10px;
-  display: flex !important;
-  justify-content: center;
+    width: 100%;
+    padding: 18px 24px 24px !important;
+    gap: 10px;
+    display: flex !important;
+    justify-content: center;
 }
 
 .swal-pro-confirm,
 .swal-pro-cancel {
-  border: 0;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13.5px;
-  font-weight: 800;
-  min-width: 132px;
-  padding: 11px 18px;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 800;
+    min-width: 132px;
+    padding: 11px 18px;
+    transition:
+        transform 0.16s ease,
+        box-shadow 0.16s ease,
+        background 0.16s ease;
 }
 
 .swal-pro-confirm {
-  background: #2563eb;
-  color: #fff;
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+    background: #2563eb;
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
 }
 
 .swal-pro-confirm--danger {
-  background: #dc2626;
-  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.25);
+    background: #dc2626;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, 0.25);
 }
 
 .swal-pro-cancel {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
 }
 
 .swal-pro-confirm:hover,
 .swal-pro-cancel:hover {
-  transform: translateY(-1px);
+    transform: translateY(-1px);
 }
 
 .swal-pro-card .swal2-radio,
 .swal-pro-card .swal2-select {
-  width: calc(100% - 48px);
-  margin: 14px auto 0;
-  border-radius: 12px;
-  color: #334155;
+    width: calc(100% - 48px);
+    margin: 14px auto 0;
+    border-radius: 12px;
+    color: #334155;
 }
 
 .swal-pro-card .swal2-radio {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 12px 14px;
-  align-items: flex-start;
-  gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 12px 14px;
+    align-items: flex-start;
+    gap: 10px;
 }
 
 .swal-pro-card .swal2-radio label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #334155;
-  margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin: 5px 0;
 }
 
 .swal-pro-card .swal2-select {
-  border: 1px solid #cbd5e1;
-  padding: 10px 12px;
-  font-size: 14px;
+    border: 1px solid #cbd5e1;
+    padding: 10px 12px;
+    font-size: 14px;
 }

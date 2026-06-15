@@ -232,20 +232,6 @@ const Marcas = () => {
   const inicio = (paginaActual - 1) * registrosPorPagina;
   const paginados = filtradas.slice(inicio, inicio + registrosPorPagina);
 
-  const badgeEstado = (estado) => {
-    if (estado === 1) return <span className="badge badge-active">Activo</span>;
-    if (estado === 2)
-      return (
-        <span
-          className="badge badge-inactive"
-          style={{ background: "#fef3c7", color: "#92400e" }}
-        >
-          En Desuso
-        </span>
-      );
-    return <span className="badge badge-inactive">Inactivo</span>;
-  };
-
   return (
     <div>
       <div

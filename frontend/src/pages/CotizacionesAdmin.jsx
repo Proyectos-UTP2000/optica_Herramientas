@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 import { Toast } from "../utils/alerts";
 import {
@@ -6,11 +6,9 @@ import {
   Search,
   Eye,
   Whatsapp,
-  CheckCircleFill,
-  XCircleFill,
   CalendarDate,
   Person,
-  Cash,
+  TelephoneFill,
   ChatLeftTextFill,
 } from "react-bootstrap-icons";
 

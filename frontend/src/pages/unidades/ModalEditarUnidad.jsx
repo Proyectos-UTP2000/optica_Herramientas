@@ -1,17 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Toast, mostrarAlerta } from "../../utils/alerts";
 
 const ModalEditarUnidad = ({ unidad, cerrarModal, recargarTabla }) => {
-  const [nombre, setNombre] = useState("");
+  const [nombre, setNombre] = useState(() => unidad?.nombre || "");
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
-
-  useEffect(() => {
-    if (unidad) setNombre(unidad.nombre || "");
-  }, [unidad]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

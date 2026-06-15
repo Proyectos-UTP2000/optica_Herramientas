@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowRepeat, Eye, Receipt, Search } from "react-bootstrap-icons";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Eye, Receipt, Search } from "react-bootstrap-icons";
 import {
   listarEmpleadosReporte,
   listarProductosReporte,
@@ -52,7 +52,7 @@ const ReporteVentas = () => {
       .slice(0, 8);
   }, [productoTexto, productos]);
 
-  const cargarReporte = async () => {
+  const cargarReporte = useCallback(async () => {
     if (hasta < desde) {
       Toast.fire({
         icon: "warning",
@@ -81,7 +81,7 @@ const ReporteVentas = () => {
     } finally {
       setCargando(false);
     }
-  };
+  }, [desde, hasta, empleadoId, texto, productoTexto, numeroVenta, medioPago]);
 
   const verDetalle = async (id) => {
     try {
@@ -113,7 +113,7 @@ const ReporteVentas = () => {
       cargarReporte();
     }, 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [cargarReporte]);
 
   const ventas = reporte?.ventas || [];
 

@@ -1,34 +1,31 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import api from "../../api/axiosConfig";
 import { XCircleFill, Save2Fill } from "react-bootstrap-icons";
 import { Toast } from "../../utils/alerts";
 
 const ModalEditarProveedor = ({ show, onClose, proveedor, onRefresh }) => {
   const [errores, setErrores] = useState({});
-  const [formulario, setFormulario] = useState({
-    idTipoDocumento: "1",
-    numeroDocumento: "",
-    razonSocial: "",
-    nombreComercial: "",
-    direccion: "",
-    telefono: "",
-    correo: "",
-  });
-
-  useEffect(() => {
-    if (proveedor) {
-      setFormulario({
-        idTipoDocumento: proveedor.idTipoDocumento?.toString() || "1",
-        numeroDocumento: proveedor.numeroDocumento || "",
-        razonSocial: proveedor.razonSocial || "",
-        nombreComercial: proveedor.nombreComercial || "",
-        direccion: proveedor.direccion || "",
-        telefono: proveedor.telefono || "",
-        correo: proveedor.correo || "",
-      });
-      setErrores({});
-    }
-  }, [proveedor]);
+  const [formulario, setFormulario] = useState(() =>
+    proveedor
+      ? {
+          idTipoDocumento: proveedor.idTipoDocumento?.toString() || "1",
+          numeroDocumento: proveedor.numeroDocumento || "",
+          razonSocial: proveedor.razonSocial || "",
+          nombreComercial: proveedor.nombreComercial || "",
+          direccion: proveedor.direccion || "",
+          telefono: proveedor.telefono || "",
+          correo: proveedor.correo || "",
+        }
+      : {
+          idTipoDocumento: "1",
+          numeroDocumento: "",
+          razonSocial: "",
+          nombreComercial: "",
+          direccion: "",
+          telefono: "",
+          correo: "",
+        },
+  );
 
   if (!show) return null;
 

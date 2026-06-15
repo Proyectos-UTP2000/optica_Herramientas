@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { Toast, mostrarAlerta } from "../utils/alerts";
 import {
   getOrdenesLaboratorio,
   actualizarEstadoOrden,
 } from "../api/clinicaService";
-import { getRecetasPorCliente } from "../api/clinicaService";
 import { EyeFill } from "react-bootstrap-icons";
 
 const OrdenesLaboratorio = () => {
@@ -54,10 +54,6 @@ const OrdenesLaboratorio = () => {
     setMostrarModalVerMedidas(true);
     setLoadingMedida(true);
     try {
-      // Find the specific recipe detail
-      const res = await getRecetasPorCliente(1); // Wait, we can fetch by client or we can just fetch all and find, or let's use the individual recipe endpoint!
-      // Since we defined `GET /api/v1/recetas/{id}`:
-      const axios = require("axios");
       const token = localStorage.getItem("token");
       const r = await axios.get(`/api/v1/recetas/${orden.recetaId}`, {
         headers: { Authorization: `Bearer ${token}` },

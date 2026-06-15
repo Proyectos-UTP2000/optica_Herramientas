@@ -3,7 +3,6 @@ import axios from "axios";
 import { EyeFill, PencilSquare, Trash3 } from "react-bootstrap-icons";
 
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
-import ToggleEstado from "../components/ui/ToggleEstado";
 import ModalCrearCliente from "./clientes/ModalCrearCliente";
 import ModalEditarCliente from "./clientes/ModalEditarCliente";
 import ModalVerCliente from "./clientes/ModalVerCliente";
