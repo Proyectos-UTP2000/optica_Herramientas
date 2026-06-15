@@ -64,182 +64,53 @@ const PublicLayout = () => {
     navigate("/");
   };
 
-  const styles = {
-    layout: {
-      display: "flex",
-      flexDirection: "column",
-      minHeight: "100vh",
-      fontFamily: "'Segoe UI', Roboto, sans-serif",
-      backgroundColor: "#f8fafc",
-    },
-    topbar: {
-      backgroundColor: "#0f172a",
-      color: "#e2e8f0",
-      fontSize: "12px",
-      padding: "6px 24px",
-      display: "flex",
-      justifyContent: "space-between",
-      flexWrap: "wrap",
-      gap: "10px",
-    },
-    topbarItem: { display: "flex", alignItems: "center", gap: "6px" },
-    navbar: {
-      backgroundColor: "#ffffff",
-      borderBottom: "1px solid #e2e8f0",
-      padding: "14px 24px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      position: "sticky",
-      top: 0,
-      zIndex: 100,
-      boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-    },
-    logoContainer: {
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      textDecoration: "none",
-    },
-    logoImg: { height: "40px", width: "auto", objectFit: "contain" },
-    logoText: {
-      fontSize: "20px",
-      fontWeight: "700",
-      color: "#0f172a",
-      margin: 0,
-    },
-    navbarActions: { display: "flex", gap: "16px", alignItems: "center" },
-    socials: { display: "flex", gap: "12px", alignItems: "center" },
-    socialLink: {
-      color: "#475569",
-      transition: "color 150ms",
-      display: "flex",
-      alignItems: "center",
-    },
-    main: { flex: 1, display: "flex", flexDirection: "column" },
-    footer: {
-      backgroundColor: "#0f172a",
-      color: "#94a3b8",
-      padding: "40px 24px 20px",
-      marginTop: "auto",
-      borderTop: "1px solid #1e293b",
-      fontSize: "14px",
-    },
-    footerGrid: {
-      maxWidth: "1200px",
-      margin: "0 auto",
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-      gap: "30px",
-      marginBottom: "30px",
-    },
-    footerTitle: {
-      color: "#ffffff",
-      fontSize: "16px",
-      fontWeight: "600",
-      marginBottom: "16px",
-    },
-    footerText: { lineHeight: "1.6", margin: "0 0 10px 0" },
-    copyright: {
-      textAlign: "center",
-      borderTop: "1px solid #1e293b",
-      paddingTop: "20px",
-      fontSize: "12px",
-    },
-    userMenu: { position: "relative" },
-    userButton: {
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      border: "1px solid #cbd5e1",
-      borderRadius: "20px",
-      padding: "6px 12px",
-      backgroundColor: "#fff",
-      cursor: "pointer",
-      fontSize: "14px",
-      fontWeight: "600",
-      color: "#334155",
-    },
-    dropdown: {
-      position: "absolute",
-      top: "100%",
-      right: 0,
-      marginTop: "8px",
-      backgroundColor: "#fff",
-      border: "1px solid #e2e8f0",
-      borderRadius: "8px",
-      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-      display: menuOpen ? "block" : "none",
-      minWidth: "160px",
-      zIndex: 200,
-    },
-    dropdownLink: {
-      display: "block",
-      width: "100%",
-      textAlign: "left",
-      padding: "10px 16px",
-      border: "none",
-      background: "none",
-      color: "#334155",
-      textDecoration: "none",
-      fontSize: "14px",
-      cursor: "pointer",
-      transition: "background-color 100ms",
-    },
-    authLink: {
-      fontSize: "14px",
-      fontWeight: "600",
-      color: "#2563eb",
-      textDecoration: "none",
-      cursor: "pointer",
-    },
-  };
-
   return (
-    <div style={styles.layout}>
+    <div className="public-layout">
       {/* Topbar Informativa */}
-      <div style={styles.topbar}>
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+      <div className="public-topbar">
+        <div className="public-topbar-group">
           {config?.horarioAtencion && (
-            <div style={styles.topbarItem}>
-              <Clock size={13} /> {config.horarioAtencion}
+            <div className="public-topbar-item">
+              <Clock size={13} /> <span>{config.horarioAtencion}</span>
             </div>
           )}
           {config?.direccion && (
-            <div style={styles.topbarItem}>
-              <GeoAlt size={13} /> {config.direccion}
+            <div className="public-topbar-item">
+              <GeoAlt size={13} /> <span>{config.direccion}</span>
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: "20px" }}>
+        <div className="public-topbar-group">
           {config?.telefonoContacto && (
-            <div style={styles.topbarItem}>
-              <Telephone size={13} /> {config.telefonoContacto}
+            <div className="public-topbar-item">
+              <Telephone size={13} /> <span>{config.telefonoContacto}</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Navbar Principal */}
-      <header style={styles.navbar}>
-        <Link to="/" style={styles.logoContainer}>
+      <header className="public-navbar">
+        <Link to="/" className="public-navbar-brand">
           {config?.logoUrl ? (
-            <img src={config.logoUrl} alt="Logo" style={styles.logoImg} />
+            <img src={config.logoUrl} alt="Logo" className="public-logo-img" />
           ) : (
-            <Globe size={28} style={{ color: "#2563eb" }} />
+            <div className="public-logo-fallback">
+              <Globe size={28} />
+            </div>
           )}
-          <span style={styles.logoText}>Nuestra Óptica</span>
+          <span className="public-logo-text">Nuestra Óptica</span>
         </Link>
 
         {/* Acciones del Navbar (User + Socials) */}
-        <div style={styles.navbarActions}>
-          <div style={styles.socials}>
+        <div className="public-navbar-actions">
+          <div className="public-socials">
             {config?.enlaceFacebook && (
               <a
                 href={config.enlaceFacebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={styles.socialLink}
+                className="public-social-link"
                 title="Facebook"
               >
                 <Facebook size={18} />
@@ -250,7 +121,7 @@ const PublicLayout = () => {
                 href={config.enlaceInstagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={styles.socialLink}
+                className="public-social-link"
                 title="Instagram"
               >
                 <Instagram size={18} />
@@ -261,7 +132,7 @@ const PublicLayout = () => {
                 href={config.enlaceTiktok}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={styles.socialLink}
+                className="public-social-link"
                 title="Tiktok"
               >
                 <Tiktok size={18} />
@@ -269,105 +140,101 @@ const PublicLayout = () => {
             )}
           </div>
 
-          <div
-            style={{ width: "1px", height: "20px", backgroundColor: "#cbd5e1" }}
-          ></div>
+          <div className="public-divider"></div>
 
           {/* Menú de Sesión Cliente */}
           {usuario ? (
-            <div style={styles.userMenu}>
+            <div className="public-user-menu">
               <button
-                style={styles.userButton}
+                className="public-user-button"
                 onClick={() => setMenuOpen(!menuOpen)}
               >
-                <PersonCircle size={18} style={{ color: "#2563eb" }} />
+                <PersonCircle size={18} />
                 <span>{usuario.split("@")[0]}</span>
               </button>
-              <div
-                style={styles.dropdown}
-                onMouseLeave={() => setMenuOpen(false)}
-              >
-                <Link
-                  to="/mi-cuenta"
-                  style={styles.dropdownLink}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Mi Perfil / Pedidos
-                </Link>
+              {menuOpen && (
                 <div
-                  style={{ height: "1px", backgroundColor: "#e2e8f0" }}
-                ></div>
-                <button style={styles.dropdownLink} onClick={handleLogout}>
-                  <BoxArrowRight size={14} style={{ marginRight: "6px" }} />
-                  Cerrar Sesión
-                </button>
-              </div>
+                  className="public-user-dropdown"
+                  onMouseLeave={() => setMenuOpen(false)}
+                >
+                  <Link
+                    to="/mi-cuenta"
+                    className="public-dropdown-link"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Mi Perfil / Pedidos
+                  </Link>
+                  <div className="public-dropdown-divider"></div>
+                  <button
+                    className="public-dropdown-link"
+                    onClick={handleLogout}
+                  >
+                    <BoxArrowRight size={14} />
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <button
-                onClick={() =>
-                  window.dispatchEvent(new CustomEvent("open-login-modal"))
-                }
-                style={{
-                  ...styles.dropdownLink,
-                  color: "#2563eb",
-                  fontWeight: "600",
-                  padding: "6px 12px",
-                }}
-              >
-                Iniciar Sesión
-              </button>
-            </div>
+            <button
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("open-login-modal"))
+              }
+              className="public-login-btn"
+            >
+              Iniciar Sesión
+            </button>
           )}
         </div>
       </header>
 
       {/* Contenido de la Página */}
-      <main style={styles.main}>
+      <main className="public-main-content">
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer style={styles.footer}>
-        <div style={styles.footerGrid}>
+      <footer className="public-footer">
+        <div className="public-footer-grid">
           <div>
-            <h4 style={styles.footerTitle}>Sobre Nosotros</h4>
-            <p style={styles.footerText}>
+            <h4 className="public-footer-title">Sobre Nosotros</h4>
+            <p className="public-footer-text">
               Cuidamos tu salud visual con los mejores profesionales, monturas
               de calidad y la última tecnología en cristales ópticos.
             </p>
           </div>
           <div>
-            <h4 style={styles.footerTitle}>Contacto</h4>
+            <h4 className="public-footer-title">Contacto</h4>
             {config?.telefonoContacto && (
-              <p style={styles.topbarItem}>
-                <Telephone size={14} /> {config.telefonoContacto}
-              </p>
+              <div className="public-footer-item">
+                <Telephone size={14} /> <span>{config.telefonoContacto}</span>
+              </div>
             )}
             {config?.correoContacto && (
-              <p style={styles.topbarItem}>
-                <Envelope size={14} /> {config.correoContacto}
-              </p>
+              <div className="public-footer-item">
+                <Envelope size={14} /> <span>{config.correoContacto}</span>
+              </div>
             )}
             {config?.direccion && (
-              <p style={styles.topbarItem}>
-                <GeoAlt size={14} /> {config.direccion}
-              </p>
+              <div className="public-footer-item">
+                <GeoAlt size={14} /> <span>{config.direccion}</span>
+              </div>
             )}
           </div>
           <div>
-            <h4 style={styles.footerTitle}>Horario Comercial</h4>
+            <h4 className="public-footer-title">Horario Comercial</h4>
             {config?.horarioAtencion ? (
-              <p style={styles.topbarItem}>
-                <Clock size={14} /> {config.horarioAtencion}
-              </p>
+              <div className="public-footer-item">
+                <Clock size={14} /> <span>{config.horarioAtencion}</span>
+              </div>
             ) : (
-              <p style={styles.footerText}>Lunes a Sábado: 9:00 AM - 8:00 PM</p>
+              <p className="public-footer-text">
+                Lunes a Sábado: 9:00 AM - 8:00 PM
+              </p>
             )}
           </div>
         </div>
-        <div style={styles.copyright}>
+        <div className="public-footer-copyright">
           &copy; {new Date().getFullYear()} Nuestra Óptica. Todos los derechos
           reservados.
         </div>

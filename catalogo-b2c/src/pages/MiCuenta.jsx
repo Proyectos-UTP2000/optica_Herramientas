@@ -17,21 +17,6 @@ const formatoMoneda = (valor) =>
     currency: "PEN",
   });
 
-const getBadgeStyles = (estado) => {
-  switch (estado) {
-    case "PENDIENTE":
-      return { bg: "#fef3c7", color: "#d97706" };
-    case "CONTACTADO":
-      return { bg: "#dbeafe", color: "#2563eb" };
-    case "PROCESADO":
-      return { bg: "#d1fae5", color: "#059669" };
-    case "ANULADO":
-      return { bg: "#fee2e2", color: "#dc2626" };
-    default:
-      return { bg: "#f3f4f6", color: "#4b5563" };
-  }
-};
-
 const MiCuenta = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("perfil"); // "perfil" o "cotizaciones"
@@ -138,7 +123,6 @@ const MiCuenta = () => {
   };
 
   const openWhatsAppCoti = (coti) => {
-    // Generate text message for WhatsApp
     const itemsStr = coti.detalles
       .map(
         (d) =>
@@ -146,21 +130,12 @@ const MiCuenta = () => {
       )
       .join("%0A");
     const texto = `Hola, quisiera consultar sobre el estado de mi cotización N° *${coti.id}* en su tienda.%0A%0AMis datos:%0A- Nombre: ${coti.clienteNombre}%0A- Teléfono: ${coti.clienteTelefono}%0A%0AProductos:%0A${itemsStr}%0A%0AEstado Actual: *${coti.estado}*%0A%0A¡Muchas gracias!`;
-    // We send it to a general WhatsApp or shop phone if configured, or just let them send it
     window.open(`https://api.whatsapp.com/send?text=${texto}`, "_blank");
   };
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-          color: "#64748b",
-        }}
-      >
+      <div className="my-account-loading">
         <h3>Cargando los datos de tu cuenta...</h3>
       </div>
     );
@@ -168,37 +143,10 @@ const MiCuenta = () => {
 
   if (!isLoggedIn) {
     return (
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "60px auto",
-          padding: "40px 24px",
-          textAlign: "center",
-          backgroundColor: "#ffffff",
-          borderRadius: "16px",
-          border: "1px solid #e2e8f0",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-        }}
-      >
-        <Lock size={48} style={{ color: "#64748b", marginBottom: "16px" }} />
-        <h2
-          style={{
-            fontSize: "24px",
-            fontWeight: "700",
-            color: "#0f172a",
-            marginBottom: "12px",
-          }}
-        >
-          Acceso Restringido
-        </h2>
-        <p
-          style={{
-            color: "#64748b",
-            fontSize: "15px",
-            lineHeight: "1.6",
-            marginBottom: "24px",
-          }}
-        >
+      <div className="my-account-restricted">
+        <Lock size={48} className="my-account-restricted-icon" />
+        <h2>Acceso Restringido</h2>
+        <p>
           Debes iniciar sesión para ver tu perfil, actualizar tus datos de envío
           y revisar el historial de tus cotizaciones.
         </p>
@@ -206,220 +154,13 @@ const MiCuenta = () => {
           onClick={() =>
             window.dispatchEvent(new CustomEvent("open-login-modal"))
           }
-          style={{
-            padding: "12px 24px",
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: "700",
-            fontSize: "14px",
-            cursor: "pointer",
-            transition: "background-color 150ms",
-          }}
+          className="btn-primary"
         >
           Iniciar Sesión / Registrarse
         </button>
       </div>
     );
   }
-
-  const styles = {
-    container: {
-      maxWidth: "1000px",
-      margin: "40px auto",
-      padding: "0 16px",
-      fontFamily: "'Segoe UI', sans-serif",
-    },
-    grid: { display: "grid", gridTemplateColumns: "280px 1fr", gap: "30px" },
-    sidebar: {
-      backgroundColor: "#ffffff",
-      border: "1px solid #e2e8f0",
-      borderRadius: "12px",
-      padding: "24px",
-      height: "fit-content",
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-    },
-    profileSummary: {
-      textAlign: "center",
-      borderBottom: "1px solid #f1f5f9",
-      paddingBottom: "20px",
-    },
-    avatar: {
-      width: "60px",
-      height: "60px",
-      borderRadius: "50%",
-      backgroundColor: "#e0f2fe",
-      color: "#0284c7",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "24px",
-      fontWeight: "700",
-      margin: "0 auto 12px",
-    },
-    profileName: {
-      fontSize: "16px",
-      fontWeight: "700",
-      color: "#0f172a",
-      margin: "0 0 4px 0",
-    },
-    profileEmail: { fontSize: "13px", color: "#64748b", margin: 0 },
-    nav: { display: "flex", flexDirection: "column", gap: "8px" },
-    navItem: (active) => ({
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      padding: "10px 14px",
-      borderRadius: "8px",
-      fontSize: "14px",
-      fontWeight: "600",
-      border: "none",
-      background: active ? "#eff6ff" : "none",
-      color: active ? "#2563eb" : "#475569",
-      cursor: "pointer",
-      textAlign: "left",
-      transition: "all 150ms",
-    }),
-    contentCard: {
-      backgroundColor: "#ffffff",
-      border: "1px solid #e2e8f0",
-      borderRadius: "12px",
-      padding: "30px",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-    },
-    cardTitle: {
-      fontSize: "20px",
-      fontWeight: "700",
-      color: "#0f172a",
-      margin: "0 0 20px 0",
-      borderBottom: "1px solid #f1f5f9",
-      paddingBottom: "12px",
-    },
-    formGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "6px",
-      marginBottom: "16px",
-    },
-    label: { fontSize: "13px", fontWeight: "600", color: "#475569" },
-    input: {
-      padding: "10px 12px",
-      border: "1px solid #cbd5e1",
-      borderRadius: "8px",
-      fontSize: "14px",
-      outline: "none",
-      color: "#0f172a",
-      transition: "border-color 150ms",
-      width: "100%",
-    },
-    submitBtn: {
-      backgroundColor: "#2563eb",
-      color: "#ffffff",
-      border: "none",
-      borderRadius: "8px",
-      padding: "12px 20px",
-      fontWeight: "700",
-      fontSize: "14px",
-      cursor: "pointer",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      transition: "background-color 150ms",
-      width: "fit-content",
-    },
-    row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" },
-
-    // Table Styles
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      fontSize: "13px",
-      textAlign: "left",
-    },
-    th: {
-      backgroundColor: "#f8fafc",
-      padding: "12px 16px",
-      color: "#475569",
-      fontWeight: "600",
-      borderBottom: "1px solid #e2e8f0",
-    },
-    td: {
-      padding: "16px",
-      borderBottom: "1px solid #f1f5f9",
-      color: "#334155",
-      verticalAlign: "middle",
-    },
-    badge: (styles) => ({
-      backgroundColor: styles.bg,
-      color: styles.color,
-      padding: "4px 8px",
-      borderRadius: "6px",
-      fontWeight: "700",
-      fontSize: "11px",
-      display: "inline-block",
-      textTransform: "uppercase",
-    }),
-    actionBtn: {
-      border: "1px solid #cbd5e1",
-      background: "#ffffff",
-      padding: "6px",
-      borderRadius: "6px",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      color: "#475569",
-      transition: "all 150ms",
-    },
-
-    // Modal Details Styles
-    modalOverlay: {
-      position: "fixed",
-      inset: 0,
-      backgroundColor: "rgba(15, 23, 42, 0.5)",
-      zIndex: 1100,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: "20px",
-      backdropFilter: "blur(2px)",
-    },
-    modal: {
-      backgroundColor: "#ffffff",
-      borderRadius: "16px",
-      width: "min(600px, 100%)",
-      maxHeight: "85vh",
-      display: "flex",
-      flexDirection: "column",
-      boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
-    },
-    modalHeader: {
-      padding: "20px 24px",
-      borderBottom: "1px solid #f1f5f9",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    modalBody: {
-      padding: "24px",
-      overflowY: "auto",
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-    },
-    infoGrid: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: "16px",
-      backgroundColor: "#f8fafc",
-      padding: "16px",
-      borderRadius: "8px",
-      border: "1px solid #e2e8f0",
-    },
-    infoItem: { display: "flex", flexDirection: "column", gap: "4px" },
-  };
 
   const getInitials = () => {
     if (!perfil) return "U";
@@ -429,29 +170,29 @@ const MiCuenta = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.grid}>
+    <div className="my-account-container">
+      <div className="my-account-grid">
         {/* Sidebar */}
-        <aside style={styles.sidebar}>
-          <div style={styles.profileSummary}>
-            <div style={styles.avatar}>{getInitials()}</div>
-            <h4 style={styles.profileName}>
+        <aside className="my-account-sidebar">
+          <div className="my-account-profile-summary">
+            <div className="my-account-avatar">{getInitials()}</div>
+            <h4 className="my-account-profile-name">
               {perfil?.nombre} {perfil?.apellidoPaterno}
             </h4>
-            <p style={styles.profileEmail}>{perfil?.correo}</p>
+            <p className="my-account-profile-email">{perfil?.correo}</p>
           </div>
 
-          <nav style={styles.nav}>
+          <nav className="my-account-nav">
             <button
-              style={styles.navItem(activeTab === "perfil")}
               onClick={() => setActiveTab("perfil")}
+              className={`my-account-nav-btn ${activeTab === "perfil" ? "active" : ""}`}
             >
               <Person size={18} />
               <span>Mis Datos</span>
             </button>
             <button
-              style={styles.navItem(activeTab === "cotizaciones")}
               onClick={() => setActiveTab("cotizaciones")}
+              className={`my-account-nav-btn ${activeTab === "cotizaciones" ? "active" : ""}`}
             >
               <FileText size={18} />
               <span>Mis Cotizaciones</span>
@@ -462,102 +203,108 @@ const MiCuenta = () => {
         {/* Main Content Area */}
         <main>
           {activeTab === "perfil" ? (
-            <div style={styles.contentCard}>
-              <h3 style={styles.cardTitle}>Información de Perfil</h3>
-              <form
-                onSubmit={handleUpdateProfile}
-                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-              >
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Nombres *</label>
+            <div className="my-account-card">
+              <h3 className="my-account-card-title">Información de Perfil</h3>
+              <form onSubmit={handleUpdateProfile} className="my-account-form">
+                <div className="my-account-form-group">
+                  <label className="my-account-label">Nombres *</label>
                   <input
                     type="text"
-                    style={styles.input}
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     required
+                    className="form-control"
                   />
                 </div>
 
-                <div style={styles.row}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Apellido Paterno</label>
+                <div className="my-account-form-row">
+                  <div className="my-account-form-group">
+                    <label className="my-account-label">Apellido Paterno</label>
                     <input
                       type="text"
-                      style={styles.input}
                       value={apellidoPaterno}
                       onChange={(e) => setApellidoPaterno(e.target.value)}
+                      className="form-control"
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Apellido Materno</label>
+                  <div className="my-account-form-group">
+                    <label className="my-account-label">Apellido Materno</label>
                     <input
                       type="text"
-                      style={styles.input}
                       value={apellidoMaterno}
                       onChange={(e) => setApellidoMaterno(e.target.value)}
+                      className="form-control"
                     />
                   </div>
                 </div>
 
-                <div style={styles.row}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Tipo de Documento</label>
+                <div className="my-account-form-row">
+                  <div className="my-account-form-group">
+                    <label className="my-account-label">
+                      Tipo de Documento
+                    </label>
                     <input
                       type="text"
-                      style={{ ...styles.input, backgroundColor: "#f8fafc" }}
                       value={perfil?.tipoDocumento?.nombre || ""}
                       disabled
+                      className="form-control"
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Número de Documento</label>
+                  <div className="my-account-form-group">
+                    <label className="my-account-label">
+                      Número de Documento
+                    </label>
                     <input
                       type="text"
-                      style={{ ...styles.input, backgroundColor: "#f8fafc" }}
                       value={perfil?.numeroDocumento || ""}
                       disabled
+                      className="form-control"
                     />
                   </div>
                 </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Dirección Predeterminada *</label>
+                <div className="my-account-form-group">
+                  <label className="my-account-label">
+                    Dirección Predeterminada *
+                  </label>
                   <input
                     type="text"
-                    style={styles.input}
                     value={direccion}
                     onChange={(e) => setDireccion(e.target.value)}
                     required
+                    className="form-control"
                   />
                 </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Teléfono de Contacto *</label>
+                <div className="my-account-form-group">
+                  <label className="my-account-label">
+                    Teléfono de Contacto *
+                  </label>
                   <input
                     type="tel"
-                    style={styles.input}
                     value={telefono}
                     onChange={(e) => setTelefono(e.target.value)}
                     required
+                    className="form-control"
                   />
                 </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>
+                <div className="my-account-form-group">
+                  <label className="my-account-label">
                     Correo Electrónico (Solo Lectura)
                   </label>
                   <input
                     type="email"
-                    style={{ ...styles.input, backgroundColor: "#f8fafc" }}
                     value={perfil?.correo || ""}
                     disabled
+                    className="form-control"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  style={styles.submitBtn}
+                  className="btn-primary"
+                  style={{ width: "fit-content", marginTop: "8px" }}
                   disabled={updating}
                 >
                   {updating ? "Guardando..." : "Actualizar Datos"}
@@ -565,44 +312,34 @@ const MiCuenta = () => {
               </form>
             </div>
           ) : (
-            <div style={styles.contentCard}>
-              <h3 style={styles.cardTitle}>Historial de Cotizaciones</h3>
+            <div className="my-account-card">
+              <h3 className="my-account-card-title">
+                Historial de Cotizaciones
+              </h3>
 
               {cotizaciones.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "#64748b",
-                    padding: "40px 0",
-                  }}
-                >
-                  <CardChecklist
-                    size={40}
-                    style={{ color: "#cbd5e1", marginBottom: "12px" }}
-                  />
-                  <p style={{ margin: 0 }}>
-                    Aún no has registrado solicitudes de cotización.
-                  </p>
+                <div className="my-account-empty-state">
+                  <CardChecklist size={40} className="my-account-empty-icon" />
+                  <p>Aún no has registrado solicitudes de cotización.</p>
                 </div>
               ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <table style={styles.table}>
+                <div className="my-account-table-container">
+                  <table className="my-account-table">
                     <thead>
                       <tr>
-                        <th style={styles.th}>ID</th>
-                        <th style={styles.th}>Fecha</th>
-                        <th style={styles.th}>Total Est.</th>
-                        <th style={styles.th}>Estado</th>
-                        <th style={styles.th}>Acciones</th>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Total Est.</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {cotizaciones.map((c) => {
-                        const badgeStyle = getBadgeStyles(c.estado);
                         return (
                           <tr key={c.id}>
-                            <td style={styles.td}>#{c.id}</td>
-                            <td style={styles.td}>
+                            <td style={{ fontWeight: "600" }}>#{c.id}</td>
+                            <td>
                               {new Date(c.fechaCreacion).toLocaleDateString(
                                 "es-PE",
                                 {
@@ -612,30 +349,33 @@ const MiCuenta = () => {
                                 },
                               )}
                             </td>
-                            <td style={styles.td}>
+                            <td
+                              style={{
+                                fontWeight: "700",
+                                color: "var(--color-primary)",
+                              }}
+                            >
                               {formatoMoneda(c.totalEstimado)}
                             </td>
-                            <td style={styles.td}>
-                              <span style={styles.badge(badgeStyle)}>
+                            <td>
+                              <span
+                                className={`my-account-badge badge-${c.estado.toLowerCase()}`}
+                              >
                                 {c.estado}
                               </span>
                             </td>
-                            <td style={styles.td}>
-                              <div style={{ display: "flex", gap: "8px" }}>
+                            <td>
+                              <div className="my-account-actions-cell">
                                 <button
-                                  style={styles.actionBtn}
                                   onClick={() => setDetalleCotizacion(c)}
+                                  className="my-account-action-btn"
                                   title="Ver Detalle"
                                 >
                                   <Eye size={16} />
                                 </button>
                                 <button
-                                  style={{
-                                    ...styles.actionBtn,
-                                    borderColor: "#25d366",
-                                    color: "#25d366",
-                                  }}
                                   onClick={() => openWhatsAppCoti(c)}
+                                  className="my-account-action-btn btn-whatsapp"
                                   title="Consultar por WhatsApp"
                                 >
                                   <Whatsapp size={16} />
@@ -657,216 +397,93 @@ const MiCuenta = () => {
       {/* Sub-modal: Detalle de Cotización */}
       {detalleCotizacion && (
         <div
-          style={styles.modalOverlay}
-          onMouseDown={() => setDetalleCotizacion(null)}
+          className="my-account-modal-overlay animate-fade"
+          onClick={() => setDetalleCotizacion(null)}
         >
-          <div style={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>
-                Detalle de Cotización #{detalleCotizacion.id}
-              </h3>
+          <div
+            className="my-account-modal animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="my-account-modal-header">
+              <h3>Detalle de Cotización #{detalleCotizacion.id}</h3>
               <button
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "20px",
-                  color: "#64748b",
-                  cursor: "pointer",
-                }}
+                className="my-account-modal-close"
                 onClick={() => setDetalleCotizacion(null)}
               >
                 ×
               </button>
             </div>
 
-            <div style={styles.modalBody}>
-              <div style={styles.infoGrid}>
-                <div style={styles.infoItem}>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
+            <div className="my-account-modal-body">
+              <div className="my-account-info-grid">
+                <div className="my-account-info-item">
+                  <span className="my-account-info-label">
                     Nombre de contacto
                   </span>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      color: "#0f172a",
-                      fontWeight: "600",
-                    }}
-                  >
+                  <span className="my-account-info-value">
                     {detalleCotizacion.clienteNombre}
                   </span>
                 </div>
-                <div style={styles.infoItem}>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Teléfono
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      color: "#0f172a",
-                      fontWeight: "600",
-                    }}
-                  >
+                <div className="my-account-info-item">
+                  <span className="my-account-info-label">Teléfono</span>
+                  <span className="my-account-info-value">
                     {detalleCotizacion.clienteTelefono}
                   </span>
                 </div>
-                <div style={styles.infoItem}>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Dirección
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      color: "#0f172a",
-                      fontWeight: "600",
-                    }}
-                  >
+                <div className="my-account-info-item">
+                  <span className="my-account-info-label">Dirección</span>
+                  <span className="my-account-info-value">
                     <GeoAlt size={12} /> {detalleCotizacion.direccion || "---"}
                   </span>
                 </div>
-                <div style={styles.infoItem}>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#64748b",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Estado
-                  </span>
-                  <span
-                    style={styles.badge(
-                      getBadgeStyles(detalleCotizacion.estado),
-                    )}
-                  >
-                    {detalleCotizacion.estado}
-                  </span>
+                <div className="my-account-info-item">
+                  <span className="my-account-info-label">Estado</span>
+                  <div>
+                    <span
+                      className={`my-account-badge badge-${detalleCotizacion.estado.toLowerCase()}`}
+                    >
+                      {detalleCotizacion.estado}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div>
-                <h5
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: "700",
-                    color: "#475569",
-                    margin: "0 0 10px 0",
-                  }}
-                >
+                <h5 className="my-account-modal-section-title">
                   Productos Solicitados
                 </h5>
-                <div
-                  style={{
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <table
-                    style={{
-                      width: "100%",
-                      borderCollapse: "collapse",
-                      fontSize: "12px",
-                    }}
-                  >
+                <div className="my-account-table-wrapper">
+                  <table className="my-account-modal-table">
                     <thead>
-                      <tr style={{ backgroundColor: "#f8fafc" }}>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "left",
-                            color: "#475569",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Producto
-                        </th>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "center",
-                            color: "#475569",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Código
-                        </th>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "center",
-                            color: "#475569",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Cant.
-                        </th>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "right",
-                            color: "#475569",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Subtotal
-                        </th>
+                      <tr>
+                        <th>Producto</th>
+                        <th style={{ textAlign: "center" }}>Código</th>
+                        <th style={{ textAlign: "center" }}>Cant.</th>
+                        <th style={{ textAlign: "right" }}>Subtotal</th>
                       </tr>
                     </thead>
                     <tbody>
                       {detalleCotizacion.detalles.map((d) => (
-                        <tr
-                          key={d.id}
-                          style={{ borderTop: "1px solid #f1f5f9" }}
-                        >
-                          <td style={{ padding: "10px", color: "#0f172a" }}>
-                            {d.productoNombre}
-                          </td>
+                        <tr key={d.id}>
+                          <td>{d.productoNombre}</td>
                           <td
                             style={{
-                              padding: "10px",
                               textAlign: "center",
-                              color: "#64748b",
+                              color: "var(--color-text-muted)",
                             }}
                           >
                             {d.productoCodigo}
                           </td>
                           <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              fontWeight: "600",
-                            }}
+                            style={{ textAlign: "center", fontWeight: "600" }}
                           >
                             {d.cantidad}
                           </td>
                           <td
                             style={{
-                              padding: "10px",
                               textAlign: "right",
-                              color: "#2563eb",
-                              fontWeight: "600",
+                              color: "var(--color-primary)",
+                              fontWeight: "700",
                             }}
                           >
                             {formatoMoneda(d.subtotal)}
@@ -875,8 +492,8 @@ const MiCuenta = () => {
                       ))}
                       <tr
                         style={{
-                          borderTop: "2px solid #e2e8f0",
-                          backgroundColor: "#f8fafc",
+                          borderTop: "2px solid var(--color-border)",
+                          backgroundColor: "var(--color-background)",
                           fontWeight: "700",
                         }}
                       >
@@ -890,8 +507,7 @@ const MiCuenta = () => {
                           style={{
                             padding: "10px",
                             textAlign: "right",
-                            color: "#2563eb",
-                            fontSize: "13px",
+                            color: "var(--color-primary)",
                           }}
                         >
                           {formatoMoneda(detalleCotizacion.totalEstimado)}
@@ -904,27 +520,10 @@ const MiCuenta = () => {
 
               {detalleCotizacion.observaciones && (
                 <div>
-                  <h5
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#475569",
-                      margin: "0 0 6px 0",
-                    }}
-                  >
+                  <h5 className="my-account-modal-section-title">
                     Observaciones
                   </h5>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "13px",
-                      color: "#475569",
-                      backgroundColor: "#f8fafc",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      border: "1px solid #e2e8f0",
-                    }}
-                  >
+                  <p className="my-account-observations">
                     {detalleCotizacion.observaciones}
                   </p>
                 </div>
