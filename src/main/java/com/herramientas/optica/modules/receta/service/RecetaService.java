@@ -11,6 +11,8 @@ import com.herramientas.optica.modules.receta.dto.RecetaRequestDTO;
 import com.herramientas.optica.modules.receta.dto.RecetaResponseDTO;
 import com.herramientas.optica.modules.clientes.repository.ClienteRepository;
 import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
+import com.herramientas.optica.modules.clientes.model.Cliente;
+import com.herramientas.optica.modules.empleados.model.Empleado;
 
 @Service
 public class RecetaService {
