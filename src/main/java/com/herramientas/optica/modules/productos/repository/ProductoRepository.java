@@ -57,4 +57,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     @Query("SELECT p FROM Producto p WHERE p.estado = 0 AND p.updatedAt < :fechaLimite")
     List<Producto> findProductosBorradosAntesDe(@Param("fechaLimite") LocalDateTime fechaLimite);
+
+    List<Producto> findByVisibleWebTrueAndEstadoOrderByOrdenAscNombreAsc(Integer estado);
+    java.util.Optional<Producto> findBySlugAndVisibleWebTrueAndEstado(String slug, Integer estado);
+    boolean existsBySlug(String slug);
+    boolean existsBySlugAndIdNot(String slug, Long id);
 }

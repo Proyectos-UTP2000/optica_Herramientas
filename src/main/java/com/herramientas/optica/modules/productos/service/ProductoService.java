@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.herramientas.optica.modules.productos.dto.ProductoPublicResponseDTO;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,6 +87,14 @@ public class ProductoService {
         Unidad unidadCompra = unidadRepository.findById(dto.getIdUnidadCompra())
                 .orElseThrow(() -> new IllegalArgumentException("Unidad de compra no encontrada."));
 
+        String slugFinal = dto.getSlug();
+        if (slugFinal == null || slugFinal.trim().isEmpty()) {
+            slugFinal = generarSlug(dto.getNombre());
+        } else {
+            slugFinal = generarSlug(slugFinal);
+        }
+        slugFinal = hacerSlugUnico(slugFinal, null);
+
         Producto producto = Producto.builder()
                 .nombre(dto.getNombre().toUpperCase())
                 .codigo(codigoFinal)
@@ -102,6 +112,12 @@ public class ProductoService {
                 .unidadCompra(unidadCompra)
                 .factorConversion(dto.getFactorConversion() != null ? dto.getFactorConversion() : 1)
                 .estado(ESTADO_ACTIVO)
+                .visibleWeb(dto.getVisibleWeb() != null ? dto.getVisibleWeb() : false)
+                .destacado(dto.getDestacado() != null ? dto.getDestacado() : false)
+                .slug(slugFinal)
+                .descripcionWeb(dto.getDescripcionWeb())
+                .etiquetas(dto.getEtiquetas())
+                .orden(dto.getOrden() != null ? dto.getOrden() : 0)
                 .build();
 
         Producto guardado = productoRepository.save(producto);
@@ -162,6 +178,14 @@ public class ProductoService {
         Unidad unidadCompra = unidadRepository.findById(dto.getIdUnidadCompra())
                 .orElseThrow(() -> new IllegalArgumentException("Unidad de compra no encontrada."));
 
+        String slugFinal = dto.getSlug();
+        if (slugFinal == null || slugFinal.trim().isEmpty()) {
+            slugFinal = generarSlug(dto.getNombre());
+        } else {
+            slugFinal = generarSlug(slugFinal);
+        }
+        slugFinal = hacerSlugUnico(slugFinal, producto.getId());
+
         producto.setNombre(dto.getNombre().toUpperCase());
         if (dto.getCodigo() != null)
             producto.setCodigo(dto.getCodigo());
@@ -177,6 +201,12 @@ public class ProductoService {
         producto.setUnidadVenta(unidadVenta);
         producto.setUnidadCompra(unidadCompra);
         producto.setFactorConversion(dto.getFactorConversion());
+        producto.setVisibleWeb(dto.getVisibleWeb() != null ? dto.getVisibleWeb() : false);
+        producto.setDestacado(dto.getDestacado() != null ? dto.getDestacado() : false);
+        producto.setSlug(slugFinal);
+        producto.setDescripcionWeb(dto.getDescripcionWeb());
+        producto.setEtiquetas(dto.getEtiquetas());
+        producto.setOrden(dto.getOrden() != null ? dto.getOrden() : 0);
 
         // Actualizar imágenes (reemplazo completo)
         if (imagenes != null && !imagenes.isEmpty()) {
@@ -260,8 +290,90 @@ public class ProductoService {
                 .unidadCompraNombre(p.getUnidadCompra().getNombre())
                 .factorConversion(p.getFactorConversion())
                 .rutasImagenes(imgs)
+                .visibleWeb(p.getVisibleWeb())
+                .destacado(p.getDestacado())
+                .slug(p.getSlug())
+                .descripcionWeb(p.getDescripcionWeb())
+                .etiquetas(p.getEtiquetas())
+                .orden(p.getOrden())
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductoPublicResponseDTO> listarPublicos() {
+        return productoRepository.findByVisibleWebTrueAndEstadoOrderByOrdenAscNombreAsc(ESTADO_ACTIVO).stream()
+                .map(this::mapearAPublicResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ProductoPublicResponseDTO buscarPorSlug(String slug) {
+        Producto p = productoRepository.findBySlugAndVisibleWebTrueAndEstado(slug, ESTADO_ACTIVO)
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con el slug: " + slug));
+        return mapearAPublicResponse(p);
+    }
+
+    private ProductoPublicResponseDTO mapearAPublicResponse(Producto p) {
+        List<String> imgs = productoImagenRepository.findByProductoId(p.getId()).stream()
+                .map(ProductoImagen::getRutaImagen)
+                .collect(Collectors.toList());
+
+        List<String> tags = java.util.Collections.emptyList();
+        if (p.getEtiquetas() != null && !p.getEtiquetas().trim().isEmpty()) {
+            tags = java.util.Arrays.stream(p.getEtiquetas().split(","))
+                    .map(String::trim)
+                    .filter(t -> !t.isEmpty())
+                    .collect(Collectors.toList());
+        }
+
+        return ProductoPublicResponseDTO.builder()
+                .id(p.getId())
+                .nombre(p.getNombre())
+                .codigo(p.getCodigo())
+                .modelo(p.getModelo())
+                .descripcion(p.getDescripcion())
+                .descripcionWeb(p.getDescripcionWeb())
+                .precio(p.getPrecio())
+                .slug(p.getSlug())
+                .tipoProducto(p.getTipoProducto())
+                .categoriaNombre(p.getCategoria().getNombre())
+                .marcaNombre(p.getMarca().getNombre())
+                .rutasImagenes(imgs)
+                .etiquetas(tags)
+                .orden(p.getOrden())
+                .conStock(p.getStock() != null && p.getStock() > 0)
+                .destacado(p.getDestacado() != null ? p.getDestacado() : false)
+                .build();
+    }
+
+    private String generarSlug(String nombre) {
+        if (nombre == null) return "";
+        return nombre.toLowerCase()
+                .replaceAll("[áàäâ]", "a")
+                .replaceAll("[éèëê]", "e")
+                .replaceAll("[íìïî]", "i")
+                .replaceAll("[óòöô]", "o")
+                .replaceAll("[úùüû]", "u")
+                .replaceAll("[ñ]", "n")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .trim();
+    }
+
+    private String hacerSlugUnico(String baseSlug, Long idExcluido) {
+        String slugTmp = baseSlug;
+        int cont = 1;
+        while (true) {
+            boolean existe = idExcluido == null 
+                ? productoRepository.existsBySlug(slugTmp)
+                : productoRepository.existsBySlugAndIdNot(slugTmp, idExcluido);
+            if (!existe) break;
+            slugTmp = baseSlug + "-" + cont;
+            cont++;
+        }
+        return slugTmp;
     }
 }
