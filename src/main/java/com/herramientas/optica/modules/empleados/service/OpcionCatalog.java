@@ -36,6 +36,7 @@ public final class OpcionCatalog {
             new OpcionDefinition("Categorías", "/categorias", "IconCategorias", 3, "Inventario", true, true),
             new OpcionDefinition("Marcas", "/marcas", "IconMarcas", 4, "Inventario", true, true),
             new OpcionDefinition("Unidades", "/unidades", "IconUnidades", 5, "Inventario", true, true),
+            new OpcionDefinition("Etiquetas", "/etiquetas", "IconCategorias", 6, "Inventario", true, true),
 
             new OpcionDefinition("Proveedor", "/proveedores", "IconDashboard", 1, "Proveedor/Compras", true, true),
             new OpcionDefinition("Compras", "/compras", "IconCompras", 2, "Proveedor/Compras", true, true),

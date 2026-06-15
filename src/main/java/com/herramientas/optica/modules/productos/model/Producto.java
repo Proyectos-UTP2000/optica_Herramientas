@@ -17,10 +17,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "producto")
@@ -113,8 +117,14 @@ public class Producto {
     @Column(name = "produc_descripcion_web", columnDefinition = "TEXT")
     private String descripcionWeb;
 
-    @Column(name = "produc_etiquetas", length = 500)
-    private String etiquetas;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "producto_etiqueta",
+        joinColumns = @JoinColumn(name = "id_producto"),
+        inverseJoinColumns = @JoinColumn(name = "id_etiqueta")
+    )
+    @Builder.Default
+    private Set<Etiqueta> etiquetas = new HashSet<>();
 
     @Builder.Default
     @Column(name = "produc_orden", nullable = false)

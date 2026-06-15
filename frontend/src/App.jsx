@@ -26,6 +26,7 @@ import ReporteCompras from "./pages/reportes/ReporteCompras";
 import ReporteCajas from "./pages/reportes/ReporteCajas";
 import EnProceso from "./pages/EnProceso";
 import CatalogoWeb from "./pages/CatalogoWeb";
+import Etiquetas from "./pages/Etiquetas";
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -89,6 +90,8 @@ function App() {
           <Route path="marcas" element={<Marcas />} />
           <Route path="categorias" element={<Categorias />} />
           <Route path="unidades" element={<Unidades />} />
+          <Route path="etiquetas" element={<Etiquetas />} />
+          <Route path="inventario/etiquetas" element={<Etiquetas />} />
           <Route path="inventario" element={<Inventario />} />
           <Route path="proveedores" element={<Proveedores />} />
           <Route path="ventas" element={<Ventas />} />

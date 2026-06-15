@@ -15,16 +15,21 @@ import org.springframework.web.multipart.MultipartFile;
 import com.herramientas.optica.modules.inventario.service.InventarioService;
 import com.herramientas.optica.modules.productos.dto.ProductoRequestDTO;
 import com.herramientas.optica.modules.productos.dto.ProductoResponseDTO;
+import com.herramientas.optica.modules.productos.dto.EtiquetaResponseDTO;
+import com.herramientas.optica.modules.productos.dto.ProductoImagenRequestDTO;
+import com.herramientas.optica.modules.productos.dto.ProductoImagenResponseDTO;
 import com.herramientas.optica.modules.productos.model.Categoria;
 import com.herramientas.optica.modules.productos.model.Marca;
 import com.herramientas.optica.modules.productos.model.Producto;
 import com.herramientas.optica.modules.productos.model.ProductoImagen;
 import com.herramientas.optica.modules.productos.model.Unidad;
+import com.herramientas.optica.modules.productos.model.Etiqueta;
 import com.herramientas.optica.modules.productos.repository.CategoriaRepository;
 import com.herramientas.optica.modules.productos.repository.MarcaRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoImagenRepository;
 import com.herramientas.optica.modules.productos.repository.ProductoRepository;
 import com.herramientas.optica.modules.productos.repository.UnidadRepository;
+import com.herramientas.optica.modules.productos.repository.EtiquetaRepository;
 
 @Service
 public class ProductoService {
@@ -36,6 +41,7 @@ public class ProductoService {
     private final ProductoImagenRepository productoImagenRepository;
     private final CloudinaryService cloudinaryService;
     private final InventarioService inventarioService;
+    private final EtiquetaRepository etiquetaRepository;
 
     private static final int ESTADO_ACTIVO = 1;
     private static final int ESTADO_INACTIVO = 2;
@@ -45,7 +51,8 @@ public class ProductoService {
             MarcaRepository marcaRepository, UnidadRepository unidadRepository,
             ProductoImagenRepository productoImagenRepository,
             CloudinaryService cloudinaryService,
-            InventarioService inventarioService) {
+            InventarioService inventarioService,
+            EtiquetaRepository etiquetaRepository) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.marcaRepository = marcaRepository;
@@ -53,8 +60,10 @@ public class ProductoService {
         this.productoImagenRepository = productoImagenRepository;
         this.cloudinaryService = cloudinaryService;
         this.inventarioService = inventarioService;
+        this.etiquetaRepository = etiquetaRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoResponseDTO> listarTodos() {
         return productoRepository.findByEstadoNot(ESTADO_BORRADO).stream()
                 .sorted(Comparator
@@ -64,6 +73,7 @@ public class ProductoService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ProductoResponseDTO buscarPorId(Long id) {
         return mapearAResponse(productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado.")));
@@ -116,7 +126,7 @@ public class ProductoService {
                 .destacado(dto.getDestacado() != null ? dto.getDestacado() : false)
                 .slug(slugFinal)
                 .descripcionWeb(dto.getDescripcionWeb())
-                .etiquetas(dto.getEtiquetas())
+                .etiquetas(cargarEtiquetasPorIds(dto.getIdEtiquetas()))
                 .orden(dto.getOrden() != null ? dto.getOrden() : 0)
                 .build();
 
@@ -126,18 +136,7 @@ public class ProductoService {
                 dto.getStockInicial() != null ? BigDecimal.valueOf(dto.getStockInicial()) : BigDecimal.ZERO,
                 dto.getStockMinimo() != null ? dto.getStockMinimo() : 1);
 
-        // Guardar imágenes en Cloudinary
-        if (imagenes != null && !imagenes.isEmpty()) {
-            for (int i = 0; i < imagenes.size(); i++) {
-                String url = cloudinaryService.subirImagen(imagenes.get(i), guardado.getCodigo());
-                ProductoImagen img = ProductoImagen.builder()
-                        .producto(guardado)
-                        .rutaImagen(url)
-                        .esPrincipal(i == 0)
-                        .build();
-                productoImagenRepository.save(img);
-            }
-        }
+        procesarImagenes(guardado, imagenes, dto.getImagenesConfig());
 
         return mapearAResponse(guardado);
     }
@@ -205,23 +204,10 @@ public class ProductoService {
         producto.setDestacado(dto.getDestacado() != null ? dto.getDestacado() : false);
         producto.setSlug(slugFinal);
         producto.setDescripcionWeb(dto.getDescripcionWeb());
-        producto.setEtiquetas(dto.getEtiquetas());
+        producto.setEtiquetas(cargarEtiquetasPorIds(dto.getIdEtiquetas()));
         producto.setOrden(dto.getOrden() != null ? dto.getOrden() : 0);
 
-        // Actualizar imágenes (reemplazo completo)
-        if (imagenes != null && !imagenes.isEmpty()) {
-            cloudinaryService.eliminarCarpetaProducto(producto.getCodigo());
-            productoImagenRepository.deleteByProductoId(id);
-            for (int i = 0; i < imagenes.size(); i++) {
-                String url = cloudinaryService.subirImagen(imagenes.get(i), producto.getCodigo());
-                ProductoImagen img = ProductoImagen.builder()
-                        .producto(producto)
-                        .rutaImagen(url)
-                        .esPrincipal(i == 0)
-                        .build();
-                productoImagenRepository.save(img);
-            }
-        }
+        procesarImagenes(producto, imagenes, dto.getImagenesConfig());
 
         Producto actualizado = productoRepository.save(producto);
         inventarioService.actualizarStockMinimoProducto(actualizado.getId(), dto.getStockMinimo());
@@ -260,8 +246,15 @@ public class ProductoService {
     }
 
     private ProductoResponseDTO mapearAResponse(Producto p) {
-        List<String> imgs = productoImagenRepository.findByProductoId(p.getId()).stream()
-                .map(ProductoImagen::getRutaImagen)
+        List<ProductoImagenResponseDTO> imagenes = productoImagenRepository.findByProductoId(p.getId()).stream()
+                .sorted(Comparator.comparing((ProductoImagen img) -> img.getOrden() != null ? img.getOrden() : 0)
+                        .thenComparing((ProductoImagen img) -> img.getId() != null ? img.getId() : 0L))
+                .map(img -> ProductoImagenResponseDTO.builder()
+                        .id(img.getId())
+                        .rutaImagen(img.getRutaImagen())
+                        .esPrincipal(img.getEsPrincipal())
+                        .orden(img.getOrden())
+                        .build())
                 .collect(Collectors.toList());
 
         return ProductoResponseDTO.builder()
@@ -289,12 +282,14 @@ public class ProductoService {
                 .idUnidadCompra(p.getUnidadCompra().getId())
                 .unidadCompraNombre(p.getUnidadCompra().getNombre())
                 .factorConversion(p.getFactorConversion())
-                .rutasImagenes(imgs)
+                .imagenes(imagenes)
                 .visibleWeb(p.getVisibleWeb())
                 .destacado(p.getDestacado())
                 .slug(p.getSlug())
                 .descripcionWeb(p.getDescripcionWeb())
-                .etiquetas(p.getEtiquetas())
+                .etiquetas(p.getEtiquetas().stream()
+                        .map(e -> EtiquetaResponseDTO.builder().id(e.getId()).nombre(e.getNombre()).estado(e.getEstado()).build())
+                        .collect(Collectors.toList()))
                 .orden(p.getOrden())
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
@@ -316,17 +311,20 @@ public class ProductoService {
     }
 
     private ProductoPublicResponseDTO mapearAPublicResponse(Producto p) {
-        List<String> imgs = productoImagenRepository.findByProductoId(p.getId()).stream()
-                .map(ProductoImagen::getRutaImagen)
+        List<ProductoImagenResponseDTO> imagenes = productoImagenRepository.findByProductoId(p.getId()).stream()
+                .sorted(Comparator.comparing((ProductoImagen img) -> img.getOrden() != null ? img.getOrden() : 0)
+                        .thenComparing((ProductoImagen img) -> img.getId() != null ? img.getId() : 0L))
+                .map(img -> ProductoImagenResponseDTO.builder()
+                        .id(img.getId())
+                        .rutaImagen(img.getRutaImagen())
+                        .esPrincipal(img.getEsPrincipal())
+                        .orden(img.getOrden())
+                        .build())
                 .collect(Collectors.toList());
 
-        List<String> tags = java.util.Collections.emptyList();
-        if (p.getEtiquetas() != null && !p.getEtiquetas().trim().isEmpty()) {
-            tags = java.util.Arrays.stream(p.getEtiquetas().split(","))
-                    .map(String::trim)
-                    .filter(t -> !t.isEmpty())
-                    .collect(Collectors.toList());
-        }
+        List<String> tags = p.getEtiquetas().stream()
+                .map(Etiqueta::getNombre)
+                .collect(Collectors.toList());
 
         return ProductoPublicResponseDTO.builder()
                 .id(p.getId())
@@ -340,7 +338,7 @@ public class ProductoService {
                 .tipoProducto(p.getTipoProducto())
                 .categoriaNombre(p.getCategoria().getNombre())
                 .marcaNombre(p.getMarca().getNombre())
-                .rutasImagenes(imgs)
+                .imagenes(imagenes)
                 .etiquetas(tags)
                 .orden(p.getOrden())
                 .conStock(p.getStock() != null && p.getStock() > 0)
@@ -375,5 +373,148 @@ public class ProductoService {
             cont++;
         }
         return slugTmp;
+    }
+
+    private java.util.Set<Etiqueta> cargarEtiquetasPorIds(java.util.List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new java.util.HashSet<>();
+        }
+        return new java.util.HashSet<>(etiquetaRepository.findAllById(ids));
+    }
+
+    private String extraerPublicId(String url) {
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
+        try {
+            int uploadIdx = url.indexOf("/image/upload/");
+            if (uploadIdx == -1) {
+                return null;
+            }
+            
+            String path = url.substring(uploadIdx + "/image/upload/".length());
+            
+            if (path.startsWith("v")) {
+                int firstSlash = path.indexOf('/');
+                if (firstSlash != -1) {
+                    String versionStr = path.substring(1, firstSlash);
+                    if (versionStr.matches("\\d+")) {
+                        path = path.substring(firstSlash + 1);
+                    }
+                }
+            }
+            
+            int lastDotIdx = path.lastIndexOf('.');
+            if (lastDotIdx != -1) {
+                path = path.substring(0, lastDotIdx);
+            }
+            return path;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void procesarImagenes(Producto producto, List<MultipartFile> archivos, List<ProductoImagenRequestDTO> config) throws IOException {
+        if (config == null || config.isEmpty()) {
+            if (archivos != null && !archivos.isEmpty()) {
+                List<ProductoImagen> existingImages = productoImagenRepository.findByProductoId(producto.getId());
+                if (!existingImages.isEmpty()) {
+                    for (ProductoImagen img : existingImages) {
+                        String publicId = extraerPublicId(img.getRutaImagen());
+                        if (publicId != null) {
+                            try {
+                                cloudinaryService.eliminarImagen(publicId);
+                            } catch (Exception e) {
+                                System.out.println("No se pudo eliminar de Cloudinary: " + e.getMessage());
+                            }
+                        }
+                    }
+                    productoImagenRepository.deleteByProductoId(producto.getId());
+                }
+
+                for (int i = 0; i < archivos.size(); i++) {
+                    MultipartFile file = archivos.get(i);
+                    if (file != null && !file.isEmpty()) {
+                        String url = cloudinaryService.subirImagen(file, producto.getCodigo());
+                        ProductoImagen img = ProductoImagen.builder()
+                                .producto(producto)
+                                .rutaImagen(url)
+                                .esPrincipal(i == 0)
+                                .orden(i)
+                                .build();
+                        productoImagenRepository.save(img);
+                    }
+                }
+            }
+            return;
+        }
+
+        List<ProductoImagen> existingImages = productoImagenRepository.findByProductoId(producto.getId());
+
+        java.util.Set<Long> configIds = config.stream()
+                .map(ProductoImagenRequestDTO::getId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<ProductoImagen> toDelete = existingImages.stream()
+                .filter(img -> !configIds.contains(img.getId()))
+                .collect(Collectors.toList());
+
+        for (ProductoImagen img : toDelete) {
+            String publicId = extraerPublicId(img.getRutaImagen());
+            if (publicId != null) {
+                try {
+                    cloudinaryService.eliminarImagen(publicId);
+                } catch (Exception e) {
+                    System.out.println("No se pudo eliminar de Cloudinary: " + e.getMessage());
+                }
+            }
+            productoImagenRepository.delete(img);
+        }
+
+        for (ProductoImagenRequestDTO req : config) {
+            if (req.getId() != null) {
+                ProductoImagen img = existingImages.stream()
+                        .filter(i -> i.getId().equals(req.getId()))
+                        .findFirst()
+                        .orElse(null);
+                if (img != null) {
+                    img.setEsPrincipal(req.getEsPrincipal() != null ? req.getEsPrincipal() : false);
+                    img.setOrden(req.getOrden() != null ? req.getOrden() : 0);
+                    productoImagenRepository.save(img);
+                }
+            }
+        }
+
+        for (ProductoImagenRequestDTO req : config) {
+            if (req.getId() == null) {
+                Integer fileIndex = req.getFileIndex();
+                if (fileIndex != null && archivos != null && fileIndex >= 0 && fileIndex < archivos.size()) {
+                    MultipartFile file = archivos.get(fileIndex);
+                    if (file != null && !file.isEmpty()) {
+                        String url = cloudinaryService.subirImagen(file, producto.getCodigo());
+                        ProductoImagen img = ProductoImagen.builder()
+                                .producto(producto)
+                                .rutaImagen(url)
+                                .esPrincipal(req.getEsPrincipal() != null ? req.getEsPrincipal() : false)
+                                .orden(req.getOrden() != null ? req.getOrden() : 0)
+                                .build();
+                        productoImagenRepository.save(img);
+                    }
+                }
+            }
+        }
+
+        List<ProductoImagen> updatedImages = productoImagenRepository.findByProductoId(producto.getId());
+        if (!updatedImages.isEmpty()) {
+            boolean hasCover = updatedImages.stream().anyMatch(ProductoImagen::getEsPrincipal);
+            if (!hasCover) {
+                updatedImages.sort(Comparator.comparing((ProductoImagen img) -> img.getOrden() != null ? img.getOrden() : 0)
+                        .thenComparing((ProductoImagen img) -> img.getId() != null ? img.getId() : 0L));
+                ProductoImagen first = updatedImages.get(0);
+                first.setEsPrincipal(true);
+                productoImagenRepository.save(first);
+            }
+        }
     }
 }

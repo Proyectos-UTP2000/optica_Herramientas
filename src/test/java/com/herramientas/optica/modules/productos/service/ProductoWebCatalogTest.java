@@ -19,9 +19,12 @@ import com.herramientas.optica.modules.productos.model.Categoria;
 import com.herramientas.optica.modules.productos.model.Marca;
 import com.herramientas.optica.modules.productos.model.TipoProducto;
 import com.herramientas.optica.modules.productos.model.Unidad;
+import com.herramientas.optica.modules.productos.model.Etiqueta;
 import com.herramientas.optica.modules.productos.repository.CategoriaRepository;
 import com.herramientas.optica.modules.productos.repository.MarcaRepository;
 import com.herramientas.optica.modules.productos.repository.UnidadRepository;
+import com.herramientas.optica.modules.productos.repository.EtiquetaRepository;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,6 +43,9 @@ class ProductoWebCatalogTest {
     @Autowired
     private UnidadRepository unidadRepository;
 
+    @Autowired
+    private EtiquetaRepository etiquetaRepository;
+
     @Test
     void crearProductoGeneraSlugAutomaticoYCamposWeb() throws Exception {
         Categoria cat = crearCategoriaMock();
@@ -54,10 +60,13 @@ class ProductoWebCatalogTest {
                 uni.getId(),
                 uni.getId()
         );
+        Etiqueta e1 = etiquetaRepository.save(Etiqueta.builder().nombre("PREMIUM").estado(1).build());
+        Etiqueta e2 = etiquetaRepository.save(Etiqueta.builder().nombre("UV400").estado(1).build());
+
         req.setVisibleWeb(true);
         req.setDestacado(true);
         req.setDescripcionWeb("Gran lente comercial");
-        req.setEtiquetas("premium, uv400, filtro-azul");
+        req.setIdEtiquetas(List.of(e1.getId(), e2.getId()));
         req.setOrden(5);
 
         ProductoResponseDTO creado = productoService.crear(req, null);
@@ -66,7 +75,9 @@ class ProductoWebCatalogTest {
         assertThat(creado.getVisibleWeb()).isTrue();
         assertThat(creado.getDestacado()).isTrue();
         assertThat(creado.getDescripcionWeb()).isEqualTo("Gran lente comercial");
-        assertThat(creado.getEtiquetas()).isEqualTo("premium, uv400, filtro-azul");
+        assertThat(creado.getEtiquetas()).hasSize(2);
+        assertThat(creado.getEtiquetas().stream().map(e -> e.getNombre()).collect(Collectors.toList()))
+                .containsExactlyInAnyOrder("PREMIUM", "UV400");
         assertThat(creado.getOrden()).isEqualTo(5);
     }
 

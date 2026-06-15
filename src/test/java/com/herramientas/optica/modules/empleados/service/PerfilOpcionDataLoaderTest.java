@@ -51,7 +51,7 @@ class PerfilOpcionDataLoaderTest {
         assertThat(rutas)
                 .contains("/clientes", "/cajas", "/inventario", "/proveedores", "/compras", "/ventas",
                         "/reportes/caja", "/reportes/kardex", "/reportes/ventas", "/reportes/compras",
-                        "/catalogo-web", "/cotizaciones")
+                        "/catalogo-web", "/cotizaciones", "/etiquetas")
                 .doesNotContain("/reportes/bajo-stock");
     }
 }
