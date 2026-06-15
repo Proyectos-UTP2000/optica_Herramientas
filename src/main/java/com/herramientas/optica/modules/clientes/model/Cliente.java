@@ -66,6 +66,9 @@ public class Cliente {
     @JoinColumn(name = "id_tipodocumento", nullable = false)
     private TipoDocumento tipoDocumento;
 
+    @Column(name = "cli_contrasena", length = 255)
+    private String contrasena;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

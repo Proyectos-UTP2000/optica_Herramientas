@@ -50,6 +50,13 @@ public class Cotizacion {
     @Column(name = "coti_observaciones", length = 500)
     private String observaciones;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente_usuario")
+    private com.herramientas.optica.modules.clientes.model.Cliente clienteUsuario;
+
+    @Column(name = "coti_direccion", length = 255)
+    private String direccion;
+
     @OneToMany(mappedBy = "cotizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     @ToString.Exclude
