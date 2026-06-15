@@ -1,0 +1,7 @@
+ALTER TABLE producto
+ADD COLUMN produc_visible_web TINYINT(1) NOT NULL DEFAULT 0,
+ADD COLUMN produc_destacado TINYINT(1) NOT NULL DEFAULT 0,
+ADD COLUMN produc_slug VARCHAR(255) UNIQUE NULL,
+ADD COLUMN produc_descripcion_web TEXT NULL,
+ADD COLUMN produc_etiquetas VARCHAR(500) NULL,
+ADD COLUMN produc_orden INT NOT NULL DEFAULT 0;
