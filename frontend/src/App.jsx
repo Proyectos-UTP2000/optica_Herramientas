@@ -29,8 +29,7 @@ import CatalogoWeb from "./pages/CatalogoWeb";
 import Etiquetas from "./pages/Etiquetas";
 import ContenidoWeb from "./pages/ContenidoWeb";
 import CotizacionesAdmin from "./pages/CotizacionesAdmin";
-import PublicLayout from "./layouts/PublicLayout";
-import CatalogoPublico from "./pages/public/CatalogoPublico";
+
 
 function App() {
   const [opciones, setOpciones] = useState([]);
@@ -77,11 +76,7 @@ function App() {
           }
         />
 
-        <Route path="/web" element={<PublicLayout />}>
-          <Route index element={<Navigate to="/web/catalogo" replace />} />
-          <Route path="catalogo" element={<CatalogoPublico />} />
-        </Route>
-        <Route path="/catalogo" element={<Navigate to="/web/catalogo" replace />} />
+
 
         <Route
           path="/"
