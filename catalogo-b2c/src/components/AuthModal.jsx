@@ -1,17 +1,25 @@
 import { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 import { Toast } from "../utils/alerts";
-import { X, Eye, EyeSlash } from "react-bootstrap-icons";
+import {
+  X,
+  Eye,
+  EyeSlash,
+  CheckCircleFill,
+  XCircleFill,
+} from "react-bootstrap-icons";
 
 const AuthModal = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(true); // true = login, false = register
+  const [authView, setAuthView] = useState("login"); // "login" | "register" | "forgot" | "reset"
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Form states
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
 
   // Register additional states
   const [nombre, setNombre] = useState("");
@@ -22,10 +30,31 @@ const AuthModal = () => {
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
 
+  // Recovery code state
+  const [codigo, setCodigo] = useState("");
+
+  // Validation rules for password complexity
+  const passwordToValidate =
+    authView === "register" || authView === "reset" ? contrasena : "";
+  const hasMinLength = passwordToValidate.length >= 8;
+  const hasUppercase = /[A-Z]/.test(passwordToValidate);
+  const hasLowercase = /[a-z]/.test(passwordToValidate);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_\-+=\[\]~;\/\\]/.test(
+    passwordToValidate,
+  );
+  const passwordsMatch = contrasena === confirmarPassword && contrasena !== "";
+
+  const passwordValida =
+    hasMinLength &&
+    hasUppercase &&
+    hasLowercase &&
+    hasSpecialChar &&
+    (authView === "register" ? true : passwordsMatch); // For registration, we can just require matching if they confirm it, or let's add confirm field for registration too!
+
   useEffect(() => {
     const handleOpen = () => {
       setIsOpen(true);
-      setIsLogin(true);
+      setAuthView("login");
     };
     window.addEventListener("open-login-modal", handleOpen);
     return () => {
@@ -38,6 +67,7 @@ const AuthModal = () => {
     // Reset form
     setCorreo("");
     setContrasena("");
+    setConfirmarPassword("");
     setNombre("");
     setApellidoPaterno("");
     setApellidoMaterno("");
@@ -45,13 +75,14 @@ const AuthModal = () => {
     setNumeroDocumento("");
     setDireccion("");
     setTelefono("");
+    setCodigo("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isLogin) {
+      if (authView === "login") {
         // Login flow
         const response = await api.post("/api/v1/auth/cliente/login", {
           username: correo,
@@ -65,7 +96,17 @@ const AuthModal = () => {
         Toast.fire({ icon: "success", title: "Sesión iniciada con éxito" });
         window.dispatchEvent(new Event("cliente-session-changed"));
         handleClose();
-      } else {
+      } else if (authView === "register") {
+        // Register password validation
+        if (!passwordValida) {
+          Toast.fire({
+            icon: "warning",
+            title: "La contraseña no cumple con los requisitos de seguridad",
+          });
+          setLoading(false);
+          return;
+        }
+
         // Register flow
         const payload = {
           nombre,
@@ -83,8 +124,47 @@ const AuthModal = () => {
           icon: "success",
           title: "Registro exitoso. Ahora puedes iniciar sesión.",
         });
-        setIsLogin(true);
+        setAuthView("login");
         setContrasena("");
+        setConfirmarPassword("");
+      } else if (authView === "forgot") {
+        // Forgot password - Request code
+        await api.post("/api/v1/auth/cliente/recuperar-contrasena", {
+          correo,
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Código enviado",
+          text: "Se ha enviado un código de verificación de 6 dígitos a tu correo registrado.",
+        });
+        setAuthView("reset");
+        setContrasena("");
+        setConfirmarPassword("");
+      } else if (authView === "reset") {
+        // Reset password with code
+        if (!passwordValida) {
+          Toast.fire({
+            icon: "warning",
+            title: "La contraseña no cumple con los requisitos de seguridad",
+          });
+          setLoading(false);
+          return;
+        }
+
+        await api.post("/api/v1/auth/cliente/restablecer-contrasena", {
+          correo,
+          codigo,
+          nuevaContrasena: contrasena,
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Contraseña restablecida",
+          text: "Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión.",
+        });
+        setAuthView("login");
+        setContrasena("");
+        setConfirmarPassword("");
+        setCodigo("");
       }
     } catch (error) {
       console.error("Auth error:", error);
@@ -101,6 +181,24 @@ const AuthModal = () => {
   };
 
   if (!isOpen) return null;
+
+  const renderRequirement = (label, met) => {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          fontSize: "12px",
+          color: met ? "#10b981" : "#ef4444",
+          marginTop: "4px",
+        }}
+      >
+        {met ? <CheckCircleFill size={12} /> : <XCircleFill size={12} />}
+        <span>{label}</span>
+      </div>
+    );
+  };
 
   const styles = {
     overlay: {
@@ -188,6 +286,8 @@ const AuthModal = () => {
       transform: "translateY(-50%)",
       color: "#64748b",
       cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
     },
     submitBtn: {
       backgroundColor: "#2563eb",
@@ -223,7 +323,10 @@ const AuthModal = () => {
       <div style={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
         <div style={styles.header}>
           <h3 style={styles.title}>
-            {isLogin ? "Iniciar Sesión" : "Crear una Cuenta"}
+            {authView === "login" && "Iniciar Sesión"}
+            {authView === "register" && "Crear una Cuenta"}
+            {authView === "forgot" && "Recuperar Contraseña"}
+            {authView === "reset" && "Restablecer Contraseña"}
           </h3>
           <button style={styles.closeBtn} onClick={handleClose}>
             <X size={24} />
@@ -231,7 +334,7 @@ const AuthModal = () => {
         </div>
 
         <form onSubmit={handleSubmit} style={styles.body}>
-          {!isLogin && (
+          {authView === "register" && (
             <>
               {/* Register Fields */}
               <div style={styles.inputGroup}>
@@ -326,58 +429,251 @@ const AuthModal = () => {
             </>
           )}
 
-          {/* Email / Username field */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Correo Electrónico *</label>
-            <input
-              type="email"
-              placeholder="ejemplo@correo.com"
-              style={styles.input}
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Password field */}
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Contraseña *</label>
-            <div style={styles.passwordWrapper}>
+          {/* Email field (shown on all except reset view, where email is already set) */}
+          {authView !== "reset" && (
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Correo Electrónico *</label>
               <input
-                type={showPassword ? "text" : "password"}
-                placeholder={
-                  isLogin ? "Ingresa tu contraseña" : "Mínimo 6 caracteres"
-                }
-                style={{ ...styles.input, paddingRight: "40px" }}
-                value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
+                type="email"
+                placeholder="ejemplo@correo.com"
+                style={styles.input}
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
                 required
-                minLength={isLogin ? undefined : 6}
+                disabled={authView === "forgot" && loading}
               />
-              <div
-                style={styles.eyeIcon}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
-              </div>
             </div>
-          </div>
+          )}
 
-          <button type="submit" style={styles.submitBtn} disabled={loading}>
-            {loading ? "Procesando..." : isLogin ? "Ingresar" : "Registrarse"}
+          {/* Code verification input (shown only on reset view) */}
+          {authView === "reset" && (
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>
+                Código de Verificación (6 dígitos) *
+              </label>
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="000000"
+                style={{
+                  ...styles.input,
+                  textAlign: "center",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  letterSpacing: "4px",
+                }}
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
+          {/* Password fields (shown on login, register, and reset views) */}
+          {authView !== "forgot" && (
+            <>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  {authView === "reset" ? "Nueva Contraseña *" : "Contraseña *"}
+                </label>
+                <div style={styles.passwordWrapper}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder={
+                      authView === "login"
+                        ? "Ingresa tu contraseña"
+                        : "Mínimo 8 caracteres"
+                    }
+                    style={{ ...styles.input, paddingRight: "40px" }}
+                    value={contrasena}
+                    onChange={(e) => setContrasena(e.target.value)}
+                    required
+                  />
+                  <div
+                    style={styles.eyeIcon}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+                  </div>
+                </div>
+              </div>
+
+              {(authView === "register" || authView === "reset") && (
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Confirmar Contraseña *</label>
+                  <div style={styles.passwordWrapper}>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Repite tu contraseña"
+                      style={{ ...styles.input, paddingRight: "40px" }}
+                      value={confirmarPassword}
+                      onChange={(e) => setConfirmarPassword(e.target.value)}
+                      required
+                    />
+                    <div
+                      style={styles.eyeIcon}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <EyeSlash size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Password strength checks */}
+              {(authView === "register" || authView === "reset") && (
+                <div
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #cbd5e1",
+                  }}
+                >
+                  {renderRequirement("Mínimo 8 caracteres", hasMinLength)}
+                  {renderRequirement(
+                    "Al menos una letra mayúscula",
+                    hasUppercase,
+                  )}
+                  {renderRequirement(
+                    "Al menos una letra minúscula",
+                    hasLowercase,
+                  )}
+                  {renderRequirement(
+                    "Al menos un carácter especial",
+                    hasSpecialChar,
+                  )}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      fontSize: "12px",
+                      color: passwordsMatch ? "#10b981" : "#ef4444",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {passwordsMatch ? (
+                      <CheckCircleFill size={12} />
+                    ) : (
+                      <XCircleFill size={12} />
+                    )}
+                    <span>Las contraseñas coinciden</span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {authView === "login" && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: "-10px",
+              }}
+            >
+              <span
+                style={{ ...styles.toggleLink, fontSize: "12px" }}
+                onClick={() => {
+                  setAuthView("forgot");
+                  setContrasena("");
+                }}
+              >
+                ¿Olvidaste tu contraseña?
+              </span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            style={{
+              ...styles.submitBtn,
+              opacity:
+                loading ||
+                ((authView === "register" || authView === "reset") &&
+                  !passwordValida)
+                  ? 0.6
+                  : 1,
+              cursor:
+                loading ||
+                ((authView === "register" || authView === "reset") &&
+                  !passwordValida)
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+            disabled={
+              loading ||
+              ((authView === "register" || authView === "reset") &&
+                !passwordValida)
+            }
+          >
+            {loading ? "Procesando..." : ""}
+            {!loading && authView === "login" && "Ingresar"}
+            {!loading && authView === "register" && "Registrarse"}
+            {!loading && authView === "forgot" && "Enviar Código"}
+            {!loading && authView === "reset" && "Restablecer Contraseña"}
           </button>
 
           <p style={styles.toggleText}>
-            {isLogin ? "¿No tienes una cuenta aún?" : "¿Ya tienes una cuenta?"}{" "}
-            <span
-              style={styles.toggleLink}
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setShowPassword(false);
-              }}
-            >
-              {isLogin ? "Regístrate" : "Inicia Sesión"}
-            </span>
+            {authView === "login" && (
+              <>
+                ¿No tienes una cuenta aún?{" "}
+                <span
+                  style={styles.toggleLink}
+                  onClick={() => setAuthView("register")}
+                >
+                  Regístrate
+                </span>
+              </>
+            )}
+            {authView === "register" && (
+              <>
+                ¿Ya tienes una cuenta?{" "}
+                <span
+                  style={styles.toggleLink}
+                  onClick={() => setAuthView("login")}
+                >
+                  Inicia Sesión
+                </span>
+              </>
+            )}
+            {authView === "forgot" && (
+              <span
+                style={styles.toggleLink}
+                onClick={() => setAuthView("login")}
+              >
+                Volver a Iniciar Sesión
+              </span>
+            )}
+            {authView === "reset" && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "0 10px",
+                }}
+              >
+                <span
+                  style={styles.toggleLink}
+                  onClick={() => setAuthView("forgot")}
+                >
+                  Reenviar Código
+                </span>
+                <span
+                  style={styles.toggleLink}
+                  onClick={() => setAuthView("login")}
+                >
+                  Volver a Iniciar Sesión
+                </span>
+              </div>
+            )}
           </p>
         </form>
       </div>
