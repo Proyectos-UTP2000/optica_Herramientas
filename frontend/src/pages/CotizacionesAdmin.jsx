@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import { Toast } from "../utils/alerts";
 import {
@@ -19,6 +20,7 @@ const formatoMoneda = (valor) =>
   });
 
 const CotizacionesAdmin = () => {
+  const navigate = useNavigate();
   const [cotizaciones, setCotizaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
@@ -711,6 +713,23 @@ const CotizacionesAdmin = () => {
                 >
                   <Whatsapp /> Contactar WhatsApp
                 </button>
+
+                {(seleccionada.estado === "PENDIENTE" ||
+                  seleccionada.estado === "CONTACTADO") && (
+                  <button
+                    style={{
+                      ...styles.btnCerrar,
+                      backgroundColor: "#2563eb",
+                      color: "#fff",
+                      border: "none",
+                    }}
+                    onClick={() => {
+                      navigate(`/ventas?cotizacionId=${seleccionada.id}`);
+                    }}
+                  >
+                    Facturar Venta
+                  </button>
+                )}
 
                 {seleccionada.estado === "PENDIENTE" && (
                   <button
