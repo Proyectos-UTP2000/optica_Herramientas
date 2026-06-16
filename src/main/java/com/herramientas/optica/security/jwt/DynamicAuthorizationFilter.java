@@ -66,7 +66,7 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (path.equals("/api/v1/dashboard/stats")) {
+        if (path.startsWith("/api/v1/dashboard/")) {
             filterChain.doFilter(request, response);
             return;
         }
