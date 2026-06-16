@@ -36,7 +36,6 @@ public final class OpcionCatalog {
             new OpcionDefinition("Categorías", "/categorias", "IconCategorias", 3, "Inventario", true, true),
             new OpcionDefinition("Marcas", "/marcas", "IconMarcas", 4, "Inventario", true, true),
             new OpcionDefinition("Unidades", "/unidades", "IconUnidades", 5, "Inventario", true, true),
-            new OpcionDefinition("Etiquetas", "/etiquetas", "IconCategorias", 6, "Inventario", true, true),
 
             new OpcionDefinition("Proveedor", "/proveedores", "IconDashboard", 1, "Proveedor/Compras", true, true),
             new OpcionDefinition("Compras", "/compras", "IconCompras", 2, "Proveedor/Compras", true, true),
@@ -47,9 +46,10 @@ public final class OpcionCatalog {
             new OpcionDefinition("Compras por Proveedor", "/reportes/compras", "IconCompras", 4, "Reportes", true, true),
                 //new OpcionDefinition("Productos Bajo Stock", "/reportes/bajo-stock", "IconInventario", 5, "Reportes", false),
 
-            new OpcionDefinition("Catálogo Web", "/catalogo-web", "IconInventario", 1, "Gestión Web", true, true),
-            new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 2, "Gestión Web", true, true),
-            new OpcionDefinition("Contenido Web", "/contenido-web", "IconGestionWeb", 3, "Gestión Web", true, true));
+            new OpcionDefinition("Contenido Web", "/contenido-web", "IconGestionWeb", 1, "Gestión Web", true, true),
+            new OpcionDefinition("Catálogo Web", "/catalogo-web", "IconInventario", 2, "Gestión Web", true, true),
+            new OpcionDefinition("Cotizaciones", "/cotizaciones", "IconVentas", 3, "Gestión Web", true, true),
+            new OpcionDefinition("Etiquetas", "/etiquetas", "IconCategorias", 4, "Gestión Web", true, true));
     }
 
     public record OpcionDefinition(String nombre, String ruta, String icono, Integer orden, String padreNombre,

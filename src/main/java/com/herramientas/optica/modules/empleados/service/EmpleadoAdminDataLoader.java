@@ -54,7 +54,7 @@ public class EmpleadoAdminDataLoader implements ApplicationRunner {
                 .apellidoPaterno("")
                 .apellidoMaterno("")
                 .correo("admin@ejemplo.com")
-                .contrasena(passwordEncoder.encode("admin"))
+                .contrasena(passwordEncoder.encode("Admin123456"))
                 .telefono("1")
                 .direccion("")
                 .estado(1)
