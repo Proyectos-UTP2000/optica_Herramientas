@@ -9,4 +9,5 @@ public class CategoriaResponseDTO {
     private Long id;
     private String nombre;
     private Integer estado;
+    private Long cantidadProductosRelacionados;
 }

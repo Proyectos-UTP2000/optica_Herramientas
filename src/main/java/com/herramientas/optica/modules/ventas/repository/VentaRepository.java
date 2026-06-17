@@ -54,4 +54,31 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
             @Param("productoTexto") String productoTexto,
             @Param("ventaId") Long ventaId,
             @Param("medioPago") com.herramientas.optica.modules.ventas.model.MedioPagoVenta medioPago);
+
+    @Query("""
+            SELECT d.producto.nombre as name, SUM(d.cantidad) as qty
+            FROM VentaDetalle d
+            WHERE d.venta.estado = 1
+            GROUP BY d.producto.id, d.producto.nombre
+            ORDER BY SUM(d.cantidad) DESC
+            """)
+    List<Object[]> findTopSellingProducts(org.springframework.data.domain.Pageable pageable);
+
+    @Query("""
+            SELECT p.marca.nombre, SUM(d.cantidad * d.precioUnitario), SUM(d.cantidad * COALESCE(p.costo, 0))
+            FROM VentaDetalle d
+            JOIN d.producto p
+            WHERE d.venta.estado = 1
+            GROUP BY p.marca.nombre
+            """)
+    List<Object[]> findRentabilidadPorMarca();
+
+    @Query("""
+            SELECT p.categoria.nombre, SUM(d.cantidad * d.precioUnitario), SUM(d.cantidad * COALESCE(p.costo, 0))
+            FROM VentaDetalle d
+            JOIN d.producto p
+            WHERE d.venta.estado = 1
+            GROUP BY p.categoria.nombre
+            """)
+    List<Object[]> findRentabilidadPorCategoria();
 }

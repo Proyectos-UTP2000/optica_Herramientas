@@ -9,4 +9,5 @@ public class UnidadResponseDTO {
     private Integer id;
     private String nombre;
     private Integer estado;
+    private Long cantidadProductosRelacionados;
 }

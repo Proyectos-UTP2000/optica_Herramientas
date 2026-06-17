@@ -70,4 +70,12 @@ public class ProductoRequestDTO {
 
     @Positive(message = "El factor de conversión debe ser mayor que cero")
     private Integer factorConversion;
+
+    private Boolean visibleWeb;
+    private Boolean destacado;
+    private String slug;
+    private String descripcionWeb;
+    private java.util.List<Long> idEtiquetas;
+    private Integer orden;
+    private java.util.List<ProductoImagenRequestDTO> imagenesConfig;
 }

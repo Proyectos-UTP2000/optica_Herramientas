@@ -43,10 +43,20 @@ public class UnidadService {
     @Transactional
     public UnidadResponseDTO crear(UnidadRequestDTO dto) {
         String nombre = dto.getNombre().trim().toUpperCase();
-        if (unidadRepository.existsByNombre(nombre)) {
-            throw new IllegalArgumentException("La unidad '" + nombre + "' ya está registrada.");
-        }
+        return unidadRepository.findByNombre(nombre)
+                .map(this::reactivarUnidadBorradaORechazar)
+                .orElseGet(() -> crearNuevaUnidad(nombre));
+    }
 
+    private UnidadResponseDTO reactivarUnidadBorradaORechazar(Unidad unidad) {
+        if (unidad.getEstado() != null && unidad.getEstado() == ESTADO_BORRADO) {
+            unidad.setEstado(ESTADO_ACTIVO);
+            return mapearAResponse(unidadRepository.save(unidad));
+        }
+        throw new IllegalArgumentException("La unidad '" + unidad.getNombre() + "' ya está registrada.");
+    }
+
+    private UnidadResponseDTO crearNuevaUnidad(String nombre) {
         Unidad unidad = Unidad.builder()
                 .nombre(nombre)
                 .estado(ESTADO_ACTIVO)
@@ -79,7 +89,7 @@ public class UnidadService {
         }
 
         if (unidad.getEstado() == ESTADO_ACTIVO) {
-            long conteo = productoRepository.countByUnidadVentaIdOrUnidadCompraIdAndEstadoNot(id, id, ESTADO_BORRADO);
+            long conteo = productoRepository.countRelacionadosPorUnidad(id, ESTADO_BORRADO);
             if (conteo > 0) {
                 // Si tiene productos, pasamos a estado 2 (En desuso)
                 unidad.setEstado(ESTADO_INACTIVO);
@@ -98,7 +108,7 @@ public class UnidadService {
         Unidad unidad = unidadRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Unidad no encontrada."));
 
-        long conteo = productoRepository.countByUnidadVentaIdOrUnidadCompraIdAndEstadoNot(id, id, ESTADO_BORRADO);
+        long conteo = productoRepository.countRelacionadosPorUnidad(id, ESTADO_BORRADO);
         if (conteo > 0) {
             throw new IllegalStateException("No se puede eliminar la unidad '" + unidad.getNombre() +
                     "' porque hay productos que dependen de ella.");
@@ -113,6 +123,7 @@ public class UnidadService {
                 .id(unidad.getId())
                 .nombre(unidad.getNombre())
                 .estado(unidad.getEstado())
+                .cantidadProductosRelacionados(productoRepository.countRelacionadosPorUnidad(unidad.getId(), ESTADO_BORRADO))
                 .build();
     }
 }

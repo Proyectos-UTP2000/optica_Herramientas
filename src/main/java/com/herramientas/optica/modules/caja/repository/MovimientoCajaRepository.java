@@ -24,4 +24,6 @@ public interface MovimientoCajaRepository extends JpaRepository<MovimientoCaja, 
               AND m.anulado = false
             """)
     BigDecimal sumarMontoPorCajaYTipo(@Param("cajaId") Long cajaId, @Param("tipo") TipoMovimientoCaja tipo);
+
+    List<MovimientoCaja> findByAnuladoFalseAndFechaAfterOrderByFechaAsc(java.time.LocalDateTime desde);
 }

@@ -16,13 +16,35 @@ import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final EmpleadoRepository empleadoRepository;
+    private final com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository;
 
-    public CustomUserDetailsService(EmpleadoRepository empleadoRepository) {
+    public CustomUserDetailsService(EmpleadoRepository empleadoRepository,
+                                    com.herramientas.optica.modules.clientes.repository.ClienteRepository clienteRepository) {
         this.empleadoRepository = empleadoRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (username != null && username.contains("@")) {
+            com.herramientas.optica.modules.clientes.model.Cliente cliente = clienteRepository.findByCorreo(username)
+                    .filter(c -> c.getEstado() != 0)
+                    .orElseThrow(() -> new UsernameNotFoundException("Cliente no encontrado o eliminado"));
+
+            if (cliente.getEstado() == 2) {
+                throw new IllegalStateException("Su cuenta se encuentra deshabilitada. Contacte al administrador.");
+            }
+            if (cliente.getContrasena() == null) {
+                throw new IllegalStateException("Esta cuenta de cliente no tiene acceso web configurado.");
+            }
+
+            return new User(
+                    cliente.getCorreo(),
+                    cliente.getContrasena(),
+                    Collections.singletonList(new SimpleGrantedAuthority("CLIENTE"))
+            );
+        }
+
         // se buca al empleado, si llega a estar eliminado o no existe, se lanza
         // excepcion
         Empleado empleado = empleadoRepository.findByUsername(username)

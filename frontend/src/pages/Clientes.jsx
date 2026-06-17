@@ -3,7 +3,6 @@ import axios from "axios";
 import { EyeFill, PencilSquare, Trash3 } from "react-bootstrap-icons";
 
 import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
-import ToggleEstado from "../components/ui/ToggleEstado";
 import ModalCrearCliente from "./clientes/ModalCrearCliente";
 import ModalEditarCliente from "./clientes/ModalEditarCliente";
 import ModalVerCliente from "./clientes/ModalVerCliente";
@@ -26,9 +25,9 @@ const Clientes = () => {
   const [filtroTipoPersona, setFiltroTipoPersona] = useState("");
   const [filtroContacto, setFiltroContacto] = useState("");
 
-  const filtrosActivosCount = 
-    (filtroEstado ? 1 : 0) + 
-    (filtroTipoPersona ? 1 : 0) + 
+  const filtrosActivosCount =
+    (filtroEstado ? 1 : 0) +
+    (filtroTipoPersona ? 1 : 0) +
     (filtroContacto ? 1 : 0);
 
   const limpiarFiltros = () => {
@@ -122,7 +121,7 @@ const Clientes = () => {
       c.correo?.toLowerCase().includes(t) ||
       c.numeroDocumento?.includes(t);
     const matchesEstado = !filtroEstado || String(c.estado) === filtroEstado;
-    
+
     let matchesTipoPersona = true;
     if (filtroTipoPersona === "NATURAL") {
       matchesTipoPersona = c.numeroDocumento?.trim().length === 8;
@@ -139,7 +138,9 @@ const Clientes = () => {
       matchesContacto = !c.correo?.trim() && !c.telefono?.trim();
     }
 
-    return matchesSearch && matchesEstado && matchesTipoPersona && matchesContacto;
+    return (
+      matchesSearch && matchesEstado && matchesTipoPersona && matchesContacto
+    );
   });
 
   const totalPaginas = Math.max(
@@ -171,22 +172,36 @@ const Clientes = () => {
             onClick={() => setShowFiltros(!showFiltros)}
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
             {showFiltros ? "Ocultar Filtros" : "Filtros"}
             {filtrosActivosCount > 0 && (
-              <span style={{
-                background: "var(--primary-color, #3b82f6)",
-                color: "white",
-                borderRadius: "50%",
-                padding: "1px 6px",
-                fontSize: "11px",
-                fontWeight: "bold"
-              }}>
+              <span
+                style={{
+                  background: "var(--primary-color, #3b82f6)",
+                  color: "white",
+                  borderRadius: "50%",
+                  padding: "1px 6px",
+                  fontSize: "11px",
+                  fontWeight: "bold",
+                }}
+              >
                 {filtrosActivosCount}
               </span>
             )}
           </button>
-          <button className="btn-primary" onClick={() => setShowModalCrear(true)}>
+          <button
+            className="btn-primary"
+            onClick={() => setShowModalCrear(true)}
+          >
             + Nuevo Cliente
           </button>
         </div>
@@ -219,29 +234,34 @@ const Clientes = () => {
               setBusqueda(e.target.value);
               setPaginaActual(1);
             }}
-            placeholder="Nombre, DNI o correo..."
+            placeholder="Nombre, DNI, RUC o correo..."
           />
         </div>
       </div>
 
       {showFiltros && (
-        <div style={{
-          background: "#f8fafc",
-          border: "1px solid var(--border-color)",
-          borderRadius: "8px",
-          padding: "16px",
-          marginBottom: "15px",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "16px",
-          alignItems: "end"
-        }}>
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            padding: "16px",
+            marginBottom: "15px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px",
+            alignItems: "end",
+          }}
+        >
           <div>
             <label className="label-control">Estado</label>
             <select
               className="input-control"
               value={filtroEstado}
-              onChange={(e) => { setFiltroEstado(e.target.value); setPaginaActual(1); }}
+              onChange={(e) => {
+                setFiltroEstado(e.target.value);
+                setPaginaActual(1);
+              }}
             >
               <option value="">Todos</option>
               <option value="1">Activos</option>
@@ -253,7 +273,10 @@ const Clientes = () => {
             <select
               className="input-control"
               value={filtroTipoPersona}
-              onChange={(e) => { setFiltroTipoPersona(e.target.value); setPaginaActual(1); }}
+              onChange={(e) => {
+                setFiltroTipoPersona(e.target.value);
+                setPaginaActual(1);
+              }}
             >
               <option value="">Todos</option>
               <option value="NATURAL">Persona Natural (DNI)</option>
@@ -265,7 +288,10 @@ const Clientes = () => {
             <select
               className="input-control"
               value={filtroContacto}
-              onChange={(e) => { setFiltroContacto(e.target.value); setPaginaActual(1); }}
+              onChange={(e) => {
+                setFiltroContacto(e.target.value);
+                setPaginaActual(1);
+              }}
             >
               <option value="">Todos</option>
               <option value="CORREO">Tiene Correo Registrado</option>
@@ -274,7 +300,11 @@ const Clientes = () => {
             </select>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <button className="btn-secondary" onClick={limpiarFiltros} style={{ width: "100%", height: "38px" }}>
+            <button
+              className="btn-secondary"
+              onClick={limpiarFiltros}
+              style={{ width: "100%", height: "38px" }}
+            >
               Limpiar Filtros
             </button>
           </div>
@@ -358,7 +388,11 @@ const Clientes = () => {
                         cambiarEstado(c.id);
                       }}
                     >
-                      <input type="checkbox" readOnly checked={c.estado === 1} />
+                      <input
+                        type="checkbox"
+                        readOnly
+                        checked={c.estado === 1}
+                      />
                       <span className="toggle-track" />
                       <span className="toggle-label">
                         {c.estado === 1 ? "Activo" : "Inactivo"}

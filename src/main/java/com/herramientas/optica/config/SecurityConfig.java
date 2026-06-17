@@ -1,7 +1,11 @@
 package com.herramientas.optica.config;
 
+import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
+import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
+import com.herramientas.optica.security.jwt.DynamicAuthorizationFilter;
+import com.herramientas.optica.security.jwt.JwtAuthenticationFilter;
+import com.herramientas.optica.security.service.CustomUserDetailsService;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +24,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository;
-import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
-import com.herramientas.optica.security.jwt.DynamicAuthorizationFilter;
-import com.herramientas.optica.security.jwt.JwtAuthenticationFilter;
-import com.herramientas.optica.security.service.CustomUserDetailsService;
-
 @Configuration
 @EnableWebSecurity
 @org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -36,20 +34,30 @@ public class SecurityConfig {
     private final EmpleadoRepository empleadoRepository;
     private final OpcionRepository opcionRepository;
     private final String frontendUrl;
+    private final String catalogoUrl;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomUserDetailsService userDetailsService, 
-                        EmpleadoRepository empleadoRepository, OpcionRepository opcionRepository,
-                        @Value("${app.frontend.url}") String frontendUrl) {
+    public SecurityConfig(
+        JwtAuthenticationFilter jwtAuthFilter,
+        CustomUserDetailsService userDetailsService,
+        EmpleadoRepository empleadoRepository,
+        OpcionRepository opcionRepository,
+        @Value("${app.frontend.url}") String frontendUrl,
+        @Value("${app.catalogo.url}") String catalogoUrl
+    ) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
         this.empleadoRepository = empleadoRepository;
         this.opcionRepository = opcionRepository;
         this.frontendUrl = frontendUrl;
+        this.catalogoUrl = catalogoUrl;
     }
 
     @Bean
     public DynamicAuthorizationFilter dynamicAuthorizationFilter() {
-        return new DynamicAuthorizationFilter(empleadoRepository, opcionRepository);
+        return new DynamicAuthorizationFilter(
+            empleadoRepository,
+            opcionRepository
+        );
     }
 
     @Bean
@@ -59,7 +67,9 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(
+            userDetailsService
+        );
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
@@ -67,42 +77,62 @@ public class SecurityConfig {
 
     // admin
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+        AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of(frontendUrl));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        corsConfiguration.setAllowedOrigins(List.of(frontendUrl, catalogoUrl));
+        corsConfiguration.setAllowedMethods(
+            List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        );
+        corsConfiguration.setAllowedHeaders(
+            List.of("Authorization", "Content-Type")
+        );
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", corsConfiguration);
         return source;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+        throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable())
 
-                // Rutas a los que cualquiera tenga accesso Cualquiera puede intentar iniciar
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**").permitAll()
-                        // Cualquier otra ruta requiere autenticación
-                        .anyRequest().authenticated())
+            // Rutas a los que cualquiera tenga accesso Cualquiera puede intentar iniciar
+            .authorizeHttpRequests(auth ->
+                auth
+                    .requestMatchers("/api/v1/auth/**", "/api/v1/public/**")
+                    .permitAll()
+                    // Cualquier otra ruta requiere autenticación
+                    .anyRequest()
+                    .authenticated()
+            )
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
 
-                // le decimos a Spring que use Jwt en lugar de la seguirdad de SpringBoot
-                // tradicional
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(dynamicAuthorizationFilter(), JwtAuthenticationFilter.class);
+            // le decimos a Spring que use Jwt en lugar de la seguirdad de SpringBoot
+            // tradicional
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(
+                jwtAuthFilter,
+                UsernamePasswordAuthenticationFilter.class
+            )
+            .addFilterAfter(
+                dynamicAuthorizationFilter(),
+                JwtAuthenticationFilter.class
+            );
 
         return http.build();
     }

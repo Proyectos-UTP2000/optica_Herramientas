@@ -1,12 +1,12 @@
-import axios from 'axios';
-import { mostrarAlerta } from '../utils/alerts';
+import axios from "axios";
+import { mostrarAlerta } from "../utils/alerts";
 
 const api = axios.create({
-  baseURL: '' 
+  baseURL: "",
 });
 
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -23,19 +23,18 @@ api.interceptors.response.use(
       if (status === 401) {
         // Token expirado o inválido -> Logout forzado
         localStorage.clear();
-        window.location.href = '/login';
-      } 
-      else if (status === 403) {
+        window.location.href = "/login";
+      } else if (status === 403) {
         // Sin permisos para la acción -> Alerta y mantener sesión
         mostrarAlerta(
-          'Acceso Denegado',
-          data.message || 'No tienes permisos para realizar esta acción.',
-          'error'
+          "Acceso Denegado",
+          data.message || "No tienes permisos para realizar esta acción.",
+          "error",
         );
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

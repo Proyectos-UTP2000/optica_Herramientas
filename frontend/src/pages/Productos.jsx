@@ -51,14 +51,33 @@ const Productos = () => {
 
   return (
     <div className="container-fluid" style={{ padding: "10px 0" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
         <div>
-          <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "#0f172a" }}>
-            <ListTask style={{ marginRight: "10px", verticalAlign: "middle" }} />
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "22px",
+              fontWeight: 700,
+              color: "#0f172a",
+            }}
+          >
+            <ListTask
+              style={{ marginRight: "10px", verticalAlign: "middle" }}
+            />
             Catálogo de Productos
           </h2>
-          <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#64748b" }}>
-            Administración de monturas, cristales, lentes de contacto y accesorios de la óptica.
+          <p
+            style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#64748b" }}
+          >
+            Administración de monturas, cristales, lentes de contacto y
+            accesorios de la óptica.
           </p>
         </div>
 
@@ -72,7 +91,7 @@ const Productos = () => {
             <ArrowRepeat className={cargando ? "spin-animation" : ""} />
             Actualizar
           </button>
-          
+
           <button
             className="btn-primary"
             onClick={() => setModalCrearAbierto(true)}
@@ -84,11 +103,18 @@ const Productos = () => {
         </div>
       </div>
 
-      <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0", padding: "20px" }}>
-        <TablaProductos 
-          productos={productos} 
-          cargando={cargando} 
-          recargarTabla={cargarProductos} 
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: "12px",
+          border: "1px solid #e2e8f0",
+          padding: "20px",
+        }}
+      >
+        <TablaProductos
+          productos={productos}
+          cargando={cargando}
+          recargarTabla={cargarProductos}
           onEditarProducto={handleAbrirEditar}
           onVerProducto={handleAbrirVer}
         />

@@ -20,5 +20,6 @@ public class PerfilResponseDTO {
         private Long id;
         private String nombre;
         private String ruta;
+        private Boolean visibleEnMenu;
     }
 }

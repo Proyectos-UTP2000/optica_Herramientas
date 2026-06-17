@@ -30,4 +30,6 @@ public class OpcionRequestDTO {
 
     @PositiveOrZero(message = "El orden no puede ser negativo")
     private Integer orden;
+
+    private Boolean visibleEnMenu;
 }

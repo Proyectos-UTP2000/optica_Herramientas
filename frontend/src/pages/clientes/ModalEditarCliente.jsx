@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Toast, mostrarAlerta } from "../../utils/alerts";
 import {
@@ -8,24 +8,15 @@ import {
 } from "../../components/ui/ModalShell";
 
 const ModalEditarCliente = ({ cliente, cerrarModal, recargarTabla }) => {
-  const [correo, setCorreo] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [direccion, setDireccion] = useState("");
+  const [correo, setCorreo] = useState(() => cliente?.correo || "");
+  const [telefono, setTelefono] = useState(() => cliente?.telefono || "");
+  const [direccion, setDireccion] = useState(() => cliente?.direccion || "");
 
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState({});
 
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
-
-  // 🧠 Cargar datos del cliente
-  useEffect(() => {
-    if (cliente) {
-      setCorreo(cliente.correo || "");
-      setTelefono(cliente.telefono || "");
-      setDireccion(cliente.direccion || "");
-    }
-  }, [cliente]);
 
   if (!cliente) return null;
 

@@ -11,4 +11,5 @@ public class MarcaResponseDTO {
     private String nombre;
     private LocalDate fecha;
     private Integer estado;
+    private Long cantidadProductosRelacionados;
 }

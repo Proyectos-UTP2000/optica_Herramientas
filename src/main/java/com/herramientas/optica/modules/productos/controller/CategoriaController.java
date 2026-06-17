@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.herramientas.optica.modules.productos.dto.CategoriaRequestDTO;
 import com.herramientas.optica.modules.productos.dto.CategoriaResponseDTO;
+import com.herramientas.optica.modules.productos.dto.MigrarProductosRequestDTO;
 import com.herramientas.optica.modules.productos.service.CategoriaService;
 
 import jakarta.validation.Valid;
@@ -54,6 +55,18 @@ public class CategoriaController {
     @PatchMapping("/{id}/estado")
     public ResponseEntity<CategoriaResponseDTO> cambiarEstado(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.cambiarEstado(id));
+    }
+
+    @PatchMapping("/{id}/en-desuso")
+    public ResponseEntity<CategoriaResponseDTO> marcarEnDesuso(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.marcarEnDesuso(id));
+    }
+
+    @PatchMapping("/{id}/migrar-productos")
+    public ResponseEntity<CategoriaResponseDTO> migrarProductosYDesactivar(
+            @PathVariable Long id,
+            @Valid @RequestBody MigrarProductosRequestDTO dto) {
+        return ResponseEntity.ok(categoriaService.migrarProductosYDesactivar(id, dto.getDestinoId()));
     }
 
     @DeleteMapping("/{id}")

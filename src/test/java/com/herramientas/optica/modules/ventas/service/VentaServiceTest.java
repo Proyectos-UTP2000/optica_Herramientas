@@ -96,6 +96,12 @@ class VentaServiceTest {
     @Autowired
     private TipoComprobanteRepository tipoComprobanteRepository;
 
+    @Autowired
+    private com.herramientas.optica.modules.cotizaciones.repository.CotizacionRepository cotizacionRepository;
+
+    @Autowired
+    private com.herramientas.optica.modules.cotizaciones.repository.CotizacionDetalleRepository cotizacionDetalleRepository;
+
     @Test
     void emitirVentaContadoCreaDetalleSalidaInventarioEIngresoCaja() {
         Empleado empleado = crearEmpleado("ventas_contado");
@@ -383,7 +389,6 @@ class VentaServiceTest {
                 .numeroDocumento(String.format("%08d", Math.abs((username + "doc").hashCode()) % 100_000_000))
                 .perfil(perfil)
                 .idTipoDocumento(1L)
-                .idEmpresa(1L)
                 .build());
     }
 
@@ -421,5 +426,54 @@ class VentaServiceTest {
                 .factorConversion(1)
                 .estado(1)
                 .build());
+    }
+
+    @Test
+    void emitirVentaConCotizacionIdVinculaYMarcaComoProcesado() {
+        Empleado empleado = crearEmpleado("ventas_coti");
+        Cliente cliente = crearCliente("70000002", "Cliente Coti");
+        Producto producto = crearProducto("VENTA-COTI", "100.00");
+        inventarioService.inicializarProducto(producto, new BigDecimal("10"), 1);
+        CajaResponseDTO caja = cajaService.abrirCaja(aperturaRequest(empleado.getId(), "100.00"));
+
+        // Crear una cotización
+        com.herramientas.optica.modules.cotizaciones.model.Cotizacion cotizacion = cotizacionRepository.save(
+                com.herramientas.optica.modules.cotizaciones.model.Cotizacion.builder()
+                        .clienteNombre("Cliente Coti")
+                        .clienteDocumento("70000002")
+                        .totalEstimado(new BigDecimal("100.00"))
+                        .estado("PENDIENTE")
+                        .build()
+        );
+
+        cotizacionDetalleRepository.save(
+                com.herramientas.optica.modules.cotizaciones.model.CotizacionDetalle.builder()
+                        .cotizacion(cotizacion)
+                        .producto(producto)
+                        .cantidad(1)
+                        .precioLista(new BigDecimal("100.00"))
+                        .subtotal(new BigDecimal("100.00"))
+                        .build()
+        );
+
+        // Crear la petición de venta con el cotizacionId
+        VentaRequestDTO request = ventaRequest(
+                cliente.getId(),
+                empleado.getId(),
+                caja.getId(),
+                producto.getId(),
+                "1",
+                "100.00"
+        );
+        request.setCotizacionId(cotizacion.getId());
+
+        VentaResponseDTO venta = ventaService.emitirVenta(request);
+
+        assertThat(venta.getId()).isNotNull();
+
+        // Verificar que la cotización se haya actualizado a PROCESADO
+        com.herramientas.optica.modules.cotizaciones.model.Cotizacion cotiActualizada =
+                cotizacionRepository.findById(cotizacion.getId()).orElseThrow();
+        assertThat(cotiActualizada.getEstado()).isEqualTo("PROCESADO");
     }
 }

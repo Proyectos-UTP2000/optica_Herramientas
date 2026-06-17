@@ -16,4 +16,5 @@ public class OpcionResponseDTO {
     private String icono;
     private Long idPadre;
     private Integer orden;
+    private Boolean visibleEnMenu;
 }

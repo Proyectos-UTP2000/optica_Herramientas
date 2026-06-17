@@ -49,21 +49,24 @@ public class ClienteService {
     @Transactional
     public ClienteResponseDTO crearCliente(ClienteRequestDTO dto) {
 
-        Optional<Cliente> clienteExistente = clienteRepository.findByNumeroDocumento(dto.getNumeroDocumento());
+        String numeroDocumento = normalizarNumeroDocumento(dto.getNumeroDocumento());
+        Optional<Cliente> clienteExistente = clienteRepository.findByNumeroDocumento(numeroDocumento);
         if (clienteExistente.isPresent()) {
             if (clienteExistente.get().getEstado() == ESTADO_BORRADO) {
-                throw new IllegalStateException("El cliente con documento " + dto.getNumeroDocumento()
+                throw new IllegalStateException("El cliente con documento " + numeroDocumento
                         + " está eliminado. ¿Desea reactivarlo?");
             }
             throw new IllegalArgumentException(
-                    "El cliente con documento " + dto.getNumeroDocumento() + " ya se encuentra registrado.");
+                    "El cliente con documento " + numeroDocumento + " ya se encuentra registrado.");
         }
 
         TipoDocumento tipoDoc = tipoDocumentoRepository.findById(dto.getIdTipoDocumento())
                 .orElseThrow(() -> new IllegalArgumentException("El tipo de documento seleccionado no existe."));
 
+        validarLongitudDocumento(numeroDocumento, tipoDoc);
+
         Cliente.ClienteBuilder clienteBuilder = Cliente.builder()
-                .numeroDocumento(dto.getNumeroDocumento())
+                .numeroDocumento(numeroDocumento)
                 .correo(validarYNormalizarCorreo(dto.getCorreo(), null))
                 .telefono(validarYNormalizarTelefono(dto.getTelefono(), null))
                 .tipoDocumento(tipoDoc)
@@ -71,8 +74,8 @@ public class ClienteService {
         String direccionFinal = dto.getDireccion();
 
         try {
-            if (dto.getIdTipoDocumento() == 1L) {
-                DniResponse dniResponse = dniRucService.consultarDni(dto.getNumeroDocumento());
+            if (esDni(tipoDoc)) {
+                DniResponse dniResponse = dniRucService.consultarDni(numeroDocumento);
                 if (dniResponse == null || !dniResponse.isSuccess() || dniResponse.getDatos() == null) {
                     throw new IllegalStateException("La API no devolvió resultados válidos para el DNI proporcionado.");
                 }
@@ -88,8 +91,8 @@ public class ClienteService {
                                     : "NO ESPECIFICADA";
                 }
 
-            } else if (dto.getIdTipoDocumento() == 2L) {
-                RucResponse rucResponse = dniRucService.consultarRuc(dto.getNumeroDocumento());
+            } else if (esRuc(tipoDoc)) {
+                RucResponse rucResponse = dniRucService.consultarRuc(numeroDocumento);
                 if (rucResponse == null || !rucResponse.isSuccess() || rucResponse.getDatos() == null) {
                     throw new IllegalStateException("La API no devolvió resultados válidos para el RUC proporcionado.");
                 }
@@ -196,6 +199,27 @@ public class ClienteService {
             throw new IllegalStateException("Acción denegada: El cliente seleccionado se encuentra eliminado.");
         }
         return cliente;
+    }
+
+    private String normalizarNumeroDocumento(String numeroDocumento) {
+        return numeroDocumento == null ? "" : numeroDocumento.trim();
+    }
+
+    private void validarLongitudDocumento(String numeroDocumento, TipoDocumento tipoDocumento) {
+        if (esDni(tipoDocumento) && !numeroDocumento.matches("\\d{8}")) {
+            throw new IllegalArgumentException("El DNI debe tener 8 dígitos.");
+        }
+        if (esRuc(tipoDocumento) && !numeroDocumento.matches("\\d{11}")) {
+            throw new IllegalArgumentException("El RUC debe tener 11 dígitos.");
+        }
+    }
+
+    private boolean esDni(TipoDocumento tipoDocumento) {
+        return tipoDocumento.getId() == 1L || "DNI".equalsIgnoreCase(tipoDocumento.getNombre());
+    }
+
+    private boolean esRuc(TipoDocumento tipoDocumento) {
+        return tipoDocumento.getId() == 2L || "RUC".equalsIgnoreCase(tipoDocumento.getNombre());
     }
 
     private String validarYNormalizarCorreo(String correoIngresado, String correoActual) {

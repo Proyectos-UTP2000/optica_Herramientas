@@ -8,14 +8,22 @@ import {
   Divider,
 } from "../../components/ui/ModalShell";
 
+const TIPOS_DOCUMENTO = {
+  DNI: { id: 1, label: "DNI", longitud: 8, endpoint: "dni" },
+  RUC: { id: 2, label: "RUC", longitud: 11, endpoint: "ruc" },
+};
+
 const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
-  const [dni, setDni] = useState("");
-  const [datosDni, setDatosDni] = useState(null);
-  const [loadingDni, setLoadingDni] = useState(false);
+  const [tipoDocumento, setTipoDocumento] = useState("DNI");
+  const [numeroDocumento, setNumeroDocumento] = useState("");
+  const [datosConsultados, setDatosConsultados] = useState(null);
+  const [loadingDocumento, setLoadingDocumento] = useState(false);
 
   const [nombre, setNombre] = useState("");
   const [apePaterno, setApePaterno] = useState("");
   const [apeMaterno, setApeMaterno] = useState("");
+  const [razonSocial, setRazonSocial] = useState("");
+  const [direccionFiscal, setDireccionFiscal] = useState("");
 
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -27,6 +35,9 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
+  const configTipo = TIPOS_DOCUMENTO[tipoDocumento];
+  const esRuc = tipoDocumento === "RUC";
+
   const inputError = (campo) =>
     `input-control ${errores[campo] ? "border-red-500" : ""}`;
 
@@ -37,46 +48,83 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
       </span>
     );
 
-  const consultarDni = async () => {
-    if (!dni || dni.length !== 8) {
-      setErrores({ dni: "Debe tener 8 dígitos." });
+  const limpiarIdentificacion = (nuevoTipo) => {
+    setTipoDocumento(nuevoTipo);
+    setNumeroDocumento("");
+    setDatosConsultados(null);
+    setNombre("");
+    setApePaterno("");
+    setApeMaterno("");
+    setRazonSocial("");
+    setDireccionFiscal("");
+    setDireccion("");
+    setErrores({});
+  };
+
+  const consultarDocumento = async () => {
+    if (!numeroDocumento || numeroDocumento.length !== configTipo.longitud) {
+      setErrores({
+        numeroDocumento: `${configTipo.label} debe tener ${configTipo.longitud} dígitos.`,
+      });
       return;
     }
 
     setErrores({});
-    setLoadingDni(true);
+    setLoadingDocumento(true);
 
     try {
-      const res = await axios.get(`/api/v1/dni/${dni}`, { headers });
+      const res = await axios.get(
+        `/api/v1/${configTipo.endpoint}/${numeroDocumento}`,
+        { headers },
+      );
 
-      if (res.data?.success) {
-        const d = res.data.datos;
+      if (!res.data?.success || !res.data?.datos) {
+        Toast.fire({
+          icon: "error",
+          title: `${configTipo.label} no encontrado`,
+        });
+        return;
+      }
 
-        setDatosDni(d);
-        setNombre(d.nombres);
-        setApePaterno(d.ape_paterno);
-        setApeMaterno(d.ape_materno);
-        setDireccion(d.domiciliado?.direccion || "");
+      const datos = res.data.datos;
+      setDatosConsultados(datos);
+
+      if (esRuc) {
+        const razon = datos.razon_social || datos.razonSocial || "";
+        const direccionSunat = datos.domiciliado?.direccion || "";
+        setRazonSocial(razon);
+        setDireccionFiscal(direccionSunat);
+        setDireccion(direccionSunat);
       } else {
-        Toast.fire({ icon: "error", title: "DNI no encontrado" });
+        setNombre(datos.nombres || "");
+        setApePaterno(datos.ape_paterno || datos.apePaterno || "");
+        setApeMaterno(datos.ape_materno || datos.apeMaterno || "");
+        setDireccion(datos.domiciliado?.direccion || "");
       }
     } catch {
-      Toast.fire({ icon: "error", title: "Error al consultar DNI" });
+      Toast.fire({
+        icon: "error",
+        title: `Error al consultar ${configTipo.label}`,
+      });
     } finally {
-      setLoadingDni(false);
+      setLoadingDocumento(false);
     }
   };
 
   const validar = () => {
     const err = {};
 
-    if (!dni || dni.length !== 8) err.dni = "DNI inválido";
-    if (!datosDni) err.general = "Debe consultar el DNI";
+    if (!numeroDocumento || numeroDocumento.length !== configTipo.longitud) {
+      err.numeroDocumento = `${configTipo.label} inválido`;
+    }
+    if (!datosConsultados)
+      err.general = `Debe consultar el ${configTipo.label}`;
     if (correo && !correo.includes("@")) {
       err.correo = "Correo inválido";
     }
-    if (telefono && telefono.length !== 9)
+    if (telefono && telefono.length !== 9) {
       err.telefono = "Debe tener 9 dígitos";
+    }
     if (!direccion.trim()) err.direccion = "Dirección obligatoria";
 
     setErrores(err);
@@ -92,11 +140,11 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
       await axios.post(
         "/api/v1/clientes",
         {
-          numeroDocumento: dni,
+          numeroDocumento,
           correo,
           telefono,
           direccion,
-          idTipoDocumento: 1,
+          idTipoDocumento: configTipo.id,
         },
         { headers },
       );
@@ -107,11 +155,10 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
     } catch (e) {
       const msg = e.response?.data?.message || "";
 
-      // 🔁 REACTIVAR — el backend lanza este mensaje cuando estado == BORRADO (0)
       if (msg.toLowerCase().includes("reactivarlo")) {
         const confirmacion = await confirmarAccion(
           "Cliente eliminado",
-          `Este cliente se encuentra registrado pero con estado Eliminado. ¿Desea reactivarlo?`,
+          "Este cliente se encuentra registrado pero con estado Eliminado. ¿Desea reactivarlo?",
           "Sí, reactivar",
           "warning",
         );
@@ -119,11 +166,14 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
         if (confirmacion.isConfirmed) {
           try {
             await axios.patch(
-              `/api/v1/clientes/reactivar/${dni}`,
+              `/api/v1/clientes/reactivar/${numeroDocumento}`,
               {},
               { headers },
             );
-            Toast.fire({ icon: "success", title: "Cliente reactivado correctamente" });
+            Toast.fire({
+              icon: "success",
+              title: "Cliente reactivado correctamente",
+            });
             recargarTabla();
             cerrarModal();
           } catch (err2) {
@@ -134,17 +184,8 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
             );
           }
         }
-
-        // 🔁 REACTIVAR — el backend lanza este mensaje cuando estado == ACTIVO o DESHABILITADO
       } else if (msg.toLowerCase().includes("ya se encuentra registrado")) {
-        // Extraemos el estado del mensaje: "...se encuentra Activo." o "...se encuentra Deshabilitado."
-        // No se puede reactivar porque no está eliminado, solo informamos
-        mostrarAlerta(
-          "Cliente ya registrado",
-          msg,
-          "info",
-        );
-
+        mostrarAlerta("Cliente ya registrado", msg, "info");
       } else {
         mostrarAlerta("Error", msg || "No se pudo crear el cliente", "error");
       }
@@ -193,32 +234,49 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
 
       <div className="form-grid">
         <div>
+          <label className="label-control">Tipo Documento *</label>
+          <select
+            className="input-control"
+            value={tipoDocumento}
+            onChange={(e) => limpiarIdentificacion(e.target.value)}
+          >
+            <option value="DNI">DNI</option>
+            <option value="RUC">RUC</option>
+          </select>
+        </div>
+
+        <div>
           <label className="label-control">Nº Documento *</label>
 
           <div style={{ display: "flex", gap: "6px" }}>
             <input
-              className={inputError("dni")}
-              value={dni}
-              onChange={(e) =>
-                setDni(e.target.value.replace(/\D/g, "").slice(0, 8))
-              }
-              placeholder="12345678"
+              className={inputError("numeroDocumento")}
+              value={numeroDocumento}
+              onChange={(e) => {
+                setNumeroDocumento(
+                  e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, configTipo.longitud),
+                );
+                setDatosConsultados(null);
+              }}
+              placeholder={esRuc ? "20601234567" : "12345678"}
             />
 
             <button
               className="btn-secondary"
-              onClick={consultarDni}
-              disabled={loadingDni}
+              onClick={consultarDocumento}
+              disabled={loadingDocumento}
             >
-              {loadingDni ? "..." : <Search />}
+              {loadingDocumento ? "..." : <Search />}
             </button>
           </div>
 
-          {msgError("dni")}
+          {msgError("numeroDocumento")}
         </div>
       </div>
 
-      {datosDni && (
+      {datosConsultados && (
         <div
           style={{
             background: "#f0fdf4",
@@ -231,26 +289,40 @@ const ModalCrearCliente = ({ cerrarModal, recargarTabla }) => {
             fontWeight: "600",
           }}
         >
-          {nombre} {apePaterno} {apeMaterno}
+          {esRuc ? razonSocial : `${nombre} ${apePaterno} ${apeMaterno}`}
         </div>
       )}
 
-      <div className="form-grid">
-        <div>
-          <label className="label-control">Nombre</label>
-          <input className="input-control" value={nombre} disabled />
-        </div>
+      {esRuc ? (
+        <div className="form-grid">
+          <div style={{ gridColumn: "span 2" }}>
+            <label className="label-control">Razón Social</label>
+            <input className="input-control" value={razonSocial} disabled />
+          </div>
 
-        <div>
-          <label className="label-control">Apellido Paterno</label>
-          <input className="input-control" value={apePaterno} disabled />
+          <div style={{ gridColumn: "span 2" }}>
+            <label className="label-control">Dirección Fiscal</label>
+            <input className="input-control" value={direccionFiscal} disabled />
+          </div>
         </div>
+      ) : (
+        <div className="form-grid">
+          <div>
+            <label className="label-control">Nombre</label>
+            <input className="input-control" value={nombre} disabled />
+          </div>
 
-        <div>
-          <label className="label-control">Apellido Materno</label>
-          <input className="input-control" value={apeMaterno} disabled />
+          <div>
+            <label className="label-control">Apellido Paterno</label>
+            <input className="input-control" value={apePaterno} disabled />
+          </div>
+
+          <div>
+            <label className="label-control">Apellido Materno</label>
+            <input className="input-control" value={apeMaterno} disabled />
+          </div>
         </div>
-      </div>
+      )}
 
       <Divider />
 

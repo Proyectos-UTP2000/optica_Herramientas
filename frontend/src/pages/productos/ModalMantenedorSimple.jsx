@@ -3,7 +3,13 @@ import axios from "axios";
 import { Toast, mostrarAlerta } from "../../utils/alerts";
 import { ModalShell } from "../../components/ui/ModalShell";
 
-const ModalMantenedorSimple = ({ titulo, endpoint, item, cerrarModal, recargar }) => {
+const ModalMantenedorSimple = ({
+  titulo,
+  endpoint,
+  item,
+  cerrarModal,
+  recargar,
+}) => {
   const [nombre, setNombre] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
@@ -29,7 +35,11 @@ const ModalMantenedorSimple = ({ titulo, endpoint, item, cerrarModal, recargar }
     try {
       if (item) {
         // Modo Edición (PUT)
-        await axios.put(`/api/v1/${endpoint}/${item.id}`, { nombre }, { headers });
+        await axios.put(
+          `/api/v1/${endpoint}/${item.id}`,
+          { nombre },
+          { headers },
+        );
         Toast.fire({ icon: "success", title: `${titulo} actualizada` });
       } else {
         // Modo Creación (POST)
@@ -39,7 +49,11 @@ const ModalMantenedorSimple = ({ titulo, endpoint, item, cerrarModal, recargar }
       recargar();
       cerrarModal();
     } catch (err) {
-      mostrarAlerta("Error", err.response?.data?.message || "Ocurrió un error", "error");
+      mostrarAlerta(
+        "Error",
+        err.response?.data?.message || "Ocurrió un error",
+        "error",
+      );
     } finally {
       setGuardando(false);
     }
@@ -51,8 +65,14 @@ const ModalMantenedorSimple = ({ titulo, endpoint, item, cerrarModal, recargar }
       onClose={cerrarModal}
       footer={
         <>
-          <button className="btn-secondary" onClick={cerrarModal}>Cancelar</button>
-          <button className="btn-primary" onClick={handleGuardar} disabled={guardando}>
+          <button className="btn-secondary" onClick={cerrarModal}>
+            Cancelar
+          </button>
+          <button
+            className="btn-primary"
+            onClick={handleGuardar}
+            disabled={guardando}
+          >
             {guardando ? "Guardando..." : "Guardar"}
           </button>
         </>
@@ -66,7 +86,11 @@ const ModalMantenedorSimple = ({ titulo, endpoint, item, cerrarModal, recargar }
           onChange={(e) => setNombre(e.target.value)}
           placeholder={`Ej. Ingrese ${titulo.toLowerCase()}`}
         />
-        {error && <span style={{ color: "var(--danger)", fontSize: "11px" }}>{error}</span>}
+        {error && (
+          <span style={{ color: "var(--danger)", fontSize: "11px" }}>
+            {error}
+          </span>
+        )}
       </div>
     </ModalShell>
   );

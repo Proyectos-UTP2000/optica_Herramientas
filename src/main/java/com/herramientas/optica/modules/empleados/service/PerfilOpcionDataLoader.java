@@ -16,8 +16,11 @@ import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
 import com.herramientas.optica.modules.empleados.repository.PerfilRepository;
 import com.herramientas.optica.modules.empleados.service.OpcionCatalog.OpcionDefinition;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 @Component
 @Order(1)
+@ConditionalOnProperty(name = "app.seeding.enabled", havingValue = "true", matchIfMissing = true)
 public class PerfilOpcionDataLoader implements ApplicationRunner {
 
     private final OpcionRepository opcionRepository;

@@ -14,8 +14,11 @@ import com.herramientas.optica.modules.empleados.model.Opcion;
 import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
 import com.herramientas.optica.modules.empleados.service.OpcionCatalog.OpcionDefinition;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 @Component
 @Order(0)
+@ConditionalOnProperty(name = "app.seeding.enabled", havingValue = "true", matchIfMissing = true)
 public class OpcionDataLoader implements ApplicationRunner {
 
     private final OpcionRepository opcionRepository;
@@ -48,6 +51,7 @@ public class OpcionDataLoader implements ApplicationRunner {
             opcion.setRuta(definicion.ruta());
             opcion.setIcono(definicion.icono());
             opcion.setOrden(definicion.orden());
+            opcion.setVisibleEnMenu(definicion.visibleEnMenu());
             opcion.setPadre(padre);
             opcionesPorNombre.put(definicion.nombre(), opcionRepository.save(opcion));
         }

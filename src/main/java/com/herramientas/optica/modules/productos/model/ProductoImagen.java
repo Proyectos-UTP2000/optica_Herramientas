@@ -36,4 +36,8 @@ public class ProductoImagen {
     @Builder.Default
     @Column(name = "es_principal", nullable = false)
     private Boolean esPrincipal = false;
+
+    @Builder.Default
+    @Column(name = "imag_orden", nullable = false)
+    private Integer orden = 0;
 }

@@ -86,6 +86,57 @@ class ProductoServiceTest {
                 .isEqualByComparingTo("6.000");
     }
 
+
+    @Test
+    void listarTodosPriorizaProductosConCatalogosEnDesuso() throws Exception {
+        Categoria categoriaActiva = categoriaRepository.save(Categoria.builder()
+                .nombre("Categoria producto activa lista")
+                .estado(1)
+                .build());
+        Categoria categoriaEnDesuso = categoriaRepository.save(Categoria.builder()
+                .nombre("Categoria producto desuso lista")
+                .estado(2)
+                .build());
+        Marca marcaActiva = marcaRepository.save(Marca.builder()
+                .nombre("Marca producto activa lista")
+                .estado(1)
+                .build());
+        Marca marcaEnDesuso = marcaRepository.save(Marca.builder()
+                .nombre("Marca producto desuso lista")
+                .estado(2)
+                .build());
+        Unidad unidad = unidadRepository.save(Unidad.builder()
+                .nombre("UND PRODUCTO LISTA DESUSO")
+                .estado(1)
+                .build());
+
+        ProductoResponseDTO normal = productoService.crear(productoRequest(
+                "Producto normal listado",
+                "PROD-LISTA-NORMAL",
+                categoriaActiva.getId(),
+                marcaActiva.getId(),
+                unidad.getId(),
+                unidad.getId(),
+                2,
+                1), null);
+        ProductoResponseDTO revisar = productoService.crear(productoRequest(
+                "Producto revisar listado",
+                "PROD-LISTA-REVISAR",
+                categoriaEnDesuso.getId(),
+                marcaEnDesuso.getId(),
+                unidad.getId(),
+                unidad.getId(),
+                2,
+                1), null);
+
+        var productos = productoService.listarTodos();
+
+        assertThat(productos.get(0).getId()).isEqualTo(revisar.getId());
+        assertThat(productos.get(0).getCategoriaEstado()).isEqualTo(2);
+        assertThat(productos.get(0).getMarcaEstado()).isEqualTo(2);
+        assertThat(productos).extracting(ProductoResponseDTO::getId).contains(normal.getId());
+    }
+
     private ProductoRequestDTO productoRequest(String nombre, String codigo, Long categoriaId, Long marcaId,
             Integer unidadVentaId, Integer unidadCompraId, Integer stockMinimo, Integer factorConversion) {
         ProductoRequestDTO dto = new ProductoRequestDTO();

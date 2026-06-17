@@ -6,9 +6,8 @@ import { iconMap } from "../utils/iconUtils";
 const normalizarTexto = (valor) => (valor || "").toString().toLowerCase();
 
 const normalizarIdPadre = (opcion) => {
-  const idPadre = opcion.idPadre !== undefined
-    ? opcion.idPadre
-    : opcion.padre?.id;
+  const idPadre =
+    opcion.idPadre !== undefined ? opcion.idPadre : opcion.padre?.id;
 
   if (idPadre === null || idPadre === undefined || idPadre === "") {
     return null;
@@ -27,12 +26,18 @@ const ConfiguracionMenu = () => {
     setLoading(true);
     try {
       const res = await api.get("/api/v1/opciones");
-      const ordenadas = [...res.data].sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      const ordenadas = [...res.data].sort(
+        (a, b) => (a.orden || 0) - (b.orden || 0),
+      );
       setOpciones(ordenadas);
       setOpcionSeleccionadaId((actual) => actual || ordenadas[0]?.id || null);
     } catch (err) {
       console.error(err);
-      mostrarAlerta("Error", "No se pudieron cargar las opciones del menú", "error");
+      mostrarAlerta(
+        "Error",
+        "No se pudieron cargar las opciones del menú",
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -53,8 +58,9 @@ const ConfiguracionMenu = () => {
 
     return opciones.filter((opcion) => {
       const padre = opcionesPorId.get(opcion.idPadre);
-      return [opcion.nombre, opcion.ruta, opcion.icono, padre?.nombre]
-        .some((valor) => normalizarTexto(valor).includes(texto));
+      return [opcion.nombre, opcion.ruta, opcion.icono, padre?.nombre].some(
+        (valor) => normalizarTexto(valor).includes(texto),
+      );
     });
   }, [busqueda, opciones, opcionesPorId]);
 
@@ -67,7 +73,11 @@ const ConfiguracionMenu = () => {
     );
 
     return opciones
-      .filter((opcion) => !opcion.idPadre && (idsFiltrados.has(opcion.id) || idsPadreConHijos.has(opcion.id)))
+      .filter(
+        (opcion) =>
+          !opcion.idPadre &&
+          (idsFiltrados.has(opcion.id) || idsPadreConHijos.has(opcion.id)),
+      )
       .sort((a, b) => (a.orden || 0) - (b.orden || 0));
   }, [opciones, opcionesFiltradas]);
 
@@ -77,17 +87,28 @@ const ConfiguracionMenu = () => {
       if (!opcion.idPadre || !idsFiltrados.has(opcion.id)) return acc;
       const lista = acc.get(opcion.idPadre) || [];
       lista.push(opcion);
-      acc.set(opcion.idPadre, lista.sort((a, b) => (a.orden || 0) - (b.orden || 0)));
+      acc.set(
+        opcion.idPadre,
+        lista.sort((a, b) => (a.orden || 0) - (b.orden || 0)),
+      );
       return acc;
     }, new Map());
   }, [opciones, opcionesFiltradas]);
 
-  const opcionSeleccionada = opciones.find((opcion) => opcion.id === opcionSeleccionadaId);
+  const opcionSeleccionada = opciones.find(
+    (opcion) => opcion.id === opcionSeleccionadaId,
+  );
 
   useEffect(() => {
     if (!opciones.length || loading) return;
-    if (opcionSeleccionadaId && opcionesFiltradas.some((opcion) => opcion.id === opcionSeleccionadaId)) return;
-    setOpcionSeleccionadaId(opcionesFiltradas[0]?.id || opciones[0]?.id || null);
+    if (
+      opcionSeleccionadaId &&
+      opcionesFiltradas.some((opcion) => opcion.id === opcionSeleccionadaId)
+    )
+      return;
+    setOpcionSeleccionadaId(
+      opcionesFiltradas[0]?.id || opciones[0]?.id || null,
+    );
   }, [loading, opciones, opcionesFiltradas, opcionSeleccionadaId]);
 
   const handleChange = (id, field, value) => {
@@ -110,9 +131,10 @@ const ConfiguracionMenu = () => {
       cargarOpciones();
     } catch (err) {
       console.error(err);
-      const mensaje = err.response?.data?.message
-        || err.response?.data?.validations?.idPadre
-        || "No se pudo guardar el cambio";
+      const mensaje =
+        err.response?.data?.message ||
+        err.response?.data?.validations?.idPadre ||
+        "No se pudo guardar el cambio";
       mostrarAlerta("Error", mensaje, "error");
     }
   };
@@ -133,7 +155,9 @@ const ConfiguracionMenu = () => {
       <div className="menu-config-layout">
         <aside className="menu-config-tree">
           <div className="menu-config-search">
-            <label className="form-label" htmlFor="buscar-menu">Buscar opción</label>
+            <label className="form-label" htmlFor="buscar-menu">
+              Buscar opción
+            </label>
             <input
               id="buscar-menu"
               className="input-control"
@@ -159,7 +183,9 @@ const ConfiguracionMenu = () => {
                       className={`menu-tree-item menu-tree-parent ${activo ? "active" : ""}`}
                       onClick={() => setOpcionSeleccionadaId(padre.id)}
                     >
-                      <span className="menu-tree-icon">{renderIcono(padre.icono)}</span>
+                      <span className="menu-tree-icon">
+                        {renderIcono(padre.icono)}
+                      </span>
                       <span>
                         <strong>{padre.nombre}</strong>
                         <small>{padre.ruta || "Sin ruta"}</small>
@@ -188,7 +214,9 @@ const ConfiguracionMenu = () => {
 
         <section className="menu-config-editor">
           {!opcionSeleccionada ? (
-            <div className="table-empty">Selecciona una opción para editar.</div>
+            <div className="table-empty">
+              Selecciona una opción para editar.
+            </div>
           ) : (
             <>
               <div className="menu-editor-header">
@@ -196,7 +224,9 @@ const ConfiguracionMenu = () => {
                   {renderIcono(opcionSeleccionada.icono)}
                 </div>
                 <div>
-                  <span className="placeholder-kicker">Opción seleccionada</span>
+                  <span className="placeholder-kicker">
+                    Opción seleccionada
+                  </span>
                   <h2>{opcionSeleccionada.nombre}</h2>
                   <p>{opcionSeleccionada.ruta || "Sin ruta asignada"}</p>
                 </div>
@@ -204,31 +234,55 @@ const ConfiguracionMenu = () => {
 
               <div className="form-grid">
                 <div>
-                  <label className="form-label" htmlFor="nombre-menu">Nombre</label>
+                  <label className="form-label" htmlFor="nombre-menu">
+                    Nombre
+                  </label>
                   <input
                     id="nombre-menu"
                     className="input-control"
                     value={opcionSeleccionada.nombre || ""}
-                    onChange={(event) => handleChange(opcionSeleccionada.id, "nombre", event.target.value)}
+                    onChange={(event) =>
+                      handleChange(
+                        opcionSeleccionada.id,
+                        "nombre",
+                        event.target.value,
+                      )
+                    }
                   />
                 </div>
                 <div>
-                  <label className="form-label" htmlFor="ruta-menu">Ruta</label>
+                  <label className="form-label" htmlFor="ruta-menu">
+                    Ruta
+                  </label>
                   <input
                     id="ruta-menu"
                     className="input-control"
                     value={opcionSeleccionada.ruta || ""}
-                    onChange={(event) => handleChange(opcionSeleccionada.id, "ruta", event.target.value)}
+                    onChange={(event) =>
+                      handleChange(
+                        opcionSeleccionada.id,
+                        "ruta",
+                        event.target.value,
+                      )
+                    }
                     placeholder="/ruta"
                   />
                 </div>
                 <div>
-                  <label className="form-label" htmlFor="padre-menu">Sección padre</label>
+                  <label className="form-label" htmlFor="padre-menu">
+                    Sección padre
+                  </label>
                   <select
                     id="padre-menu"
                     className="input-control"
                     value={opcionSeleccionada.idPadre ?? ""}
-                    onChange={(event) => handleChange(opcionSeleccionada.id, "idPadre", event.target.value)}
+                    onChange={(event) =>
+                      handleChange(
+                        opcionSeleccionada.id,
+                        "idPadre",
+                        event.target.value,
+                      )
+                    }
                   >
                     <option value="">Sin padre</option>
                     {opciones
@@ -241,13 +295,21 @@ const ConfiguracionMenu = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="form-label" htmlFor="orden-menu">Orden</label>
+                  <label className="form-label" htmlFor="orden-menu">
+                    Orden
+                  </label>
                   <input
                     id="orden-menu"
                     type="number"
                     className="input-control"
                     value={opcionSeleccionada.orden ?? 0}
-                    onChange={(event) => handleChange(opcionSeleccionada.id, "orden", event.target.value)}
+                    onChange={(event) =>
+                      handleChange(
+                        opcionSeleccionada.id,
+                        "orden",
+                        event.target.value,
+                      )
+                    }
                   />
                 </div>
               </div>
@@ -255,12 +317,20 @@ const ConfiguracionMenu = () => {
               <div className="menu-icon-section">
                 <div className="menu-icon-section-header">
                   <div>
-                    <label className="form-label" htmlFor="icono-menu">Icono</label>
+                    <label className="form-label" htmlFor="icono-menu">
+                      Icono
+                    </label>
                     <input
                       id="icono-menu"
                       className="input-control"
                       value={opcionSeleccionada.icono || ""}
-                      onChange={(event) => handleChange(opcionSeleccionada.id, "icono", event.target.value)}
+                      onChange={(event) =>
+                        handleChange(
+                          opcionSeleccionada.id,
+                          "icono",
+                          event.target.value,
+                        )
+                      }
                       placeholder="IconDashboard"
                     />
                   </div>
@@ -271,7 +341,9 @@ const ConfiguracionMenu = () => {
                       type="button"
                       key={key}
                       className={`menu-icon-option ${opcionSeleccionada.icono === key ? "active" : ""}`}
-                      onClick={() => handleChange(opcionSeleccionada.id, "icono", key)}
+                      onClick={() =>
+                        handleChange(opcionSeleccionada.id, "icono", key)
+                      }
                     >
                       {iconMap[key]}
                       <span>{key}</span>

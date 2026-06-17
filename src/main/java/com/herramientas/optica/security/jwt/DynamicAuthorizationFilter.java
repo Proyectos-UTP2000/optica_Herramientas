@@ -47,7 +47,7 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
-        if (path.startsWith("/api/v1/auth/")) {
+        if (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/public/") || path.startsWith("/api/v1/cliente-portal/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -66,7 +66,7 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (path.equals("/api/v1/dashboard/stats")) {
+        if (path.startsWith("/api/v1/dashboard/") || path.startsWith("/api/v1/empleados/perfil/")) {
             filterChain.doFilter(request, response);
             return;
         }

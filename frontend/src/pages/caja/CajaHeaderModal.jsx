@@ -55,7 +55,10 @@ const CajaHeaderModal = ({
   const abrirCaja = async (event) => {
     event.preventDefault();
     if (!empleadoId) {
-      Toast.fire({ icon: "warning", title: "No se encontro el empleado de la sesion" });
+      Toast.fire({
+        icon: "warning",
+        title: "No se encontro el empleado de la sesion",
+      });
       return;
     }
     if (Number(montoInicial) < 0 || montoInicial === "") {
@@ -138,18 +141,38 @@ const CajaHeaderModal = ({
 
   return (
     <div style={overlayStyle} onMouseDown={onCerrar}>
-      <div style={modalStyle} onMouseDown={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid #e2e8f0" }}>
+      <div
+        style={modalStyle}
+        onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "14px 16px",
+            borderBottom: "1px solid #e2e8f0",
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <CashCoin style={{ color: "#1d4ed8" }} />
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, color: "#0f172a" }}>Caja</h3>
+              <h3 style={{ margin: 0, fontSize: 16, color: "#0f172a" }}>
+                Caja
+              </h3>
               <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>
                 {cajaActual ? "Caja abierta" : "Apertura de caja"}
               </p>
             </div>
           </div>
-          <button type="button" className="btn-secondary" onClick={onCerrar} title="Cerrar">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onCerrar}
+            title="Cerrar"
+          >
             <X />
           </button>
         </div>
@@ -166,7 +189,9 @@ const CajaHeaderModal = ({
               onChange={(event) => setMontoInicial(event.target.value)}
               autoFocus
             />
-            <label className="label-control" style={{ marginTop: 10 }}>Observaciones</label>
+            <label className="label-control" style={{ marginTop: 10 }}>
+              Observaciones
+            </label>
             <textarea
               className="input-control"
               value={observaciones}
@@ -175,7 +200,12 @@ const CajaHeaderModal = ({
               rows={3}
               style={{ resize: "vertical" }}
             />
-            <button type="submit" className="btn-primary" disabled={guardando} style={{ width: "100%", marginTop: 14 }}>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={guardando}
+              style={{ width: "100%", marginTop: 14 }}
+            >
               {guardando ? "Abriendo..." : "Abrir caja"}
             </button>
           </form>
@@ -183,32 +213,97 @@ const CajaHeaderModal = ({
 
         {cajaActual && modo === "resumen" && (
           <div style={{ padding: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 10,
+              }}
+            >
               <div style={campoStyle}>
-                <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>Inicio</div>
-                <strong style={{ color: "#0f172a", display: "flex", alignItems: "center", gap: 6 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#64748b",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Inicio
+                </div>
+                <strong
+                  style={{
+                    color: "#0f172a",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
                   <Clock /> {formatoHora(cajaActual.fechaApertura)}
                 </strong>
               </div>
               <div style={campoStyle}>
-                <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>Monto inicial</div>
-                <strong style={{ color: "#0f172a" }}>{formatoMoneda(cajaActual.montoInicial)}</strong>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#64748b",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Monto inicial
+                </div>
+                <strong style={{ color: "#0f172a" }}>
+                  {formatoMoneda(cajaActual.montoInicial)}
+                </strong>
               </div>
               <div style={campoStyle}>
-                <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>Ventas / ingresos</div>
-                <strong style={{ color: "#166534" }}>{formatoMoneda(cajaActual.totalIngresos)}</strong>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#64748b",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Ventas / ingresos
+                </div>
+                <strong style={{ color: "#166534" }}>
+                  {formatoMoneda(cajaActual.totalIngresos)}
+                </strong>
               </div>
               <div style={campoStyle}>
-                <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>Esperado</div>
-                <strong style={{ color: "#0f172a" }}>{formatoMoneda(cajaActual.montoEsperado)}</strong>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#64748b",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Esperado
+                </div>
+                <strong style={{ color: "#0f172a" }}>
+                  {formatoMoneda(cajaActual.montoEsperado)}
+                </strong>
               </div>
             </div>
 
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-              <button type="button" className="btn-secondary" onClick={onVerReporte} style={{ flex: 1 }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={onVerReporte}
+                style={{ flex: 1 }}
+              >
                 <FileText /> Reporte diario
               </button>
-              <button type="button" className="btn-primary" onClick={() => setModo("cierre")} style={{ flex: 1, background: "#dc2626" }}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setModo("cierre")}
+                style={{ flex: 1, background: "#dc2626" }}
+              >
                 Cerrar caja
               </button>
             </div>
@@ -228,9 +323,12 @@ const CajaHeaderModal = ({
               autoFocus
             />
             <div style={{ marginTop: 8, fontSize: 12, color: "#64748b" }}>
-              Esperado: <strong>{formatoMoneda(cajaActual.montoEsperado)}</strong>
+              Esperado:{" "}
+              <strong>{formatoMoneda(cajaActual.montoEsperado)}</strong>
             </div>
-            <label className="label-control" style={{ marginTop: 10 }}>Observaciones</label>
+            <label className="label-control" style={{ marginTop: 10 }}>
+              Observaciones
+            </label>
             <textarea
               className="input-control"
               value={observaciones}
@@ -240,10 +338,20 @@ const CajaHeaderModal = ({
               style={{ resize: "vertical" }}
             />
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-              <button type="button" className="btn-secondary" onClick={() => setModo("resumen")} style={{ flex: 1 }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setModo("resumen")}
+                style={{ flex: 1 }}
+              >
                 Volver
               </button>
-              <button type="submit" className="btn-primary" disabled={guardando} style={{ flex: 1, background: "#dc2626" }}>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={guardando}
+                style={{ flex: 1, background: "#dc2626" }}
+              >
                 {guardando ? "Cerrando..." : "Confirmar cierre"}
               </button>
             </div>

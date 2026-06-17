@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.herramientas.optica.modules.clientes.repository.ClienteRepository;
 import com.herramientas.optica.modules.empleados.repository.EmpleadoRepository; 
+import com.herramientas.optica.modules.productos.repository.ProductoRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,12 @@ public class DashboardController {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    @Autowired
+    private com.herramientas.optica.security.service.DashboardService dashboardService;
+
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Long>> getStats() {
         Map<String, Long> stats = new HashMap<>();
@@ -28,9 +35,14 @@ public class DashboardController {
         stats.put("totalUsuarios", empleadoRepository.count());
         stats.put("totalClientes", clienteRepository.count());
         
-        // Dejamos un valor estático o 0 para productos para no romper el frontend
-        stats.put("totalProductos", 0L); 
+        // Obtenemos el conteo real de productos
+        stats.put("totalProductos", productoRepository.count()); 
         
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/analytics")
+    public ResponseEntity<com.herramientas.optica.security.dto.DashboardAnalyticsDTO> getAnalytics() {
+        return ResponseEntity.ok(dashboardService.obtenerAnaliticas());
     }
 }

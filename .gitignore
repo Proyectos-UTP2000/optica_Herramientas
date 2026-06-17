@@ -38,6 +38,7 @@ build/
 AGENTS.md
 GEMINI.md
 .agents/
+.superpowers/
 skills-lock.json
 docs/
 

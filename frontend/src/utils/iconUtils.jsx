@@ -11,8 +11,8 @@ import {
   IconConfig,
   IconMarcas,
   IconCategorias,
-  IconUnidades
-} from '../components/ui/IconCatalog';
+  IconUnidades,
+} from "../components/ui/IconCatalog";
 
 export const iconMap = {
   IconDashboard: <IconDashboard />,

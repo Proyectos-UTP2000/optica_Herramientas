@@ -101,6 +101,10 @@ public class Venta {
     @Column(name = "fecha_vencimiento")
     private LocalDate fechaVencimiento;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cotizacion")
+    private com.herramientas.optica.modules.cotizaciones.model.Cotizacion cotizacion;
+
     @Builder.Default
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VentaDetalle> detalles = new ArrayList<>();

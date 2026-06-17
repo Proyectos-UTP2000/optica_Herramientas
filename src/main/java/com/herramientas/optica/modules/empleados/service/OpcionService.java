@@ -11,13 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class OpcionService {
 
     private final OpcionRepository opcionRepository;
-    private final OpcionDataLoader opcionDataLoader;
-    private final PerfilOpcionDataLoader perfilOpcionDataLoader;
+    private final Optional<OpcionDataLoader> opcionDataLoader;
+    private final Optional<PerfilOpcionDataLoader> perfilOpcionDataLoader;
 
     @Transactional(readOnly = true)
     public List<OpcionResponseDTO> listarTodas() {
@@ -75,13 +77,19 @@ public class OpcionService {
             opcion.setRuta(dto.getRuta());
         }
 
+        if (dto.getVisibleEnMenu() != null) {
+            opcion.setVisibleEnMenu(dto.getVisibleEnMenu());
+        }
+
         return mapToDTO(opcionRepository.save(opcion));
     }
 
     @Transactional
     public String initDefaults() {
-        String opciones = opcionDataLoader.verificarOpciones();
-        String relaciones = perfilOpcionDataLoader.verificarRelacionesPerfilOpcion();
+        String opciones = opcionDataLoader.map(OpcionDataLoader::verificarOpciones)
+                .orElse("Opciones no verificadas (seeding deshabilitado)");
+        String relaciones = perfilOpcionDataLoader.map(PerfilOpcionDataLoader::verificarRelacionesPerfilOpcion)
+                .orElse("Relaciones no verificadas (seeding deshabilitado)");
         return opciones + ". " + relaciones;
     }
 
@@ -92,6 +100,7 @@ public class OpcionService {
             .ruta(opcion.getRuta())
             .icono(opcion.getIcono())
             .orden(opcion.getOrden())
+            .visibleEnMenu(Boolean.TRUE.equals(opcion.getVisibleEnMenu()))
             .idPadre(
                 opcion.getPadre() != null ? opcion.getPadre().getId() : null
             )

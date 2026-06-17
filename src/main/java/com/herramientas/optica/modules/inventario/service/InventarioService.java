@@ -3,6 +3,7 @@ package com.herramientas.optica.modules.inventario.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import com.herramientas.optica.modules.productos.repository.ProductoRepository;
 public class InventarioService {
 
     private static final int ESTADO_ACTIVO = 1;
+    private static final int ESTADO_INACTIVO = 2;
 
     private final InventarioSaldoRepository inventarioSaldoRepository;
     private final MovimientoInventarioRepository movimientoInventarioRepository;
@@ -82,6 +84,9 @@ public class InventarioService {
     @Transactional(readOnly = true)
     public List<InventarioSaldoResponseDTO> listarSaldos() {
         return inventarioSaldoRepository.findAll().stream()
+                .sorted(Comparator
+                        .comparing((InventarioSaldo saldo) -> !requiereRevisionCatalogo(saldo.getProducto()))
+                        .thenComparing(saldo -> saldo.getProducto().getNombre(), Comparator.nullsLast(String::compareTo)))
                 .map(this::mapearSaldo)
                 .toList();
     }
@@ -326,6 +331,13 @@ public class InventarioService {
                 .productoId(producto.getId())
                 .productoNombre(producto.getNombre())
                 .productoCodigo(producto.getCodigo())
+                .categoriaId(producto.getCategoria().getId())
+                .categoriaNombre(producto.getCategoria().getNombre())
+                .categoriaEstado(producto.getCategoria().getEstado())
+                .marcaId(producto.getMarca().getId())
+                .marcaNombre(producto.getMarca().getNombre())
+                .marcaEstado(producto.getMarca().getEstado())
+                .requiereRevisionCatalogo(requiereRevisionCatalogo(producto))
                 .stockActual(saldo.getStockActual())
                 .stockMinimo(saldo.getStockMinimo())
                 .unidadVentaId(producto.getUnidadVenta().getId())
@@ -336,6 +348,16 @@ public class InventarioService {
                 .bajoStock(saldo.getStockActual().compareTo(saldo.getStockMinimo()) <= 0)
                 .updatedAt(saldo.getUpdatedAt())
                 .build();
+    }
+
+    private boolean requiereRevisionCatalogo(Producto producto) {
+        return esCatalogoEnDesusoOIndefinido(producto.getCategoria().getEstado(), producto.getCategoria().getNombre())
+                || esCatalogoEnDesusoOIndefinido(producto.getMarca().getEstado(), producto.getMarca().getNombre());
+    }
+
+    private boolean esCatalogoEnDesusoOIndefinido(Integer estado, String nombre) {
+        return (estado != null && estado == ESTADO_INACTIVO)
+                || (nombre != null && "INDEFINIDO".equalsIgnoreCase(nombre.trim()));
     }
 
     private MovimientoInventarioResponseDTO mapearMovimiento(MovimientoInventario movimiento) {

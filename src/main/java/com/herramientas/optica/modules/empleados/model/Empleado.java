@@ -30,7 +30,12 @@ public class Empleado {
     @Column(name = "emple_nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "emple_nombreuser", nullable = false, unique = true, length = 50)
+    @Column(
+        name = "emple_nombreuser",
+        nullable = false,
+        unique = true,
+        length = 50
+    )
     private String username;
 
     @Column(name = "emple_apellido_paterno", nullable = false, length = 100)
@@ -45,7 +50,12 @@ public class Empleado {
     @Column(name = "emple_contrasena", nullable = false, length = 150)
     private String contrasena;
 
-    @Column(name = "emple_telefono", nullable = false, unique = true, length = 9)
+    @Column(
+        name = "emple_telefono",
+        nullable = false,
+        unique = true,
+        length = 9
+    )
     private String telefono;
 
     @Column(name = "emple_direccion", nullable = false, length = 100)
@@ -55,7 +65,12 @@ public class Empleado {
     @Builder.Default
     private Integer estado = 1;
 
-    @Column(name = "emple_ndocumento", nullable = false, unique = true, length = 20)
+    @Column(
+        name = "emple_ndocumento",
+        nullable = false,
+        unique = true,
+        length = 20
+    )
     private String numeroDocumento;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -65,8 +80,10 @@ public class Empleado {
     @Column(name = "id_tipodocumento", nullable = false)
     private Long idTipoDocumento;
 
-    @Column(name = "id_empresa", nullable = false)
-    @Builder.Default
-    private Long idEmpresa = 1L;
 
+    @Column(name = "emple_reset_codigo", length = 6)
+    private String resetCodigo;
+
+    @Column(name = "emple_reset_expiracion")
+    private java.time.LocalDateTime resetExpiracion;
 }

@@ -1,7 +1,5 @@
 package com.herramientas.optica.modules.clientes.model;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -66,11 +65,20 @@ public class Cliente {
     @JoinColumn(name = "id_tipodocumento", nullable = false)
     private TipoDocumento tipoDocumento;
 
+    @Column(name = "cli_contrasena", length = 255)
+    private String contrasena;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "cli_reset_codigo", length = 6)
+    private String resetCodigo;
+
+    @Column(name = "cli_reset_expiracion")
+    private LocalDateTime resetExpiracion;
 
     @PrePersist
     protected void onCreate() {

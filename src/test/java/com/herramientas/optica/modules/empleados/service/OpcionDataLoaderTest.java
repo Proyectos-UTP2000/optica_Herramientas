@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.seeding.enabled=true")
 @ActiveProfiles("test")
 @Transactional
 class OpcionDataLoaderTest {
@@ -41,6 +41,12 @@ class OpcionDataLoaderTest {
         assertThat(opcionRepository.findByNombre("Catálogo Web")).isPresent()
                 .get()
                 .satisfies(opcion -> assertThat(opcion.getRuta()).isEqualTo("/catalogo-web"));
+        assertThat(opcionRepository.findByNombre("Cajas Operativas")).isPresent()
+                .get()
+                .satisfies(opcion -> {
+                    assertThat(opcion.getRuta()).isEqualTo("/cajas");
+                    assertThat(opcion.getVisibleEnMenu()).isFalse();
+                });
         assertThat(opcionRepository.findByNombre("Productos Bajo Stock")).isEmpty();
     }
 }

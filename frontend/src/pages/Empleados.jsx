@@ -5,7 +5,6 @@ import { Toast, confirmarAccion, mostrarAlerta } from "../utils/alerts";
 import ModalCrearEmpleado from "./empleados/ModalCrearEmpleado";
 import ModalEditarEmpleado from "./empleados/ModalEditarEmpleado";
 import ModalVerEmpleado from "./empleados/ModalVerEmpleado";
-import ToggleEstado from "../components/ui/ToggleEstado";
 
 const Empleados = () => {
   const [empleados, setEmpleados] = useState([]);
@@ -18,7 +17,7 @@ const Empleados = () => {
   const [showModalEditar, setShowModalEditar] = useState(false);
   const [showModalVer, setShowModalVer] = useState(false);
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
-  
+
   const [showFiltros, setShowFiltros] = useState(false);
   const [filtroPerfil, setFiltroPerfil] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
@@ -141,22 +140,36 @@ const Empleados = () => {
             onClick={() => setShowFiltros(!showFiltros)}
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
             {showFiltros ? "Ocultar Filtros" : "Filtros"}
             {filtrosActivosCount > 0 && (
-              <span style={{
-                background: "var(--primary-color, #3b82f6)",
-                color: "white",
-                borderRadius: "50%",
-                padding: "1px 6px",
-                fontSize: "11px",
-                fontWeight: "bold"
-              }}>
+              <span
+                style={{
+                  background: "var(--primary-color, #3b82f6)",
+                  color: "white",
+                  borderRadius: "50%",
+                  padding: "1px 6px",
+                  fontSize: "11px",
+                  fontWeight: "bold",
+                }}
+              >
                 {filtrosActivosCount}
               </span>
             )}
           </button>
-          <button className="btn-primary" onClick={() => setShowModalCrear(true)}>
+          <button
+            className="btn-primary"
+            onClick={() => setShowModalCrear(true)}
+          >
             + Nuevo Empleado
           </button>
         </div>
@@ -194,27 +207,34 @@ const Empleados = () => {
       </div>
 
       {showFiltros && (
-        <div style={{
-          background: "#f8fafc",
-          border: "1px solid var(--border-color)",
-          borderRadius: "8px",
-          padding: "16px",
-          marginBottom: "15px",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "16px",
-          alignItems: "end"
-        }}>
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            padding: "16px",
+            marginBottom: "15px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px",
+            alignItems: "end",
+          }}
+        >
           <div>
             <label className="label-control">Cargo / Perfil</label>
             <select
               className="input-control"
               value={filtroPerfil}
-              onChange={(e) => { setFiltroPerfil(e.target.value); setPaginaActual(1); }}
+              onChange={(e) => {
+                setFiltroPerfil(e.target.value);
+                setPaginaActual(1);
+              }}
             >
               <option value="">Todos los perfiles</option>
-              {perfiles.map(p => (
-                <option key={p.id} value={p.nombre}>{p.nombre}</option>
+              {perfiles.map((p) => (
+                <option key={p.id} value={p.nombre}>
+                  {p.nombre}
+                </option>
               ))}
             </select>
           </div>
@@ -223,7 +243,10 @@ const Empleados = () => {
             <select
               className="input-control"
               value={filtroEstado}
-              onChange={(e) => { setFiltroEstado(e.target.value); setPaginaActual(1); }}
+              onChange={(e) => {
+                setFiltroEstado(e.target.value);
+                setPaginaActual(1);
+              }}
             >
               <option value="">Todos</option>
               <option value="1">Activos</option>
@@ -231,7 +254,11 @@ const Empleados = () => {
             </select>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <button className="btn-secondary" onClick={limpiarFiltros} style={{ width: "100%", height: "38px" }}>
+            <button
+              className="btn-secondary"
+              onClick={limpiarFiltros}
+              style={{ width: "100%", height: "38px" }}
+            >
               Limpiar Filtros
             </button>
           </div>
@@ -310,7 +337,11 @@ const Empleados = () => {
                         cambiarEstado(e.id);
                       }}
                     >
-                      <input type="checkbox" readOnly checked={e.estado === 1} />
+                      <input
+                        type="checkbox"
+                        readOnly
+                        checked={e.estado === 1}
+                      />
                       <span className="toggle-track" />
                       <span className="toggle-label">
                         {e.estado === 1 ? "Activo" : "Inactivo"}

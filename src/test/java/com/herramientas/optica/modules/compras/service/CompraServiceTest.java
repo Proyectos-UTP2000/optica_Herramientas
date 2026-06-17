@@ -420,7 +420,6 @@ class CompraServiceTest {
                 .numeroDocumento(String.format("%08d", Math.abs((username + "doc").hashCode()) % 100_000_000))
                 .perfil(perfil)
                 .idTipoDocumento(1L)
-                .idEmpresa(1L)
                 .build());
     }
 

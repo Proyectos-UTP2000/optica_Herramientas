@@ -17,10 +17,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "producto")
@@ -98,6 +102,33 @@ public class Producto {
     @Builder.Default
     @jakarta.persistence.OneToMany(mappedBy = "producto", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private java.util.List<ProductoImagen> imagenes = new java.util.ArrayList<>();
+
+    @Builder.Default
+    @Column(name = "produc_visible_web", nullable = false)
+    private Boolean visibleWeb = false;
+
+    @Builder.Default
+    @Column(name = "produc_destacado", nullable = false)
+    private Boolean destacado = false;
+
+    @Column(name = "produc_slug", unique = true, length = 255)
+    private String slug;
+
+    @Column(name = "produc_descripcion_web", columnDefinition = "TEXT")
+    private String descripcionWeb;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "producto_etiqueta",
+        joinColumns = @JoinColumn(name = "id_producto"),
+        inverseJoinColumns = @JoinColumn(name = "id_etiqueta")
+    )
+    @Builder.Default
+    private Set<Etiqueta> etiquetas = new HashSet<>();
+
+    @Builder.Default
+    @Column(name = "produc_orden", nullable = false)
+    private Integer orden = 0;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

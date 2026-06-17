@@ -13,6 +13,13 @@ public class InventarioSaldoResponseDTO {
     private Long productoId;
     private String productoNombre;
     private String productoCodigo;
+    private Long categoriaId;
+    private String categoriaNombre;
+    private Integer categoriaEstado;
+    private Long marcaId;
+    private String marcaNombre;
+    private Integer marcaEstado;
+    private Boolean requiereRevisionCatalogo;
     private BigDecimal stockActual;
     private BigDecimal stockMinimo;
     private Integer unidadVentaId;

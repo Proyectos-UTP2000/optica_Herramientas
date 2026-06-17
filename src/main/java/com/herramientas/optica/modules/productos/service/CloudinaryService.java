@@ -66,4 +66,14 @@ public class CloudinaryService {
             );
         }
     }
+
+    public void eliminarImagen(String publicId) throws IOException {
+        try {
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        } catch (Exception e) {
+            System.out.println(
+                "Aviso: No se pudo eliminar la imagen con publicId " + publicId + ". Detalle: " + e.getMessage()
+            );
+        }
+    }
 }
