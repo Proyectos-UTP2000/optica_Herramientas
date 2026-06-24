@@ -29,7 +29,7 @@ const Inventario = () => {
     setCargando(true);
     const token = localStorage.getItem("token");
     try {
-      const url = "http://localhost:8080/api/v1/inventario/saldos";
+      const url = "/api/v1/inventario/saldos";
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
