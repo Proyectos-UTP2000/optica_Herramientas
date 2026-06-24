@@ -350,7 +350,7 @@ const MainLayout = ({ opciones = [], setToken }) => {
               href={
                 typeof __CATALOGO_URL__ !== "undefined"
                   ? __CATALOGO_URL__
-                  : "http://localhost:5174"
+                  : "/"
               }
               target="_blank"
               rel="noopener noreferrer"
