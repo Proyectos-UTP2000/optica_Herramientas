@@ -1,7 +1,7 @@
 services:
   mysql:
     image: "mysql:8.0"
-    container_name: optica_db
+    container_name: optica_db_prod
     restart: always
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -9,10 +9,10 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=America/Lima
-    ports:
-      - "127.0.0.1:3306:3306"
+    # Por seguridad, en producción no exponemos el puerto de la base de datos a internet.
+    # Queda accesible internamente para los contenedores de la red.
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data_prod:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: optica_backend
+    container_name: optica_backend_prod
     restart: always
     depends_on:
       mysql:
@@ -47,6 +47,8 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    # En producción el backend es accedido internamente por el proxy de Nginx de los frontends.
+    # No es necesario exponer el puerto 8080 al exterior a menos que consumas la API directamente.
     ports:
       - "127.0.0.1:8080:8080"
 
@@ -56,10 +58,13 @@ services:
       dockerfile: Dockerfile
       args:
         CATALOGO_URL: ${CATALOGO_URL}
-    container_name: optica_admin
+    container_name: optica_admin_prod
     restart: always
     depends_on:
       - backend
+    # Si usas un proxy inverso en el servidor host (como Nginx con SSL/HTTPS),
+    # es mejor enlazarlo a "127.0.0.1:4173:80" para que solo el proxy local acceda.
+    # Si quieres exponerlo directamente al puerto público 4173, déjalo como "4173:80".
     ports:
       - "4173:80"
 
@@ -67,12 +72,15 @@ services:
     build:
       context: ./catalogo-b2c
       dockerfile: Dockerfile
-    container_name: optica_catalogo
+    container_name: optica_catalogo_prod
     restart: always
     depends_on:
       - backend
+    # Si usas un proxy inverso en el servidor host (como Nginx con SSL/HTTPS),
+    # es mejor enlazarlo a "127.0.0.1:4174:80" para que solo el proxy local acceda.
+    # Si quieres exponerlo directamente al puerto público 4174, déjalo como "4174:80".
     ports:
       - "4174:80"
 
 volumes:
-  mysql_data:
+  mysql_data_prod:
