@@ -380,7 +380,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `empleado` WRITE;
 /*!40000 ALTER TABLE `empleado` DISABLE KEYS */;
 INSERT INTO `empleado` VALUES
-(1,'admin','admin','','','admin@ejemplo.com','$2a$12$KHq9.h4WnAz0rod7c1Q8NejMMfCFdSnC58sJg.LZ2nEqdisGpKqlW','1','',1,'1',1,1,1,NULL,NULL),
+(1,'admin','admin','','','admin@ejemplo.com','$2a$10$o3iSK3QpRCKU4k79OEPOE.KP7Nu7wsE7zsBxe76IsuUHRiCITF.Mm','1','',1,'1',1,1,1,NULL,NULL),
 (2,'ROGER PAUL','rvelasco','VELASCO','ZAPATA','rogervz.1710@gmail.com','$2a$10$1n21wzKLe.JkhBbTzTuN8OmiwThmHJEKvxCwEnTjDYj5BrRhqdgM6','987654321','CALLE SANTA ROSA 355',1,'72934888',1,2,1,NULL,NULL);
 /*!40000 ALTER TABLE `empleado` ENABLE KEYS */;
 UNLOCK TABLES;
