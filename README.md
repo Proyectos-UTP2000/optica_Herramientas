@@ -484,6 +484,7 @@ Cobertura incluye: autenticación JWT, módulo `webconfig` (singleton), módulo 
 - [ ] Soporte multi-sucursal
 
 ---
+# Texto sin Motivo
 
 <div align="center">
   <sub>Desarrollado como proyecto de gestión integral para ópticas · Stack: Spring Boot + React + MySQL</sub>
