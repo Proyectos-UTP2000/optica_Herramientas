@@ -27,6 +27,7 @@
 - [Seguridad](#seguridad)
 - [Migraciones de Base de Datos](#migraciones-de-base-de-datos)
 - [Tests](#tests)
+- [Gestión de Releases y Despliegue](#gestión-de-releases-y-despliegue)
 - [Decisiones de Diseño](#decisiones-de-diseño)
 - [Roadmap](#roadmap)
 
@@ -456,6 +457,15 @@ Ejecutar la suite de tests unitarios:
 Los tests usan el perfil `test` con base de datos H2 en memoria. No requieren tener Docker ni MySQL corriendo.
 
 Cobertura incluye: autenticación JWT, módulo `webconfig` (singleton), módulo `cotizaciones` (reglas de negocio y transaccionalidad).
+
+---
+
+## Gestión de Releases y Despliegue
+
+El proyecto cuenta con guías detalladas para la gestión del ciclo de vida del software y su despliegue en producción:
+
+*   **[Guía de Releases (Control de Versiones y Ramas)](file:///docs/Release.md):** Detalla el flujo de ramificación (`developers`, `release/*`, `main`), el control de versiones candidatas (RC) y la creación de releases en GitHub.
+*   **[Guía de Despliegue en GCP (GitHub Actions + Nginx)](file:///docs/Deploy.md):** Detalla la arquitectura de despliegue en una máquina virtual Debian en Google Cloud Platform, la configuración del proxy inverso local Nginx con SSL (Certbot) y el paso a paso para configurar los secretos de GitHub Actions.
 
 ---
 
