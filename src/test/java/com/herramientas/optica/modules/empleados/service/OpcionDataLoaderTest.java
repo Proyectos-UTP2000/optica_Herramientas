@@ -10,7 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.herramientas.optica.modules.empleados.repository.OpcionRepository;
 
-@SpringBootTest(properties = "app.seeding.enabled=true")
+@SpringBootTest(properties = {
+    "app.seeding.enabled=true",
+    "spring.datasource.url=jdbc:h2:mem:optica_test_opcion;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1"
+})
 @ActiveProfiles("test")
 @Transactional
 class OpcionDataLoaderTest {
