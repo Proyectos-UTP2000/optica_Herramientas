@@ -130,7 +130,7 @@ const ModalGestionEtiquetas = ({ onClose }) => {
     if (!nombre || nombre.length < 2) {
       Toast.fire({
         icon: "warning",
-        title: "El nombre debe tener al menos 2 caracteres",
+        title: "El nombre 2 debe tener al menos 2 caracteres",
       });
       return;
     }
