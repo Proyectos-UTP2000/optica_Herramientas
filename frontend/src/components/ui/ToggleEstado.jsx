@@ -9,7 +9,7 @@ const ToggleEstado = ({ activo, onChange }) => {
     >
       <input type="checkbox" readOnly checked={activo} />
       <span className="toggle-track" />
-      <span className="toggle-label">{activo ? "Activo" : "Inactivo"}</span>
+      <span className="toggle-label">{activo ? "Activo" : "Prueba"}</span>
     </label>
   );
 };
